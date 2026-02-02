@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bebop Puzzle Maker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="p-4 md:p-6 lg:p-8">
+
+<div class="max-w-[1800px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100vh-4rem)]">
+    
+    <!-- LEFT: Piece Library -->
+    <div class="lg:col-span-2 flex flex-col gap-4 overflow-hidden">
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex-1 flex flex-col overflow-hidden">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <h2 class="font-bold text-gray-800 text-sm uppercase tracking-wider">Library</h2>
+                    <button onclick="newCanvas()" class="w-5 h-5 flex items-center justify-center border-2 border-gray-300 text-gray-400 rounded hover:border-blue-500 hover:text-blue-500 transition text-xs font-bold" title="New Canvas">+</button>
+                </div>
+                <span id="library-count" class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-0.5 rounded-full">0</span>
+            </div>
+            
+            <div id="library-list" class="flex-1 overflow-y-auto custom-scroll space-y-3 pr-2">
+                <div id="empty-library" class="text-center py-12 text-gray-300 italic text-sm">
+                    Library is empty.<br>Define and save a chunk.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CENTER: Canvas + Visual Panel Below -->
+    <div class="lg:col-span-6 flex flex-col gap-4 min-w-0 justify-end">
+        <!-- Smaller Canvas -->
+        <div id="canvas-container" class="relative group shadow-lg max-w-[400px] mx-auto w-full">
+            <canvas id="woodCanvas"></canvas>
+            <div id="marquee"></div>
+            <div id="snap-points-layer"></div>
+            <div id="handles-layer"></div>
+        </div>
+        
+        <!-- Visual Controls Panel (Below Canvas) -->
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between mb-5">
+                <h2 class="text-sm font-black text-gray-700 uppercase">Visual Controls</h2>
+                <div class="flex gap-2">
+                    <button onclick="undo()" class="bg-white border border-gray-200 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition text-xs font-bold uppercase" title="Undo (Cmd+Z)">Undo</button>
+                    <button onclick="redo()" class="bg-white border border-gray-200 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition text-xs font-bold uppercase" title="Redo (Cmd+Shift+Z)">Redo</button>
+                    <button onclick="clearAll()" class="text-gray-400 hover:text-red-500 px-3 py-1.5 transition text-xs font-bold uppercase">Clear</button>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-6">
+                <!-- Left Column: Tools & Snap -->
+                <div class="space-y-5">
+                    <!-- Tools -->
+                    <div class="space-y-3">
+                        <label class="text-xs font-black text-gray-400 uppercase">Draw Tools</label>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button onclick="setActiveTool('select')" id="tool-select" class="tool-btn p-3 border-2 rounded-xl flex flex-col items-center justify-center gap-1 bg-white hover:border-gray-300 transition active" title="Select (1)">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5"/></svg>
+                                <span class="text-[9px] font-bold">SEL</span>
+                            </button>
+                            <button onclick="setActiveTool('line')" id="tool-line" class="tool-btn p-3 border-2 rounded-xl flex flex-col items-center justify-center gap-1 bg-white hover:border-gray-300 transition" title="Solid Line (2)">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14"/></svg>
+                                <span class="text-[9px] font-bold">LINE</span>
+                            </button>
+                            <button onclick="setActiveTool('dotted')" id="tool-dotted" class="tool-btn p-3 border-2 rounded-xl flex flex-col items-center justify-center gap-1 bg-white hover:border-gray-300 transition" title="Dashed Line (3)">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-dasharray="4 4"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14"/></svg>
+                                <span class="text-[9px] font-bold">DASH</span>
+                            </button>
+                            <button onclick="setActiveTool('dot')" id="tool-dot" class="tool-btn p-3 border-2 rounded-xl flex flex-col items-center justify-center gap-1 bg-white hover:border-gray-300 transition" title="Dot (4)">
+                                <svg class="w-5 h-5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="currentColor"/></svg>
+                                <span class="text-[9px] font-bold">DOT</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Snap Toggle -->
+                    <div class="flex items-center justify-between p-3 bg-blue-50 rounded-xl">
+                        <span class="font-bold text-blue-900 text-xs uppercase">Snap-to-Grid</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="masterLock" class="sr-only peer" checked>
+                            <div class="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 transition-colors duration-200 ease-in-out relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:shadow-sm after:transition-transform after:duration-200 after:ease-in-out peer-checked:after:translate-x-5"></div>
+                        </label>
+                    </div>
+                    
+                    <!-- Color Picker -->
+                    <div class="space-y-3">
+                        <label class="text-xs font-black text-gray-400 uppercase">Color</label>
+                        <div id="color-picker" class="flex gap-2 flex-wrap"></div>
+                    </div>
+                </div>
+                
+                <!-- Right Column: Properties -->
+                <div class="space-y-5">
+                    <!-- Path Controls (only shown when selection) -->
+                    <div id="segment-control" class="space-y-2 hidden">
+                        <div class="flex justify-between items-center">
+                            <label class="text-xs font-black text-gray-400 uppercase">Dashes</label>
+                            <span id="segValue" class="text-xs font-bold text-blue-600">4</span>
+                        </div>
+                        <input type="range" id="segments" min="1" max="15" value="4" class="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="updateProperty('segments', this.value)">
+                    </div>
+                    <div id="width-control" class="space-y-2 hidden">
+                        <div class="flex justify-between items-center">
+                            <label id="width-label" class="text-xs font-black text-gray-400 uppercase">Thickness</label>
+                            <span id="widthValue" class="text-xs font-bold text-blue-600">8</span>
+                        </div>
+                        <input type="range" id="pathWidth" min="2" max="80" value="8" class="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="updateProperty('width', this.value)">
+                    </div>
+                    
+                    <!-- Flip -->
+                    <div class="flex gap-3">
+                        <button onclick="flipAction('h')" class="flex-1 py-2.5 border-2 border-gray-200 rounded-xl text-xs font-bold text-gray-700 hover:bg-gray-50 transition">Flip H</button>
+                        <button onclick="flipAction('v')" class="flex-1 py-2.5 border-2 border-gray-200 rounded-xl text-xs font-bold text-gray-700 hover:bg-gray-50 transition">Flip V</button>
+                    </div>
+                    
+                    <!-- Layer Controls -->
+                    <div id="layer-controls" class="hidden">
+                        <label class="text-xs font-black text-gray-400 uppercase mb-2 block">Layer</label>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button onclick="sendToBack()" class="py-2 border-2 border-gray-200 rounded-lg text-sm font-bold text-gray-600 hover:bg-gray-50">⇤</button>
+                            <button onclick="sendBackward()" class="py-2 border-2 border-gray-200 rounded-lg text-sm font-bold text-gray-600 hover:bg-gray-50">←</button>
+                            <button onclick="bringForward()" class="py-2 border-2 border-gray-200 rounded-lg text-sm font-bold text-gray-600 hover:bg-gray-50">→</button>
+                            <button onclick="bringToFront()" class="py-2 border-2 border-gray-200 rounded-lg text-sm font-bold text-gray-600 hover:bg-gray-50">⇥</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Delete -->
+                    <button id="delete-btn" onclick="deleteSelected()" class="w-full text-red-500 hover:text-red-700 text-xs font-bold py-2.5 bg-red-50 rounded-xl hidden">Delete Selected</button>
+                    
+                    <!-- Placeholder when nothing selected -->
+                    <div id="no-selection-hint" class="text-center py-4 text-gray-300 text-xs italic">
+                        Select an element to edit properties
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Export Row -->
+            <div class="flex justify-end gap-3 mt-5 pt-4 border-t border-gray-100">
+                <div class="relative group">
+                    <button class="bg-gray-100 text-gray-700 px-4 py-2 rounded-xl font-bold hover:bg-gray-200 transition text-xs uppercase">Export ▾</button>
+                    <div class="hidden group-hover:block absolute right-0 bottom-full mb-1 bg-white border border-gray-200 rounded-xl shadow-lg z-10 min-w-[120px]">
+                        <button onclick="downloadImage()" class="block w-full text-left px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 uppercase rounded-t-xl">PNG</button>
+                        <button onclick="downloadSVG()" class="block w-full text-left px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 uppercase">SVG</button>
+                        <button onclick="exportLibraryJSON()" class="block w-full text-left px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 uppercase border-t">Library</button>
+                        <button onclick="importLibraryJSON()" class="block w-full text-left px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 uppercase rounded-b-xl">Import</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: Music Definition Panel -->
+    <div class="lg:col-span-4 flex flex-col gap-4 overflow-y-auto custom-scroll pr-1">
+        <div class="control-panel p-4 flex flex-col gap-3">
+            <div>
+                <h1 class="text-base font-black text-gray-800 tracking-tight leading-none uppercase">Bebop Puzzle</h1>
+                <p class="text-[9px] text-blue-500 font-bold uppercase tracking-widest">4-Note Chunk</p>
+            </div>
+
+            <!-- Basic Fields -->
+            <div class="space-y-2">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-gray-400 uppercase">Name</label>
+                    <input type="text" id="piece-name" placeholder="e.g. Arpeggio" class="w-full text-sm p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:outline-none font-medium">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-gray-400 uppercase">Label</label>
+                    <input type="text" id="piece-label" placeholder="e.g. Ascending" class="w-full text-sm p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:outline-none font-medium text-blue-600">
+                </div>
+            </div>
+            <div class="grid grid-cols-4 gap-1">
+                <button onclick="document.getElementById('piece-label').value='Ascending'" class="py-1 border border-green-200 bg-green-50 rounded text-[8px] font-bold text-green-600 hover:bg-green-100 transition">Asc</button>
+                <button onclick="document.getElementById('piece-label').value='Descending'" class="py-1 border border-red-200 bg-red-50 rounded text-[8px] font-bold text-red-600 hover:bg-red-100 transition">Desc</button>
+                <button onclick="document.getElementById('piece-label').value='From Above'" class="py-1 border border-purple-200 bg-purple-50 rounded text-[8px] font-bold text-purple-600 hover:bg-purple-100 transition">Above</button>
+                <button onclick="document.getElementById('piece-label').value='From Below'" class="py-1 border border-amber-200 bg-amber-50 rounded text-[8px] font-bold text-amber-600 hover:bg-amber-100 transition">Below</button>
+            </div>
+
+            <!-- Intervallic Definition -->
+            <div class="space-y-2 pt-2 border-t border-gray-100">
+                <div class="flex items-center justify-between">
+                    <label class="text-[10px] font-black text-gray-600 uppercase">Intervals</label>
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                        <span class="text-[9px] font-bold text-gray-500">Inversions</span>
+                        <input type="checkbox" id="allow-inversions" class="sr-only peer">
+                        <div class="w-9 h-5 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 transition-colors duration-200 ease-in-out relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:shadow-sm after:transition-transform after:duration-200 after:ease-in-out peer-checked:after:translate-x-4"></div>
+                    </label>
+                </div>
+                
+                <div class="space-y-2">
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-bold text-gray-500 uppercase flex justify-between">1→2 <span class="text-blue-500" id="count-int1">0</span></label>
+                        <div id="grid-int1" class="interval-grid"></div>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-bold text-gray-500 uppercase flex justify-between">2→3 <span class="text-blue-500" id="count-int2">0</span></label>
+                        <div id="grid-int2" class="interval-grid"></div>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-bold text-gray-500 uppercase flex justify-between">3→4 <span class="text-blue-500" id="count-int3">0</span></label>
+                        <div id="grid-int3" class="interval-grid"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Save Button -->
+            <div class="pt-2">
+                <button onclick="saveToLibrary()" class="w-full bg-blue-600 text-white py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-100 hover:bg-blue-700 transition active:scale-[0.98]">
+                    Save to Library
+                </button>
+            </div>
+            
+            <!-- Hidden panel title for JS -->
+            <span id="panel-title" class="hidden"></span>
+            <span id="flip-label" class="hidden"></span>
+            <span id="flip-hint" class="hidden"></span>
+        </div>
+    </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

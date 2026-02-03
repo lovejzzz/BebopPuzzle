@@ -124,7 +124,7 @@ function saveToStorage() {
     }
 }
 
-function loadFromStorage() {
+async function loadFromStorage() {
     try {
         const data = JSON.parse(localStorage.getItem('bebopPuzzleMaker'));
         if (data) {
@@ -145,9 +145,59 @@ function loadFromStorage() {
             }
             renderLibrary();
         }
+        
+        // Load default library if no library exists
+        if (state.savedLibrary.length === 0) {
+            await loadDefaultLibrary();
+        }
     } catch (e) {
         console.warn('Failed to load from localStorage:', e);
+        // Still try to load default library on error
+        await loadDefaultLibrary();
     }
+}
+
+async function loadDefaultLibrary() {
+    try {
+        const response = await fetch('default-library.json');
+        if (response.ok) {
+            const data = await response.json();
+            if (data.library && Array.isArray(data.library)) {
+                state.savedLibrary = data.library;
+                // Regenerate thumbnails to remove any selection glow
+                regenerateAllThumbnails();
+                renderLibrary();
+                saveToStorage();
+            }
+        }
+    } catch (e) {
+        console.warn('Failed to load default library:', e);
+    }
+}
+
+function regenerateAllThumbnails() {
+    if (!canvas || !ctx) return;
+    
+    // Save current state
+    const oldElements = [...state.elements];
+    const oldSelection = [...state.selectedIndices];
+    
+    state.savedLibrary.forEach((piece, index) => {
+        if (piece.elements && piece.elements.length > 0) {
+            // Temporarily load piece elements
+            state.elements = piece.elements;
+            state.selectedIndices = []; // No selection = no glow
+            draw();
+            
+            // Capture new thumbnail
+            piece.thumbnail = canvas.toDataURL('image/png', 0.5);
+        }
+    });
+    
+    // Restore original state
+    state.elements = oldElements;
+    state.selectedIndices = oldSelection;
+    draw();
 }
 
 function exportLibraryJSON() {

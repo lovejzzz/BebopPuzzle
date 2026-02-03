@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bebop Puzzle - Playground</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .grid-cell {
+            background: linear-gradient(135deg, #f5f0e8 0%, #ebe4d8 100%);
+            border: 2px dashed #d4c9b8;
+            transition: all 0.2s ease;
+        }
+        .grid-cell.drag-over {
+            border-color: #3b82f6;
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            transform: scale(1.02);
+        }
+        .grid-cell.occupied {
+            border: 2px solid #d4c9b8;
+            border-style: solid;
+        }
+        .library-piece {
+            cursor: grab;
+            transition: all 0.2s ease;
+        }
+        .library-piece:active {
+            cursor: grabbing;
+        }
+        .library-piece.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+        .trash-zone {
+            transition: all 0.2s ease;
+        }
+        .trash-zone.drag-over {
+            background: #fef2f2 !important;
+            border-color: #ef4444 !important;
+            transform: scale(1.05);
+        }
+        .chord-input {
+            text-align: center;
+            font-weight: bold;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid #e5e7eb;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .chord-input:focus {
+            border-color: #3b82f6;
+        }
+        .piece-in-grid {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .piece-in-grid img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .snap-preview {
+            position: absolute;
+            left: 0;
+            right: 0;
+            background: rgba(59, 130, 246, 0.15);
+            border: 2px dashed #3b82f6;
+            border-radius: 12px;
+            pointer-events: none;
+            z-index: 5;
+            transition: opacity 0.15s ease;
+        }
+        .drag-preview {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.9;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .drag-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .placed-piece {
+            position: absolute;
+            left: 0;
+            right: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: grab;
+            transition: transform 0.1s ease;
+        }
+        .placed-piece:hover {
+            transform: scale(1.02);
+        }
+        .placed-piece img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen p-4 md:p-6 lg:p-8">
+
+<div class="max-w-[1400px] mx-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-black text-gray-800 uppercase tracking-tight">Playground</h1>
+            <p class="text-xs text-blue-500 font-bold uppercase tracking-widest">Drag pieces to compose a melody</p>
+        </div>
+        <a href="index.html" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-xl font-bold hover:bg-gray-200 transition text-sm uppercase">
+            ← Back to Maker
+        </a>
+    </div>
+
+    <div class="flex gap-6">
+        <!-- LEFT: Library Sidebar -->
+        <div class="w-64 flex-shrink-0">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 sticky top-4">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="font-bold text-gray-800 text-sm uppercase tracking-wider">Library</h2>
+                    <span id="library-count" class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-0.5 rounded-full">0</span>
+                </div>
+                
+                <div id="library-list" class="space-y-2 max-h-[70vh] overflow-y-auto custom-scroll pr-2">
+                    <div id="empty-library" class="text-center py-8 text-gray-300 italic text-sm">
+                        No pieces in library.<br>Create some in the Maker!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CENTER: Grid Area -->
+        <div class="flex-1">
+            <!-- Chord Symbols Row -->
+            <div class="grid grid-cols-4 gap-4 mb-2 px-2">
+                <input type="text" class="chord-input text-lg py-2" placeholder="Chord" id="chord-1">
+                <input type="text" class="chord-input text-lg py-2" placeholder="Chord" id="chord-2">
+                <input type="text" class="chord-input text-lg py-2" placeholder="Chord" id="chord-3">
+                <input type="text" class="chord-input text-lg py-2" placeholder="Chord" id="chord-4">
+            </div>
+
+            <!-- 3x4 Grid -->
+            <div class="grid grid-cols-4 gap-4" id="melody-grid">
+                <!-- Column containers -->
+                <div class="grid-column relative" data-col="0">
+                    <div class="grid-cell aspect-square rounded-xl" data-col="0" data-row="0"></div>
+                    <div class="grid-cell aspect-square rounded-xl mt-4" data-col="0" data-row="1"></div>
+                    <div class="grid-cell aspect-square rounded-xl mt-4" data-col="0" data-row="2"></div>
+                </div>
+                <div class="grid-column relative" data-col="1">
+                    <div class="grid-cell aspect-square rounded-xl" data-col="1" data-row="0"></div>
+                    <div class="grid-cell aspect-square rounded-xl mt-4" data-col="1" data-row="1"></div>
+                    <div class="grid-cell aspect-square rounded-xl mt-4" data-col="1" data-row="2"></div>
+                </div>
+                <div class="grid-column relative" data-col="2">
+                    <div class="grid-cell aspect-square rounded-xl" data-col="2" data-row="0"></div>
+                    <div class="grid-cell aspect-square rounded-xl mt-4" data-col="2" data-row="1"></div>
+                    <div class="grid-cell aspect-square rounded-xl mt-4" data-col="2" data-row="2"></div>
+                </div>
+                <div class="grid-column relative" data-col="3">
+                    <div class="grid-cell aspect-square rounded-xl" data-col="3" data-row="0"></div>
+                    <div class="grid-cell aspect-square rounded-xl mt-4" data-col="3" data-row="1"></div>
+                    <div class="grid-cell aspect-square rounded-xl mt-4" data-col="3" data-row="2"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT: Trash Zone -->
+        <div class="w-32 flex-shrink-0 flex flex-col justify-end">
+            <div id="trash-zone" class="trash-zone bg-gray-100 border-2 border-dashed border-gray-300 rounded-xl p-4 flex flex-col items-center justify-center gap-2 h-32">
+                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                <span class="text-xs font-bold text-gray-400 uppercase">Trash</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// State
+let library = [];
+let gridState = {
+    // col -> { piece, position } where position can be 0, 0.5, 1, 1.5, 2, 2.5 (0.5 = between row 0 and 1)
+    0: null,
+    1: null,
+    2: null,
+    3: null
+};
+let draggedPiece = null;
+let draggedFromGrid = null;
+let dragPreview = null;
+let currentSnapCol = null;
+let currentSnapPos = null;
+let cellSize = 0;
+
+// Load library from localStorage (same key as main app)
+async function loadLibrary() {
+    const saved = localStorage.getItem('bebopPuzzleMaker');
+    if (saved) {
+        const data = JSON.parse(saved);
+        if (data.library) {
+            library = data.library;
+        }
+    }
+    
+    // Load default library if empty
+    if (library.length === 0) {
+        try {
+            const response = await fetch('default-library.json');
+            if (response.ok) {
+                const data = await response.json();
+                if (data.library) {
+                    library = data.library;
+                }
+            }
+        } catch (e) {
+            console.warn('Failed to load default library:', e);
+        }
+    }
+    
+    renderLibrary();
+}
+
+// Render library items
+function renderLibrary() {
+    const container = document.getElementById('library-list');
+    const countEl = document.getElementById('library-count');
+    const emptyEl = document.getElementById('empty-library');
+    
+    countEl.textContent = library.length;
+    
+    if (library.length === 0) {
+        emptyEl.style.display = 'block';
+        container.innerHTML = '';
+        container.appendChild(emptyEl);
+        return;
+    }
+    
+    emptyEl.style.display = 'none';
+    container.innerHTML = '';
+    
+    library.forEach((piece, index) => {
+        const div = document.createElement('div');
+        div.className = 'library-piece bg-gray-50 rounded-lg p-2 flex items-center gap-2 border border-gray-100 hover:border-blue-300 hover:shadow-sm';
+        div.dataset.index = index;
+        
+        // Color-code label
+        let labelColor = 'text-blue-500';
+        if (piece.label === 'Ascending') labelColor = 'text-green-600';
+        else if (piece.label === 'Descending') labelColor = 'text-red-600';
+        else if (piece.label === 'From Above') labelColor = 'text-purple-600';
+        else if (piece.label === 'From Below') labelColor = 'text-amber-600';
+        
+        div.innerHTML = `
+            <div class="w-12 h-12 bg-white rounded overflow-hidden border border-gray-100 flex-shrink-0">
+                <img src="${piece.thumbnail}" class="w-full h-full object-cover" draggable="false">
+            </div>
+            <div class="flex-1 min-w-0">
+                <h3 class="font-bold text-gray-800 text-[10px] truncate uppercase">${piece.name}</h3>
+                <p class="text-[8px] ${labelColor} font-bold uppercase truncate">${piece.label}</p>
+            </div>
+        `;
+        
+        // Mouse events for custom drag
+        div.addEventListener('mousedown', (e) => startDrag(e, piece, null));
+        
+        container.appendChild(div);
+    });
+}
+
+// Custom drag system
+function startDrag(e, piece, fromGrid) {
+    e.preventDefault();
+    draggedPiece = piece;
+    draggedFromGrid = fromGrid;
+    
+    // Get cell size
+    const firstCell = document.querySelector('.grid-cell');
+    if (firstCell) {
+        cellSize = firstCell.offsetWidth;
+    }
+    
+    // Create drag preview at final size
+    dragPreview = document.createElement('div');
+    dragPreview.className = 'drag-preview';
+    dragPreview.style.width = cellSize + 'px';
+    dragPreview.style.height = cellSize + 'px';
+    dragPreview.innerHTML = `<img src="${piece.thumbnail}" draggable="false">`;
+    document.body.appendChild(dragPreview);
+    
+    updateDragPreview(e.clientX, e.clientY);
+    
+    document.addEventListener('mousemove', onDragMove);
+    document.addEventListener('mouseup', onDragEnd);
+}
+
+function updateDragPreview(x, y) {
+    if (dragPreview) {
+        dragPreview.style.left = (x - cellSize / 2) + 'px';
+        dragPreview.style.top = (y - cellSize / 2) + 'px';
+    }
+}
+
+function onDragMove(e) {
+    updateDragPreview(e.clientX, e.clientY);
+    
+    // Remove existing snap preview
+    const existingPreview = document.querySelector('.snap-preview');
+    if (existingPreview) existingPreview.remove();
+    
+    // Clear cell highlights
+    document.querySelectorAll('.grid-cell').forEach(c => c.classList.remove('drag-over'));
+    
+    const columns = document.querySelectorAll('.grid-column');
+    let foundSnap = false;
+    
+    columns.forEach(col => {
+        const rect = col.getBoundingClientRect();
+        const colIndex = parseInt(col.dataset.col);
+        
+        // Check if mouse is within this column
+        if (e.clientX >= rect.left && e.clientX <= rect.right) {
+            // Allow overwriting - no monophonic restriction
+            
+            const cells = col.querySelectorAll('.grid-cell');
+            const firstCell = cells[0];
+            const cellHeight = firstCell.offsetHeight;
+            const gap = 16; // mt-4 = 16px
+            
+            // Calculate relative Y position within column
+            const relY = e.clientY - rect.top;
+            
+            // Snap positions: 0, 0.5, 1, 1.5, 2 (can't go to 2.5 as piece would overflow)
+            // 0 = top of row 0, 0.5 = middle (straddles row 0 and 1), 1 = top of row 1, etc.
+            const snapPositions = [0, 0.5, 1, 1.5, 2];
+            
+            let closestPos = 0;
+            let closestDist = Infinity;
+            
+            snapPositions.forEach(pos => {
+                const posY = pos * (cellHeight + gap);
+                const dist = Math.abs(relY - posY - cellHeight/2); // center of where piece would be
+                if (dist < closestDist) {
+                    closestDist = dist;
+                    closestPos = pos;
+                }
+            });
+            
+            // Show snap preview
+            const preview = document.createElement('div');
+            preview.className = 'snap-preview';
+            preview.style.top = (closestPos * (cellHeight + gap)) + 'px';
+            preview.style.height = cellHeight + 'px';
+            col.appendChild(preview);
+            
+            currentSnapCol = colIndex;
+            currentSnapPos = closestPos;
+            foundSnap = true;
+        }
+    });
+    
+    // Check trash zone
+    const trash = document.getElementById('trash-zone');
+    const trashRect = trash.getBoundingClientRect();
+    if (e.clientX >= trashRect.left && e.clientX <= trashRect.right &&
+        e.clientY >= trashRect.top && e.clientY <= trashRect.bottom && draggedFromGrid) {
+        trash.classList.add('drag-over');
+    } else {
+        trash.classList.remove('drag-over');
+    }
+    
+    if (!foundSnap) {
+        currentSnapCol = null;
+        currentSnapPos = null;
+    }
+}
+
+function onDragEnd(e) {
+    document.removeEventListener('mousemove', onDragMove);
+    document.removeEventListener('mouseup', onDragEnd);
+    
+    // Clear visual states
+    const snapPreview = document.querySelector('.snap-preview');
+    if (snapPreview) snapPreview.remove();
+    document.querySelectorAll('.grid-cell').forEach(c => c.classList.remove('drag-over'));
+    
+    // Check trash zone
+    const trash = document.getElementById('trash-zone');
+    const trashRect = trash.getBoundingClientRect();
+    if (e.clientX >= trashRect.left && e.clientX <= trashRect.right &&
+        e.clientY >= trashRect.top && e.clientY <= trashRect.bottom && draggedFromGrid) {
+        trash.classList.remove('drag-over');
+        gridState[draggedFromGrid.col] = null;
+        renderGrid();
+    } else if (currentSnapCol !== null && currentSnapPos !== null && draggedPiece) {
+        // Clear old position if dragging from grid
+        if (draggedFromGrid) {
+            gridState[draggedFromGrid.col] = null;
+        }
+        
+        // Place piece at snap position
+        gridState[currentSnapCol] = {
+            piece: draggedPiece,
+            position: currentSnapPos
+        };
+        renderGrid();
+    }
+    
+    // Remove drag preview
+    if (dragPreview) {
+        dragPreview.remove();
+        dragPreview = null;
+    }
+    
+    trash.classList.remove('drag-over');
+    draggedPiece = null;
+    draggedFromGrid = null;
+    currentSnapCol = null;
+    currentSnapPos = null;
+}
+
+// Render grid state
+function renderGrid() {
+    const columns = document.querySelectorAll('.grid-column');
+    
+    // Clear all placed pieces
+    document.querySelectorAll('.placed-piece').forEach(p => p.remove());
+    document.querySelectorAll('.grid-cell').forEach(c => c.classList.remove('occupied'));
+    
+    // Place pieces
+    for (let col = 0; col < 4; col++) {
+        if (gridState[col]) {
+            const { piece, position } = gridState[col];
+            const column = document.querySelector(`.grid-column[data-col="${col}"]`);
+            
+            if (column) {
+                const firstCell = column.querySelector('.grid-cell');
+                const cellHeight = firstCell ? firstCell.offsetHeight : 100;
+                const gap = 16; // gap-4 = 16px
+                
+                // Calculate top position based on position value
+                // position 0 = row 0, 0.5 = between 0 and 1, 1 = row 1, etc.
+                const topOffset = position * (cellHeight + gap);
+                
+                const pieceEl = document.createElement('div');
+                pieceEl.className = 'placed-piece';
+                pieceEl.style.top = topOffset + 'px';
+                pieceEl.style.height = cellHeight + 'px';
+                pieceEl.innerHTML = `<img src="${piece.thumbnail}" draggable="false">`;
+                
+                // Make placed pieces draggable
+                pieceEl.addEventListener('mousedown', (e) => {
+                    e.stopPropagation();
+                    startDrag(e, piece, { col, position });
+                });
+                
+                column.appendChild(pieceEl);
+                
+                // Mark overlapping cells as occupied
+                const startRow = Math.floor(position);
+                const endRow = Math.ceil(position);
+                for (let r = startRow; r <= Math.min(endRow, 2); r++) {
+                    const cell = column.querySelector(`.grid-cell[data-row="${r}"]`);
+                    if (cell) cell.classList.add('occupied');
+                }
+            }
+        }
+    }
+}
+
+// Calculate cell size on resize
+function updateCellSize() {
+    const firstCell = document.querySelector('.grid-cell');
+    if (firstCell) {
+        cellSize = firstCell.offsetWidth;
+    }
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    loadLibrary();
+    updateCellSize();
+    window.addEventListener('resize', updateCellSize);
+});
+</script>
+
+</body>
+</html>

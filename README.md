@@ -2,7 +2,7 @@
 
 A jazz music theory game that teaches bebop vocabulary through tactile puzzle-solving. Drag melodic pattern pieces onto a grid, connect them, and hear your bebop line come alive.
 
-**[Play it now](https://lovejzzz.github.io/BebopPuzzle/game.html)** — runs entirely in the browser, no install needed.
+**[Play it now](https://lovejzzz.github.io/BebopPuzzle/)** — runs entirely in the browser, no install needed.
 
 ---
 
@@ -95,10 +95,10 @@ Every non-tutorial level generates a fresh puzzle each time you play. The genera
 ```
 git clone https://github.com/lovejzzz/BebopPuzzle.git
 cd BebopPuzzle
-open game.html
+open index.html
 ```
 
-Single-file game. No build step, no dependencies, no server. Just open `game.html` in any modern browser.
+Single-file game. No build step, no dependencies, no server. Just open `index.html` in any modern browser.
 
 ## Dev Tools
 

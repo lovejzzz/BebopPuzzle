@@ -78,7 +78,7 @@
         }
         .screen.active {
             opacity: 1; pointer-events: auto;
-            transform: scale(1);
+            transform: none;
         }
 
         /* ---- Typography ---- */
@@ -562,6 +562,7 @@
             padding: 0;
             flex-shrink: 0;
             position: relative;
+            z-index: 10;
         }
 
         /* The wooden tray surface */
@@ -610,7 +611,7 @@
             margin: 0 auto;
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
         }
 
         .play-btn {
@@ -663,6 +664,8 @@
             flex: 1;
             padding: 4px 2px;
             scrollbar-width: none;
+            min-height: 92px;
+            align-items: center;
         }
         .piece-tray::-webkit-scrollbar { display: none; }
 
@@ -759,7 +762,7 @@
         }
 
         .hint-options-popup {
-            position: absolute; z-index: 50;
+            position: fixed; z-index: 200;
             display: flex; gap: 8px; padding: 10px;
             background: var(--bg-card);
             border-radius: 14px;
@@ -809,74 +812,67 @@
             line-height: 1.5;
         }
 
-        /* ---- Tempo slider hint ---- */
+        /* ---- Tempo slider — persistent bottom-right widget ---- */
         .tempo-hint {
-            position: fixed;
-            top: 80px; left: 50%; transform: translateX(-50%);
+            position: absolute;
+            bottom: 100%;
+            right: 12px;
+            margin-bottom: 8px;
             z-index: 40;
-            background: var(--bg-card);
-            border: 1px solid rgba(240,168,48,0.3);
-            border-radius: 16px;
-            padding: 18px 24px;
-            max-width: 300px;
-            width: 85%;
+            background: linear-gradient(135deg, rgba(20,15,10,0.95) 0%, rgba(30,22,15,0.95) 100%);
+            border: 1px solid rgba(240,168,48,0.2);
+            border-radius: 12px;
+            padding: 10px 14px;
+            width: 160px;
             text-align: center;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
             animation: pop-in 0.25s ease-out;
         }
         .tempo-hint.hidden { display: none; }
         .tempo-hint-title {
-            font-size: 10px; font-weight: 800;
+            font-size: 8px; font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             color: var(--gold);
-            margin-bottom: 12px;
+            margin-bottom: 6px;
+            opacity: 0.7;
         }
         .tempo-hint-value {
-            font-size: 22px; font-weight: 800;
+            font-size: 18px; font-weight: 800;
             color: var(--text-primary);
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             font-family: 'JetBrains Mono', monospace;
         }
         .tempo-hint-slider {
             width: 100%;
             -webkit-appearance: none;
             appearance: none;
-            height: 6px;
-            border-radius: 3px;
+            height: 4px;
+            border-radius: 2px;
             background: rgba(240,168,48,0.15);
             outline: none;
-            margin-bottom: 14px;
+            margin-bottom: 6px;
         }
         .tempo-hint-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 22px; height: 22px;
+            width: 18px; height: 18px;
             border-radius: 50%;
             background: var(--gold);
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(212,175,55,0.4);
+            box-shadow: 0 2px 6px rgba(212,175,55,0.4);
         }
         .tempo-hint-slider::-moz-range-thumb {
-            width: 22px; height: 22px;
+            width: 18px; height: 18px;
             border-radius: 50%;
             background: var(--gold);
             cursor: pointer;
             border: none;
         }
-        .tempo-hint-ok {
-            padding: 8px 24px;
-            border-radius: 10px;
-            border: 1px solid rgba(240,168,48,0.3);
-            background: rgba(240,168,48,0.1);
-            color: var(--gold);
-            font-size: 12px; font-weight: 700;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-        }
-        .tempo-hint-ok:hover {
-            background: rgba(240,168,48,0.2);
+        .tempo-hint-labels {
+            display: flex; justify-content: space-between;
+            font-size: 8px; color: var(--text-muted);
+            margin: -4px 2px 0; font-weight: 600;
         }
 
         /* ---- Game toast ---- */
@@ -1144,6 +1140,78 @@
             box-shadow: 0 8px 32px var(--gold-glow);
         }
 
+        /* ---- Game Complete overlay ---- */
+        .game-complete-overlay {
+            position: fixed; inset: 0;
+            background: rgba(7,9,15,0.92);
+            z-index: 110;
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .game-complete-overlay.hidden { display: none; }
+
+        .game-complete-modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border-medium);
+            border-radius: 24px;
+            padding: 40px 32px;
+            max-width: 380px;
+            width: 90%;
+            text-align: center;
+            animation: success-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+
+        .game-complete-badge {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 16px;
+            animation: fade-in 0.4s 0.1s ease both;
+        }
+
+        .game-complete-title {
+            font-size: 42px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--gold) 0%, #fde68a 50%, var(--gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            animation: fade-in 0.4s 0.2s ease both;
+        }
+
+        .game-complete-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            line-height: 1.5;
+            animation: fade-in 0.4s 0.3s ease both;
+        }
+
+        .game-complete-stars {
+            display: flex; gap: 6px; justify-content: center;
+            font-size: 22px;
+            margin-bottom: 20px;
+            animation: fade-in 0.4s 0.4s ease both;
+        }
+
+        .game-complete-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin-bottom: 28px;
+            animation: fade-in 0.4s 0.5s ease both;
+        }
+
+        .game-complete-actions {
+            display: flex; gap: 10px;
+            animation: fade-in 0.4s 0.6s ease both;
+        }
+        .game-complete-actions .success-btn { flex: 1; }
+
         /* ---- Tutorial overlay ---- */
         .tutorial-bar {
             position: fixed;
@@ -1169,7 +1237,7 @@
            CRAFT TABLE  (right-side duplication board)
            ============================================= */
 
-        /* Wrapper: puzzle-area becomes a row with grid + craft table */
+        /* Wrapper: puzzle-area fills the body */
         .puzzle-body {
             flex: 1;
             display: flex;
@@ -1180,36 +1248,55 @@
             flex: 1;
         }
 
-        /* The craft table panel */
-        .craft-table {
-            width: 180px;
+        /* Craft toggle button — small icon in the tray */
+        /* Craft table — inline left of tray */
+        .craft-inline {
+            display: none; /* shown via JS when craft enabled */
             flex-shrink: 0;
-            display: none;          /* hidden by default */
+        }
+        .craft-inline.visible {
+            display: block;
+            animation: craftFadeIn 0.3s ease;
+        }
+        @keyframes craftFadeIn {
+            0% { opacity: 0; transform: translateX(10px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+        .craft-inline-body {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .craft-inline-mid {
+            display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
-            padding: 20px 14px;
-            background:
-                linear-gradient(180deg, #1a1520 0%, #1e1828 50%, #1a1520 100%);
-            border-left: 1px solid rgba(167,139,250,0.1);
-            position: relative;
-            overflow: hidden;
+            gap: 4px;
         }
-        .craft-table.visible {
+        .craft-inline-btns {
             display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
-        /* Soft glow */
-        .craft-table::before {
-            content: '';
-            position: absolute; inset: 0;
-            pointer-events: none;
-            background:
-                radial-gradient(ellipse 80% 50% at 50% 30%, rgba(167,139,250,0.04), transparent),
-                radial-gradient(ellipse 60% 40% at 50% 80%, rgba(240,168,48,0.03), transparent);
+        .craft-inline-output-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+        }
+        .craft-tray-divider {
+            display: none;
+            width: 1px;
+            height: 60px;
+            background: linear-gradient(180deg, transparent 0%, rgba(167,139,250,0.2) 30%, rgba(167,139,250,0.2) 70%, transparent 100%);
+            flex-shrink: 0;
+        }
+        .craft-tray-divider.visible {
+            display: block;
         }
 
         .craft-table-title {
-            font-size: 11px; font-weight: 800;
+            font-size: 9px; font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.12em;
             color: var(--gold);
@@ -1219,8 +1306,8 @@
 
         /* Drop zone — where you drag pieces to */
         .craft-drop-zone {
-            width: 140px; height: 140px;
-            border-radius: 16px;
+            width: 76px; height: 76px;
+            border-radius: 12px;
             border: 2px dashed rgba(167,139,250,0.25);
             background: rgba(167,139,250,0.03);
             display: flex; align-items: center; justify-content: center;
@@ -1275,19 +1362,19 @@
             color: var(--purple);
             text-align: center;
             z-index: 1;
-            min-height: 12px;
+            min-height: 10px;
         }
 
         /* Shared craft button style (Flip & Duplicate, equal weight) */
         .craft-btn {
-            width: 100%; max-width: 150px;
-            padding: 11px 0;
-            border-radius: 12px;
+            width: 100%; max-width: 130px;
+            padding: 10px 16px;
+            border-radius: 8px;
             border: 1.5px solid rgba(212,175,55,0.15);
             background:
                 linear-gradient(180deg, rgba(212,175,55,0.06) 0%, rgba(212,175,55,0.02) 100%);
             color: rgba(212,175,55,0.35);
-            font-size: 12px; font-weight: 800;
+            font-size: 11px; font-weight: 800;
             letter-spacing: 0.08em;
             text-transform: uppercase;
             cursor: default;
@@ -1326,11 +1413,22 @@
             border-color: rgba(167,139,250,0.6);
         }
 
+        /* Compact inline buttons */
+        .craft-btn.craft-btn-sm {
+            max-width: 80px;
+            padding: 5px 10px;
+            font-size: 9px;
+            letter-spacing: 0.05em;
+        }
+        .craft-btn.craft-btn-sm .craft-btn-icon {
+            font-size: 11px;
+        }
+
         /* Flip icon spin animation */
         .craft-btn .craft-btn-icon {
             display: inline-block;
             transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
-            font-size: 15px;
+            font-size: 14px;
         }
         .craft-btn.flipping .craft-btn-icon {
             transform: rotateY(180deg);
@@ -1343,22 +1441,23 @@
             letter-spacing: 0.1em;
             color: rgba(52,211,153,0.35);
             z-index: 1;
-            margin-top: 2px;
         }
         .craft-arrow {
-            font-size: 18px;
+            font-size: 16px;
             color: rgba(167,139,250,0.2);
             z-index: 1;
+            line-height: 1;
+            display: none; /* hidden in horizontal layout */
         }
         .craft-output {
-            width: 120px; height: 120px;
-            border-radius: 14px;
+            width: 76px; height: 76px;
+            border-radius: 12px;
             border: 2px dashed rgba(52,211,153,0.15);
             background: rgba(52,211,153,0.02);
             display: flex; align-items: center; justify-content: center;
             z-index: 1;
             cursor: default;
-            min-height: 120px;
+            min-height: 76px;
             position: relative;
             overflow: hidden;
         }
@@ -1366,6 +1465,43 @@
             width: 100%; height: 100%;
             object-fit: cover;
             border-radius: 8px;
+        }
+        /* Stacked poker-style cards for duplicates */
+        .craft-output-stack {
+            position: relative;
+            width: 100%; height: 100%;
+        }
+        .craft-output-stack .stack-card {
+            position: absolute;
+            width: 82%; height: 82%;
+            top: 50%; left: 50%;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            border: 1.5px solid rgba(52,211,153,0.15);
+        }
+        .craft-output-stack .stack-card img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+        .craft-output-stack .stack-back {
+            transform: translate(-50%, -50%) translate(10px, -8px) rotate(8deg);
+            opacity: 0.6;
+            filter: brightness(0.75) saturate(0.8);
+            animation: stackCardBack 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
+        }
+        .craft-output-stack .stack-front {
+            transform: translate(-50%, -50%) translate(-6px, 4px) rotate(-4deg);
+            box-shadow: 0 3px 12px rgba(0,0,0,0.5);
+            animation: stackCardFront 0.4s 0.1s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+        @keyframes stackCardBack {
+            0% { transform: translate(-50%, -50%) translate(-20px, 0) rotate(0deg) scale(0.5); opacity: 0; }
+            100% { transform: translate(-50%, -50%) translate(10px, -8px) rotate(8deg) scale(1); opacity: 0.6; }
+        }
+        @keyframes stackCardFront {
+            0% { transform: translate(-50%, -50%) translate(-20px, 0) rotate(0deg) scale(0.5); opacity: 0; }
+            100% { transform: translate(-50%, -50%) translate(-6px, 4px) rotate(-4deg) scale(1); opacity: 1; }
         }
         .craft-output-empty-hint {
             font-size: 8px; font-weight: 700;
@@ -1456,28 +1592,29 @@
             50% { opacity: 1; }
         }
 
-        /* Consume animation — applied to the CONTAINER so img's scaleX(-1) stays intact */
+        /* Consume animation — piece slides right toward the output zone */
         @keyframes craft-consume {
-            0% { transform: scale(1); opacity: 1; filter: brightness(1) saturate(1); }
-            30% { transform: scale(0.9); opacity: 0.8; filter: brightness(1.3) saturate(0.6); }
-            60% { transform: scale(0.5); opacity: 0.4; filter: brightness(1.8) saturate(0.2); }
-            100% { transform: scale(0); opacity: 0; filter: brightness(2.5) saturate(0);
+            0% { transform: scale(1) translateX(0); opacity: 1; filter: brightness(1); }
+            40% { transform: scale(0.85) translateX(30px); opacity: 0.7; filter: brightness(1.4); }
+            70% { transform: scale(0.5) translateX(60px); opacity: 0.3; filter: brightness(1.8); }
+            100% { transform: scale(0.2) translateX(80px); opacity: 0; filter: brightness(2.5);
                    border-color: rgba(167,139,250,0.1); box-shadow: none; }
         }
         .craft-drop-zone.consuming {
-            animation: craft-consume 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation: craft-consume 0.55s cubic-bezier(0.4, 0, 0.2, 1) forwards;
             border-color: rgba(167,139,250,0.5);
             box-shadow: 0 0 20px rgba(167,139,250,0.3);
         }
 
-        /* Output piece fly-to-tray — smooth ease-out with gentle scale */
+        /* Output piece fly-to-tray — arcs down toward the bottom bar */
         @keyframes craft-output-fly {
-            0% { transform: scale(1) translateY(0); opacity: 1; }
-            30% { transform: scale(0.9) translateY(20px); opacity: 0.85; }
-            100% { transform: scale(0.25) translateY(90px); opacity: 0; }
+            0% { transform: scale(1) translate(0, 0); opacity: 1; }
+            30% { transform: scale(0.8) translate(-10px, 30px); opacity: 0.85; }
+            60% { transform: scale(0.5) translate(-20px, 60px); opacity: 0.5; }
+            100% { transform: scale(0.2) translate(-30px, 100px); opacity: 0; }
         }
         .craft-output.flying {
-            animation: craft-output-fly 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation: craft-output-fly 0.55s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
 
         /* Magic duplication animation */
@@ -1505,9 +1642,9 @@
             100% { opacity: 0; transform: scale(0) rotate(360deg); }
         }
         @keyframes craft-pop-in {
-            0% { transform: scale(0); opacity: 0; }
-            60% { transform: scale(1.15); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
+            0% { transform: scale(0.3) translateX(-40px); opacity: 0; }
+            60% { transform: scale(1.1) translateX(4px); opacity: 1; }
+            100% { transform: scale(1) translateX(0); opacity: 1; }
         }
         /* Flip phase 1: rotate to edge-on (90°) */
         @keyframes craft-flip-out {
@@ -1533,6 +1670,88 @@
         .craft-drop-zone.flip-phase-in {
             animation: craft-flip-in 0.3s cubic-bezier(0, 0, 0.2, 1) forwards;
         }
+
+        /* Stacked drop zone — multiple pieces layered poker-style */
+        .craft-dz-stack {
+            position: relative;
+            width: 100%; height: 100%;
+        }
+        .craft-dz-layer {
+            position: absolute;
+            inset: 8px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            border: 1.5px solid rgba(167,139,250,0.25);
+            background: #1a1a2e;
+            transition: transform 0.2s ease;
+        }
+        .craft-dz-layer img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .craft-dz-count {
+            position: absolute;
+            top: 6px; right: 6px;
+            min-width: 20px; height: 20px;
+            padding: 0 5px;
+            border-radius: 10px;
+            background: rgba(167,139,250,0.85);
+            color: #fff;
+            font-size: 11px; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 20;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+            pointer-events: none;
+        }
+
+        /* Flying flip ghost — travels from drop zone to output while flipping */
+        .craft-flip-ghost {
+            position: fixed;
+            z-index: 100;
+            pointer-events: none;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(167,139,250,0.4), 0 0 30px rgba(167,139,250,0.2);
+            will-change: transform, left, top;
+            transition: left 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+                        top 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+                        width 0.7s ease,
+                        height 0.7s ease;
+        }
+        .craft-flip-ghost img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+        /* The flip rotation runs on the inner wrapper */
+        .craft-flip-ghost-inner {
+            width: 100%; height: 100%;
+            animation: ghostFlipSpin 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            transform-style: preserve-3d;
+        }
+        @keyframes ghostFlipSpin {
+            0%   { transform: perspective(500px) rotateY(0deg) scale(1); }
+            45%  { transform: perspective(500px) rotateY(90deg) scale(0.9); }
+            55%  { transform: perspective(500px) rotateY(90deg) scale(0.9); }
+            100% { transform: perspective(500px) rotateY(180deg) scale(1); }
+        }
+        /* Claim ghost — flies from output to tray */
+        .craft-claim-ghost {
+            position: fixed;
+            z-index: 100;
+            pointer-events: none;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(52,211,153,0.4), 0 0 20px rgba(52,211,153,0.2);
+            will-change: left, top, width, height, opacity;
+            transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                        top 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+                        width 0.5s ease,
+                        height 0.5s ease,
+                        opacity 0.5s ease;
+        }
+
         .craft-drop-zone.duplicating {
             animation: craft-shake 0.8s ease, craft-glow 1s ease;
         }
@@ -1559,14 +1778,15 @@
         .craft-onboard {
             position: absolute;
             inset: 0;
-            background: rgba(7,9,15,0.88);
+            background: rgba(7,9,15,0.92);
             z-index: 20;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            padding: 20px 16px;
+            gap: 10px;
+            padding: 16px 12px;
+            border-radius: 16px;
             text-align: center;
             animation: craftOnboardFade 0.4s ease;
             cursor: pointer;
@@ -1576,7 +1796,7 @@
             to { opacity: 1; }
         }
         .craft-onboard-icon {
-            font-size: 32px;
+            font-size: 26px;
             animation: craftOnboardBounce 1.5s ease-in-out infinite;
         }
         @keyframes craftOnboardBounce {
@@ -1584,14 +1804,14 @@
             50% { transform: translateY(-6px); }
         }
         .craft-onboard-title {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 800;
             color: var(--gold);
             text-transform: uppercase;
             letter-spacing: 0.08em;
         }
         .craft-onboard-desc {
-            font-size: 11px;
+            font-size: 10px;
             color: var(--text-secondary);
             line-height: 1.5;
         }
@@ -1823,7 +2043,7 @@
     <div id="screen-landing" class="screen active">
         <div>
             <div class="landing-title">Bebop<br>Puzzle</div>
-            <div class="landing-subtitle" style="margin-top: 12px;">Learn Jazz Vocabulary</div>
+            <div class="landing-subtitle" style="margin-top: 12px;">The Jazz Ear Training Game</div>
         </div>
         <div style="display: flex; flex-direction: column; gap: 12px; align-items: center;">
             <button class="landing-btn landing-btn-primary" onclick="onPlayPressed()">Play</button>
@@ -1910,32 +2130,6 @@
                 <div class="chord-row" id="chord-row"></div>
                 <div class="melody-grid" id="melody-grid"></div>
             </div>
-
-            <!-- Craft Table (right side duplication board) -->
-            <div class="craft-table" id="craft-table">
-                <div class="craft-table-title">Craft Table</div>
-
-                <div class="craft-drop-zone" id="craft-drop-zone">
-                    <div class="craft-drop-hint">Drop piece<br>here</div>
-                </div>
-                <div class="craft-piece-label" id="craft-piece-label"></div>
-                <div class="craft-variant-label" id="craft-variant-label"></div>
-
-                <button class="craft-btn" id="craft-flip-btn" onclick="craftToggleFlip()">
-                    <span class="craft-btn-icon">⇌</span> Flip
-                </button>
-
-                <button class="craft-btn" id="craft-dupe-btn" onclick="craftDuplicate()">
-                    <span class="craft-btn-icon">✦</span> Duplicate
-                </button>
-
-                <div class="craft-arrow">↓</div>
-                <div class="craft-output-label">Result</div>
-                <div class="craft-output" id="craft-output" onclick="claimOutputPiece()">
-                    <div class="craft-output-empty-hint">···</div>
-                </div>
-                <div class="craft-claim-hint" id="craft-claim-hint">tap or drag to board</div>
-            </div>
         </div>
 
         <div class="puzzle-bottombar">
@@ -1943,7 +2137,41 @@
                 <div class="bottombar-inner">
                     <button class="play-btn" id="play-btn" onclick="togglePlay()">▶</button>
                     <div class="piece-tray" id="piece-tray"></div>
+                    <div class="craft-tray-divider" id="craft-tray-divider"></div>
+                    <!-- Craft Table — inline right of tray -->
+                    <div class="craft-inline" id="craft-table">
+                        <div class="craft-inline-body">
+                            <div class="craft-drop-zone" id="craft-drop-zone">
+                                <div class="craft-drop-hint">Drop<br>here</div>
+                            </div>
+                            <div class="craft-inline-mid">
+                                <div class="craft-piece-label" id="craft-piece-label"></div>
+                                <div class="craft-inline-btns">
+                                    <button class="craft-btn craft-btn-sm" id="craft-flip-btn" onclick="craftToggleFlip()">
+                                        <span class="craft-btn-icon">⇌</span> Flip
+                                    </button>
+                                    <button class="craft-btn craft-btn-sm" id="craft-dupe-btn" onclick="craftDuplicate()">
+                                        <span class="craft-btn-icon">✦</span> Dupe
+                                    </button>
+                                </div>
+                                <div class="craft-variant-label" id="craft-variant-label"></div>
+                            </div>
+                            <div class="craft-inline-output-wrap">
+                                <div class="craft-output" id="craft-output" onclick="claimOutputPiece()">
+                                    <div class="craft-output-empty-hint">···</div>
+                                </div>
+                                <div class="craft-claim-hint" id="craft-claim-hint">tap</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            </div>
+            <!-- Tempo slider — persistent bottom-right widget -->
+            <div class="tempo-hint hidden" id="tempo-hint">
+                <div class="tempo-hint-title">Tempo</div>
+                <div class="tempo-hint-value" id="tempo-value">90 BPM</div>
+                <input type="range" class="tempo-hint-slider" id="tempo-slider" min="40" max="120" value="90" oninput="onTempoChange(this.value)">
+                <div class="tempo-hint-labels"><span>Slow</span><span>Fast</span></div>
             </div>
         </div>
     </div>
@@ -1980,21 +2208,30 @@
     </div>
 
     <!-- =============================================
+         GAME COMPLETE OVERLAY
+         ============================================= -->
+    <div class="game-complete-overlay hidden" id="game-complete-overlay">
+        <div class="game-complete-modal">
+            <div class="game-complete-badge">✦ Bebop Legend ✦</div>
+            <div class="game-complete-title font-display">All Done!</div>
+            <div class="game-complete-subtitle">You've mastered all 5 chapters of bebop vocabulary.</div>
+            <div class="game-complete-stars" id="game-complete-stars"></div>
+            <div class="game-complete-desc">You now know Arpeggios, Neighbors, Approaches, and Enclosures — the core language of bebop improvisation. Keep practicing and you'll sound like Bird himself.</div>
+            <div class="game-complete-actions">
+                <button class="success-btn success-btn-retry" onclick="gameCompleteReplay()">Play Again</button>
+                <button class="success-btn success-btn-next" onclick="gameCompleteMap()">Back to Map</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =============================================
          HINT TOAST
          ============================================= -->
     <div class="hint-toast hidden" id="hint-toast">
         <div class="hint-toast-text" id="hint-toast-text"></div>
     </div>
 
-    <div class="tempo-hint hidden" id="tempo-hint">
-        <div class="tempo-hint-title">Adjust Tempo</div>
-        <div class="tempo-hint-value" id="tempo-value">90 BPM</div>
-        <input type="range" class="tempo-hint-slider" id="tempo-slider" min="60" max="90" value="90" oninput="onTempoChange(this.value)">
-        <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-muted);margin:-8px 2px 12px;font-weight:600;">
-            <span>Slow</span><span>Fast</span>
-        </div>
-        <button class="tempo-hint-ok" onclick="confirmTempo()">OK</button>
-    </div>
+    <!-- tempo-hint is now inside puzzle-bottombar, see below -->
 
     <!-- =============================================
          TUTORIAL BAR
@@ -2166,8 +2403,17 @@ function getEighth() { return 60 / currentBPM / 2; }
 let isPlaying = false;
 let playbackTimeouts = [];
 
+// Shared AudioContext for both melody and SFX — avoids accumulating contexts
+function getAudioCtx() {
+    if (!audioCtx || audioCtx.state === 'closed') {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+}
+
 function playNote(freq, startTime, duration) {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const audioCtx = getAudioCtx();
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     const filter = audioCtx.createBiquadFilter();
@@ -2185,7 +2431,7 @@ function playNote(freq, startTime, duration) {
 }
 
 function stopPlayback() {
-    if (audioCtx) { audioCtx.close(); audioCtx = null; }
+    // Cancel all pending playhead/stop timeouts without closing the shared context
     playbackTimeouts.forEach(t => clearTimeout(t));
     playbackTimeouts = [];
     isPlaying = false;
@@ -2394,13 +2640,16 @@ function generateRandomPuzzle(template) {
     for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
         // 1. Pick random pieces for each chain slot
         const pieces = [];
+        let generatorFailed = false;
         for (let i = 0; i < template.len; i++) {
             const baseName = template.pool[Math.floor(Math.random() * template.pool.length)];
             const fm = FLIP_MAP[baseName];
+            if (!fm) { generatorFailed = true; break; } // unknown piece type — skip attempt
             const isFlipped = Math.random() < 0.5;
             const label = isFlipped ? fm.flipH : fm.defaultLabel;
             pieces.push({ baseName, label });
         }
+        if (generatorFailed) continue;
 
         // 2. Ensure newPiece appears at least once in the chain
         if (template.newPc) {
@@ -2408,6 +2657,7 @@ function generateRandomPuzzle(template) {
             if (!hasNew) {
                 const slot = Math.floor(Math.random() * template.len);
                 const fm = FLIP_MAP[template.newPc];
+                if (!fm) continue; // unknown new piece — skip attempt
                 const isFlipped = Math.random() < 0.5;
                 pieces[slot] = { baseName: template.newPc, label: isFlipped ? fm.flipH : fm.defaultLabel };
             }
@@ -2521,22 +2771,30 @@ function generateRandomPuzzle(template) {
 
     // Fallback — should rarely happen; return a minimal valid puzzle
     console.warn('Generator exhausted attempts for', template.id, '— using fallback');
-    const fm = FLIP_MAP[template.pool[0]];
+    // Find the first pool piece that has a valid FLIP_MAP entry
+    const fallbackBase = template.pool.find(n => FLIP_MAP[n]) || 'Arpeggio';
+    const fm = FLIP_MAP[fallbackBase];
     const fallbackPieces = [];
     for (let i = 0; i < template.len; i++) {
-        fallbackPieces.push({ baseName: template.pool[0], label: i % 2 === 0 ? fm.defaultLabel : fm.flipH });
+        fallbackPieces.push({ baseName: fallbackBase, label: i % 2 === 0 ? fm.defaultLabel : fm.flipH });
     }
-    // Alternating Ascending/Descending arpeggios always connect at the same position
+    // Alternating Ascending/Descending arpeggios connect at position 1.0 throughout
+    // Verified: entry/exit rules for Arpeggio Asc↔Desc give pos=1.0 for all slots
     const fallbackPos = new Array(template.len).fill(1.0);
     const removeCols = Array.from({length: template.rem}, (_, i) => i);
     const { chords, targetChord } = pickRandomChords(template.len);
     const traySet = new Set();
     removeCols.forEach(c => traySet.add(fallbackPieces[c].baseName));
+    // Compute target position from the last piece's exit rule
+    const lastFallback = fallbackPieces[template.len - 1];
+    const lastFallbackKey = lastFallback.baseName + '|' + lastFallback.label;
+    const lastFallbackRule = PIECE_RULES[lastFallbackKey];
+    const fallbackTargetPos = lastFallbackRule ? (1.0 + lastFallbackRule.exit - 0.5) : 0.5;
     return {
         id: template.id, chapter: template.ch, name: template.name,
         chords, targetChord,
         solution: fallbackPieces.map((p, i) => ({ col: i, pieceName: p.baseName, pieceLabel: p.label, position: fallbackPos[i] })),
-        targetPiece: { position: 1.5 },
+        targetPiece: { position: fallbackTargetPos },
         removeCols, trayBasePieces: [...traySet],
         hints: template.hints, timeThreshold: template.time,
         tutorial: template.tutorial || ''
@@ -2667,6 +2925,7 @@ function goToMap() {
     trayAvailable = [];
     if (timerInterval) clearInterval(timerInterval);
     document.getElementById('tutorial-bar').classList.add('hidden');
+    hideTempoHint();
     // Remember which chapter tab to show
     if (currentLevelData) activeChapterTab = currentLevelData.chapter;
     showScreen('map');
@@ -2767,13 +3026,20 @@ function renderChapterContent(chapterId) {
 function renderLevelNode(level) {
     const prog = getLevelProgress(level.id);
     const unlocked = isLevelUnlocked(level);
+    // Cache chapter levels once — used for both index lookup and unlock hint
     const chapterLevels = LEVELS.filter(l => l.chapter === level.chapter);
     const num = chapterLevels.indexOf(level) + 1;
 
     if (!unlocked) {
-        return `<div class="level-node locked-node">
+        // Find the preceding level so we can tell the player what to complete first
+        const prevLevel = num > 1 ? chapterLevels[num - 2] : null;
+        const hintAttr = prevLevel
+            ? `onclick="showToast('Complete level ${num - 1} first', 'info')"`
+            : '';
+        return `<div class="level-node locked-node" ${hintAttr}>
             <div class="level-num">${num}</div>
             <div class="level-name">${level.name}</div>
+            <div class="level-stars-display" style="color:var(--text-muted);">🔒</div>
         </div>`;
     }
 
@@ -2799,6 +3065,9 @@ function renderLevelNode(level) {
 // PUZZLE: LOAD LEVEL
 // ==================================================================
 function startLevel(levelId) {
+    stopPlayback(); // ensure any ongoing playback is halted before loading new level
+    clearHintVisuals();
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
     const template = LEVEL_TEMPLATES.find(t => t.id === levelId);
     if (!template) return;
 
@@ -2818,6 +3087,8 @@ function startLevel(levelId) {
         const piece = findPiece(s.pieceName, s.pieceLabel);
         if (piece) {
             gridState[s.col] = { piece, position: s.position, selectedIntervals: selectRandomIntervals(piece) };
+        } else {
+            console.warn(`startLevel: solution piece not found in library — ${s.pieceName} ${s.pieceLabel}`);
         }
     });
 
@@ -2825,6 +3096,8 @@ function startLevel(levelId) {
     const targetPiece = library.find(p => p.name === 'Target');
     if (targetPiece) {
         gridState[numCols] = { piece: targetPiece, position: currentLevelData.targetPiece.position, selectedIntervals: {} };
+    } else {
+        console.warn('startLevel: Target piece missing from library — melody playback will be silent');
     }
 
     // Compute melody before removing
@@ -2860,6 +3133,9 @@ function startLevel(levelId) {
 
         // Always show craft table — needed for flipping and duplicating
         showCraftTable();
+
+        // Show persistent tempo slider
+        showTempoHint();
 
         if (currentLevelData.tutorial) {
             showTutorial(currentLevelData.tutorial);
@@ -3092,43 +3368,56 @@ function renderTray() {
 // ==================================================================
 // CRAFT TABLE  (right-side duplication board)
 // ==================================================================
-let craftBaseName = null;
-let craftFlipH = false;
-let craftOutputPiece = null;   // the duplicated piece ready to drag
+// craftStack: array of { baseName, flipH } — supports multiple stacked pieces
+let craftStack = [];           // replaces craftBaseName + craftFlipH
+let craftBaseName = null;      // kept for compat — always mirrors craftStack[0]?.baseName
+let craftFlipH = false;        // kept for compat — always mirrors craftStack[0]?.flipH
+let craftOutputPiece = null;   // the result ready to drag/claim
 let craftOpen = false;
 
 function showCraftTable() {
     const table = document.getElementById('craft-table');
-    table.classList.add('visible');
+    const divider = document.getElementById('craft-tray-divider');
+    if (table) table.classList.add('visible');
+    if (divider) divider.classList.add('visible');
     craftOpen = true;
 
     // Show onboarding hint the first time
     if (!localStorage.getItem('bebopCraftOnboard')) {
-        const hint = document.createElement('div');
-        hint.className = 'craft-onboard';
-        hint.innerHTML = `
-            <div class="craft-onboard-icon">⇌</div>
-            <div class="craft-onboard-title">Craft Table</div>
-            <div class="craft-onboard-desc">Drag a piece here to <strong>flip</strong> its direction or <strong>duplicate</strong> it to get extra copies.</div>
-            <div class="craft-onboard-tap">tap to continue</div>
-        `;
-        hint.addEventListener('click', () => {
-            hint.style.opacity = '0';
-            hint.style.transition = 'opacity 0.3s ease';
-            setTimeout(() => hint.remove(), 300);
-            localStorage.setItem('bebopCraftOnboard', '1');
-        });
-        table.appendChild(hint);
+        setTimeout(() => {
+            const hint = document.createElement('div');
+            hint.className = 'craft-onboard';
+            hint.innerHTML = `
+                <div class="craft-onboard-icon">🔨</div>
+                <div class="craft-onboard-title">Craft Table</div>
+                <div class="craft-onboard-desc">Drag a piece here to <strong>flip</strong> its direction or <strong>duplicate</strong> it to get extra copies.</div>
+                <div class="craft-onboard-tap">tap to continue</div>
+            `;
+            hint.addEventListener('click', () => {
+                hint.style.opacity = '0';
+                hint.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => hint.remove(), 300);
+                localStorage.setItem('bebopCraftOnboard', '1');
+            });
+            table.appendChild(hint);
+        }, 100);
     }
 }
 
 function hideCraftTable() {
-    document.getElementById('craft-table').classList.remove('visible');
+    const table = document.getElementById('craft-table');
+    const divider = document.getElementById('craft-tray-divider');
+    if (table) table.classList.remove('visible');
+    if (divider) divider.classList.remove('visible');
     craftOpen = false;
     clearCraftTable();
 }
 
+function openCraftPopover() { /* no-op, kept for compat */ }
+function closeCraftPopover() { /* no-op, kept for compat */ }
+
 function clearCraftTable() {
+    craftStack = [];
     craftBaseName = null;
     craftFlipH = false;
     craftOutputPiece = null;
@@ -3156,60 +3445,139 @@ function clearCraftOutput() {
 }
 
 function placePieceInCraft(baseName, flipState) {
-    craftBaseName = baseName;
-    craftFlipH = !!flipState;
-    craftOutputPiece = null;
+    // Add to stack instead of replacing
+    craftStack.push({ baseName, flipH: !!flipState });
+    // Keep compat aliases pointing at first stack entry
+    craftBaseName = craftStack[0].baseName;
+    craftFlipH = craftStack[0].flipH;
+    clearCraftOutput();
     updateCraftDrop();
     document.getElementById('craft-flip-btn').classList.add('ready');
     document.getElementById('craft-dupe-btn').classList.add('ready');
-    clearCraftOutput();
 }
 
 function updateCraftDrop() {
-    if (!craftBaseName) return;
-    const map = FLIP_MAP[craftBaseName];
-    if (!map) return;
-    const label = getFlippedLabel(craftBaseName, craftFlipH);
-    const defaultPiece = findPiece(craftBaseName, map.defaultLabel);
+    if (craftStack.length === 0) return;
 
     const dz = document.getElementById('craft-drop-zone');
     dz.classList.add('has-piece');
-    dz.classList.toggle('flipped', craftFlipH);
-    if (defaultPiece) {
-        dz.innerHTML = `<img src="${defaultPiece.thumbnail}" draggable="false">`;
+    dz.classList.remove('flipped'); // stacked view handles flip per-card
+
+    // Build stacked visual: show up to 3 thumbnails as offset layers (bottom → top)
+    const visible = craftStack.slice(-3); // show at most top 3
+    const count = craftStack.length;
+    dz.innerHTML = `<div class="craft-dz-stack" data-count="${count}"></div>`;
+    const stackEl = dz.querySelector('.craft-dz-stack');
+
+    visible.forEach((entry, i) => {
+        const map = FLIP_MAP[entry.baseName];
+        if (!map) return;
+        const piece = findPiece(entry.baseName, map.defaultLabel);
+        if (!piece) return;
+        const layer = document.createElement('div');
+        layer.className = 'craft-dz-layer';
+        // offset each card slightly — bottom cards peeking out behind top card
+        const offset = (visible.length - 1 - i) * 4;
+        layer.style.transform = `translate(${-offset}px, ${-offset}px)`;
+        layer.style.zIndex = i + 1;
+        const img = document.createElement('img');
+        img.src = piece.thumbnail;
+        img.draggable = false;
+        if (entry.flipH) img.style.transform = 'scaleX(-1)';
+        layer.appendChild(img);
+        stackEl.appendChild(layer);
+    });
+
+    // Count badge when more than 1
+    if (count > 1) {
+        const badge = document.createElement('div');
+        badge.className = 'craft-dz-count';
+        badge.textContent = count;
+        dz.appendChild(badge);
     }
 
-    document.getElementById('craft-piece-label').textContent = craftBaseName;
-    document.getElementById('craft-variant-label').textContent = label;
-    document.getElementById('craft-flip-btn').classList.toggle('active', craftFlipH);
+    // Label: top card info; if all same type show "N× Name", else "N× mixed"
+    const top = craftStack[craftStack.length - 1];
+    const topLabel = getFlippedLabel(top.baseName, top.flipH);
+    const allSameName = craftStack.every(e => e.baseName === top.baseName);
+    document.getElementById('craft-piece-label').textContent =
+        count > 1 ? `${count}× ${allSameName ? top.baseName : 'mixed'}` : top.baseName;
+    document.getElementById('craft-variant-label').textContent =
+        count > 1 ? '' : topLabel;
+    document.getElementById('craft-flip-btn').classList.toggle('active',
+        craftStack.every(e => e.flipH));
+    // Update compat aliases to top of stack
+    craftBaseName = top.baseName;
+    craftFlipH = top.flipH;
 }
 
-function showOutputPiece(baseName, flipH) {
-    const map = FLIP_MAP[baseName];
-    if (!map) return;
-    const defaultPiece = findPiece(baseName, map.defaultLabel);
-    if (!defaultPiece) return;
-
+// showOutputPieces: display N heterogeneous result pieces in the output zone
+// pieces: array of { baseName, flipH }
+// mode: 'flip' | 'dupe' (for cosmetic differences only)
+function showOutputPieces(pieces, mode) {
+    if (!pieces || pieces.length === 0) return;
     const output = document.getElementById('craft-output');
-    output.innerHTML = `<img src="${defaultPiece.thumbnail}" draggable="false" style="${flipH ? 'transform:scaleX(-1);' : ''}">`;
+    const count = pieces.length;
+
+    // Build stacked visual — show up to 3 layers as offset thumbnails
+    const visible = pieces.slice(-3);
+    const stackEl = document.createElement('div');
+    stackEl.className = 'craft-dz-stack';
+
+    visible.forEach((p, i) => {
+        const map = FLIP_MAP[p.baseName];
+        if (!map) return;
+        const piece = findPiece(p.baseName, map.defaultLabel);
+        if (!piece) return;
+        const layer = document.createElement('div');
+        layer.className = 'craft-dz-layer';
+        const offset = (visible.length - 1 - i) * 4;
+        layer.style.transform = `translate(${-offset}px, ${-offset}px)`;
+        layer.style.zIndex = i + 1;
+        const img = document.createElement('img');
+        img.src = piece.thumbnail;
+        img.draggable = false;
+        if (p.flipH) img.style.transform = 'scaleX(-1)';
+        layer.appendChild(img);
+        stackEl.appendChild(layer);
+    });
+
+    output.innerHTML = '';
+    output.appendChild(stackEl);
+
+    if (count > 1) {
+        const badge = document.createElement('div');
+        badge.className = 'craft-dz-count';
+        badge.textContent = count;
+        output.appendChild(badge);
+    }
+
     output.classList.add('has-piece', 'popping-in');
-    craftOutputPiece = { baseName, flipH };
+
+    // craftOutputPiece holds the top piece (for single drag-to-grid) and .pieces[] for claim-all
+    const top = pieces[pieces.length - 1];
+    craftOutputPiece = { baseName: top.baseName, flipH: top.flipH, pieces };
 
     spawnSparkles(output, 3);
 
-    // After pop-in, transition to shining claimable state
     setTimeout(() => {
         output.classList.remove('popping-in');
         output.classList.add('claimable');
-        // Show "tap to claim" hint
         const hint = document.getElementById('craft-claim-hint');
         if (hint) hint.classList.add('visible');
-
-        // Make result draggable to puzzle board
         output.style.cursor = 'grab';
-        output.addEventListener('mousedown', craftOutputDragStart);
-        output.addEventListener('touchstart', craftOutputTouchStart, {passive: false});
+        output.addEventListener('mousedown', craftOutputDragStart, { once: true });
+        output.addEventListener('touchstart', craftOutputTouchStart, { passive: false, once: true });
     }, 450);
+}
+
+// Backward-compat wrapper for any remaining callers
+function showOutputPiece(baseName, flipH, isDupe) {
+    if (isDupe) {
+        showOutputPieces([{ baseName, flipH }, { baseName, flipH }], 'dupe');
+    } else {
+        showOutputPieces([{ baseName, flipH }], 'flip');
+    }
 }
 
 function craftOutputDragStart(e) {
@@ -3217,6 +3585,7 @@ function craftOutputDragStart(e) {
     if (!craftOutputPiece || !output.classList.contains('claimable')) return;
     e.preventDefault();
     e.stopPropagation();
+    // Drag the top piece; any extras will go to tray when finishDrag is called
     const { baseName, flipH } = craftOutputPiece;
     const label = getFlippedLabel(baseName, flipH);
     const piece = findPiece(baseName, label);
@@ -3243,100 +3612,200 @@ function claimOutputPiece() {
     if (!craftOutputPiece || !output.classList.contains('claimable')) return;
     sfx('claim');
 
-    const { baseName, flipH } = craftOutputPiece;
+    // Collect ALL pieces in the output
+    const allPieces = craftOutputPiece.pieces || [{ baseName: craftOutputPiece.baseName, flipH: craftOutputPiece.flipH }];
 
     // Hide claim hint
     const hint = document.getElementById('craft-claim-hint');
     if (hint) hint.classList.remove('visible');
 
-    // Fly animation
-    output.classList.remove('claimable');
-    output.style.animation = 'craft-output-fly 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+    // Source rect
+    const outRect = output.getBoundingClientRect();
+
+    // 1. Add ALL pieces to tray data and render so DOM elements exist
+    const firstNewIdx = trayAvailable.length;
+    allPieces.forEach(p => {
+        trayAvailable.push(p.baseName);
+        trayFlipState.push(p.flipH);
+    });
+    clearCraftTable();
+    output.style.opacity = '0';
+    renderTray();
+
+    // 2. Find newly added tray cards and hide them
+    const tray = document.getElementById('piece-tray');
+    const trayCards = tray.querySelectorAll('.tray-piece');
+    const newCards = [];
+    for (let i = firstNewIdx; i < firstNewIdx + allPieces.length; i++) {
+        if (trayCards[i]) {
+            trayCards[i].style.opacity = '0';
+            newCards.push({ card: trayCards[i], piece: allPieces[i - firstNewIdx] });
+        }
+    }
+
+    // 3. Create ghosts and fly them to their tray positions
     spawnSparkles(output, 4);
 
-    // After fly: add to tray + clear
-    setTimeout(() => {
-        // For flip: 1 piece back. For duplicate: 2 pieces back.
-        // The caller sets craftOutputPiece.dupeMode to know which.
-        if (craftOutputPiece && craftOutputPiece.dupeMode) {
-            trayAvailable.push(baseName);
-            trayFlipState.push(flipH);
-            trayAvailable.push(baseName);
-            trayFlipState.push(flipH);
-        } else {
-            trayAvailable.push(baseName);
-            trayFlipState.push(flipH);
+    newCards.forEach(({ card, piece: p }, i) => {
+        const map = FLIP_MAP[p.baseName];
+        const defaultPiece = map ? findPiece(p.baseName, map.defaultLabel) : null;
+        const targetRect = card.getBoundingClientRect();
+        const ghost = document.createElement('div');
+        ghost.className = 'craft-claim-ghost';
+        ghost.style.left = outRect.left + 'px';
+        ghost.style.top = outRect.top + 'px';
+        ghost.style.width = outRect.width + 'px';
+        ghost.style.height = outRect.height + 'px';
+        if (defaultPiece) {
+            const img = document.createElement('img');
+            img.src = defaultPiece.thumbnail;
+            img.draggable = false;
+            if (p.flipH) img.style.transform = 'scaleX(-1)';
+            img.style.width = '100%';
+            img.style.height = '100%';
+            img.style.objectFit = 'cover';
+            img.style.borderRadius = '10px';
+            ghost.appendChild(img);
         }
-        clearCraftTable();
-        renderTray();
-    }, 650);
+        document.body.appendChild(ghost);
+
+        const delay = i * 80;
+        setTimeout(() => {
+            requestAnimationFrame(() => {
+                ghost.style.left = targetRect.left + 'px';
+                ghost.style.top = targetRect.top + 'px';
+                ghost.style.width = targetRect.width + 'px';
+                ghost.style.height = targetRect.height + 'px';
+            });
+            setTimeout(() => {
+                card.style.opacity = '';
+                spawnSparkles(card, 2);
+                ghost.remove();
+            }, 520);
+        }, delay);
+    });
+
+    // 4. Clean up output after last ghost departs
+    setTimeout(() => {
+        output.style.opacity = '';
+    }, allPieces.length > 1 ? 650 : 550);
 }
 
 function craftToggleFlip() {
-    if (!craftBaseName) return;
+    if (craftStack.length === 0) return;
     sfx('flip');
-    const baseName = craftBaseName;
+
     const dz = document.getElementById('craft-drop-zone');
+    const output = document.getElementById('craft-output');
 
     // Disable buttons during animation
     document.getElementById('craft-flip-btn').classList.remove('ready');
     document.getElementById('craft-dupe-btn').classList.remove('ready');
 
-    // Phase 1: Rotate out to edge-on (0.3s)
-    dz.classList.remove('flip-phase-out', 'flip-phase-in', 'consuming');
-    void dz.offsetWidth;
-    dz.classList.add('flip-phase-out');
+    // Snapshot stack BEFORE toggling flip (for pre-flip thumbnail display)
+    const preFlipStack = craftStack.map(e => ({ baseName: e.baseName, flipH: e.flipH }));
+
+    // Toggle flip on EVERY entry in the stack
+    craftStack.forEach(e => { e.flipH = !e.flipH; });
+    craftFlipH = craftStack[craftStack.length - 1].flipH;
+
+    // Build result list now (post-flip state)
+    const resultPieces = craftStack.map(e => ({ baseName: e.baseName, flipH: e.flipH }));
+
+    // Hide the drop zone immediately
+    dz.style.opacity = '0';
     spawnSparkles(dz, 4);
 
-    // At edge-on (card invisible): swap the image
-    setTimeout(() => {
-        craftFlipH = !craftFlipH;
-        const label = getFlippedLabel(baseName, craftFlipH);
-        const defaultPiece = findPiece(baseName, FLIP_MAP[baseName]?.defaultLabel);
-        if (defaultPiece) {
-            dz.innerHTML = `<img src="${defaultPiece.thumbnail}" draggable="false"${craftFlipH ? ' style="transform:scaleX(-1)"' : ''}>`;
+    const dzRect = dz.getBoundingClientRect();
+    const outRect = output.getBoundingClientRect();
+
+    const GHOST_FLIGHT = 750;    // ms for a single ghost to fly
+    const GHOST_STAGGER = 80;    // ms between each card's departure
+    const allGhosts = [];
+
+    // Launch one ghost per card, bottom-to-top (index 0 = bottom, goes first)
+    preFlipStack.forEach((entry, i) => {
+        const map = FLIP_MAP[entry.baseName];
+        const piece = map ? findPiece(entry.baseName, map.defaultLabel) : null;
+
+        // Small visual offset so cards appear to peel off the stack
+        const stackOffset = (preFlipStack.length - 1 - i) * 4; // matches layer offset in updateCraftDrop
+        const startLeft = dzRect.left - stackOffset;
+        const startTop  = dzRect.top  - stackOffset;
+
+        const ghost = document.createElement('div');
+        ghost.className = 'craft-flip-ghost';
+        ghost.style.left   = startLeft + 'px';
+        ghost.style.top    = startTop  + 'px';
+        ghost.style.width  = dzRect.width  + 'px';
+        ghost.style.height = dzRect.height + 'px';
+        ghost.style.zIndex = 100 + i;   // higher = on top (top card renders last)
+
+        const inner = document.createElement('div');
+        // Use animation-delay so spin starts exactly when this card launches
+        const launchDelay = i * GHOST_STAGGER;
+        inner.className = 'craft-flip-ghost-inner';
+        inner.style.animationDelay = launchDelay + 'ms';
+        inner.style.animationFillMode = 'both'; // stay at start until delay fires
+        if (piece) {
+            const img = document.createElement('img');
+            img.src = piece.thumbnail;
+            img.draggable = false;
+            if (entry.flipH) img.style.transform = 'scaleX(-1)';
+            inner.appendChild(img);
         }
-        document.getElementById('craft-variant-label').textContent = label;
-        document.getElementById('craft-flip-btn').classList.toggle('active', craftFlipH);
-
-        // Phase 2: Rotate in from other side (0.3s)
-        dz.classList.remove('flip-phase-out');
-        void dz.offsetWidth;
-        dz.classList.add('flip-phase-in');
-    }, 300);
-
-    // After flip-in completes: start consume dissolve
-    setTimeout(() => {
-        dz.classList.remove('flip-phase-in');
-        void dz.offsetWidth;
-        dz.classList.add('consuming');
-        spawnSparkles(dz, 4);
-
-        // After dissolve: clear input, show result in output
+        ghost.appendChild(inner);
+        document.body.appendChild(ghost);
+        allGhosts.push(ghost);
         setTimeout(() => {
-            const flippedFlipH = craftFlipH;
+            spawnSparkles(ghost, 2);
+            // Land offset mirrors updateCraftDrop layer positioning in output zone
+            const outStackOffset = (preFlipStack.length - 1 - i) * 4;
+            const destLeft = outRect.left + (outRect.width  - dzRect.width)  / 2 - outStackOffset;
+            const destTop  = outRect.top  + (outRect.height - dzRect.height) / 2 - outStackOffset;
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    ghost.style.left = destLeft + 'px';
+                    ghost.style.top  = destTop  + 'px';
+                });
+            });
+        }, launchDelay);
+    });
 
-            // Clear the input zone
-            dz.innerHTML = '<div class="craft-drop-hint">Drop piece<br>here</div>';
-            dz.classList.remove('has-piece', 'flipped', 'consuming');
-            document.getElementById('craft-piece-label').textContent = '';
-            document.getElementById('craft-variant-label').textContent = '';
-            craftBaseName = null;
+    // Last ghost's arrival time = when all cards have landed
+    const lastLaunch = (preFlipStack.length - 1) * GHOST_STAGGER;
+    const totalDuration = lastLaunch + GHOST_FLIGHT;
 
-            // Show flipped piece in output box — user clicks to claim
-            showOutputPiece(baseName, flippedFlipH);
-        }, 650);
-    }, 650);
+    setTimeout(() => {
+        // Sparkle burst on output
+        spawnSparkles(output, 3);
+
+        // Clear all ghosts
+        allGhosts.forEach(g => g.remove());
+
+        // Clear the input zone
+        craftStack = [];
+        craftBaseName = null;
+        craftFlipH = false;
+
+        dz.innerHTML = '<div class="craft-drop-hint">Drop piece<br>here</div>';
+        dz.classList.remove('has-piece', 'flipped', 'flip-phase-out', 'flip-phase-in', 'consuming');
+        dz.style.opacity = '';
+        document.getElementById('craft-piece-label').textContent = '';
+        document.getElementById('craft-variant-label').textContent = '';
+        document.getElementById('craft-flip-btn').classList.remove('active');
+
+        // Show all flipped pieces stacked in output
+        showOutputPieces(resultPieces, 'flip');
+    }, totalDuration);
 }
 
 function craftDuplicate() {
-    if (!craftBaseName) return;
+    if (craftStack.length === 0) return;
     sfx('dupe');
-    const baseName = craftBaseName;
-    const flipH = craftFlipH;
-    const label = getFlippedLabel(baseName, flipH);
-    const piece = findPiece(baseName, label);
-    if (!piece) return;
+
+    // Snapshot the stack before clearing it
+    const stackSnapshot = craftStack.map(e => ({ baseName: e.baseName, flipH: e.flipH }));
 
     // Disable buttons during animation
     document.getElementById('craft-flip-btn').classList.remove('ready');
@@ -3349,7 +3818,7 @@ function craftDuplicate() {
     dz.classList.add('duplicating');
     spawnSparkles(dz, 6);
 
-    // Step 2: After shake, dissolve original + show duplicate in output
+    // Step 2: After shake, dissolve original + show duplicates in output
     setTimeout(() => {
         dz.classList.remove('duplicating');
         spawnSparkles(dz, 3);
@@ -3361,15 +3830,24 @@ function craftDuplicate() {
 
         // After dissolve, clear input and show result — user clicks to claim
         setTimeout(() => {
+            // Clear input stack
+            craftStack = [];
+            craftBaseName = null;
+            craftFlipH = false;
+
             dz.innerHTML = '<div class="craft-drop-hint">Drop piece<br>here</div>';
             dz.classList.remove('has-piece', 'flipped', 'consuming');
             document.getElementById('craft-piece-label').textContent = '';
             document.getElementById('craft-variant-label').textContent = '';
-            craftBaseName = null;
+            document.getElementById('craft-flip-btn').classList.remove('active');
 
-            // Show duplicate in output, mark as dupe mode so claim gives 2 pieces
-            showOutputPiece(baseName, flipH);
-            if (craftOutputPiece) craftOutputPiece.dupeMode = true;
+            // Show ALL stack entries doubled in output (each piece × 2)
+            const dupedPieces = [];
+            stackSnapshot.forEach(e => {
+                dupedPieces.push({ baseName: e.baseName, flipH: e.flipH });
+                dupedPieces.push({ baseName: e.baseName, flipH: e.flipH }); // second copy
+            });
+            showOutputPieces(dupedPieces, 'dupe');
         }, 650);
     }, 900);
 }
@@ -3444,13 +3922,16 @@ function startDrag(e, piece, fromGrid) {
     const firstCell = document.querySelector('.grid-cell');
     if (firstCell) cellSize = firstCell.offsetWidth;
 
+    // Auto-open craft popover when dragging so user can drop into it
+    // craft table is always visible inline, no popover to open
+
     dragPreview = document.createElement('div');
     dragPreview.className = 'drag-preview';
     dragPreview.style.width = cellSize + 'px';
     dragPreview.style.height = cellSize + 'px';
     dragPreview.innerHTML = `<img src="${piece.thumbnail}" draggable="false">`;
     document.body.appendChild(dragPreview);
-    updateDragPreview(e.clientX, e.clientY);
+    updateDragPreview(e.clientX, e.clientY, false);
 
     document.addEventListener('mousemove', onDragMove);
     document.addEventListener('mouseup', onDragEnd);
@@ -3464,22 +3945,27 @@ function startDragTouch(e, piece, fromGrid) {
     const firstCell = document.querySelector('.grid-cell');
     if (firstCell) cellSize = firstCell.offsetWidth;
 
+    // Auto-open craft popover when dragging so user can drop into it
+    // craft table is always visible inline, no popover to open
+
     dragPreview = document.createElement('div');
     dragPreview.className = 'drag-preview';
     dragPreview.style.width = cellSize + 'px';
     dragPreview.style.height = cellSize + 'px';
     dragPreview.innerHTML = `<img src="${piece.thumbnail}" draggable="false">`;
     document.body.appendChild(dragPreview);
-    updateDragPreview(touch.clientX, touch.clientY);
+    updateDragPreview(touch.clientX, touch.clientY, true);
 
     document.addEventListener('touchmove', onTouchMove, {passive:false});
     document.addEventListener('touchend', onTouchEnd);
 }
 
-function updateDragPreview(x, y) {
+function updateDragPreview(x, y, isTouchEvent) {
     if (dragPreview) {
-        dragPreview.style.left = (x - cellSize/2) + 'px';
-        dragPreview.style.top = (y - cellSize/2) + 'px';
+        // On touch, lift the preview above the finger so it stays visible
+        const offsetY = isTouchEvent ? cellSize * 1.1 : cellSize / 2;
+        dragPreview.style.left = (x - cellSize / 2) + 'px';
+        dragPreview.style.top = (y - offsetY) + 'px';
     }
 }
 
@@ -3494,6 +3980,8 @@ function processDragAt(x, y) {
         const rect = col.getBoundingClientRect();
         const colIndex = parseInt(col.dataset.col);
         if (x < rect.left || x > rect.right) return;
+        // Must also be within the vertical bounds of the column (prevents tray/bottombar false-positives)
+        if (y < rect.top - 20 || y > rect.bottom + 20) return;
         if (colIndex === numCols) return;
         if (draggedPiece.name === 'Target') return;
         if (!isEmptyCol(colIndex) && !draggedFromGrid && !draggedFromCraft) return;
@@ -3531,14 +4019,15 @@ function processDragAt(x, y) {
 }
 
 function onDragMove(e) {
-    updateDragPreview(e.clientX, e.clientY);
+    updateDragPreview(e.clientX, e.clientY, false);
     processDragAt(e.clientX, e.clientY);
 }
 
 function onTouchMove(e) {
     e.preventDefault();
     const touch = e.touches[0];
-    updateDragPreview(touch.clientX, touch.clientY);
+    updateDragPreview(touch.clientX, touch.clientY, true);
+    // Use the actual finger position for snap detection (not the lifted preview)
     processDragAt(touch.clientX, touch.clientY);
 }
 
@@ -3550,18 +4039,14 @@ function finishDrag(clientX, clientY) {
 
     // If dragged from craft output
     if (draggedFromCraft && draggedPiece) {
+        // Collect all output pieces for later use
+        const outputPieces = craftOutputPiece?.pieces ||
+            (craftOutputPiece ? [{ baseName: craftOutputPiece.baseName, flipH: craftOutputPiece.flipH }] : []);
+
         if (craftOpen && clientX && clientY && isCraftDrop(clientX, clientY)) {
-            // Dropped back on the craft drop zone
-            const baseName = craftOutputPiece ? craftOutputPiece.baseName : draggedPiece.name;
-            const flipState = craftOutputPiece ? craftOutputPiece.flipH : false;
-            if (craftOutputPiece && craftOutputPiece.dupeMode) {
-                // Duplicate mode: one copy goes to tray, other stays in craft
-                trayAvailable.push(baseName);
-                trayFlipState.push(flipState);
-                renderTray();
-            }
+            // Dropped back on the craft drop zone — re-stack all output pieces
             clearCraftOutput();
-            placePieceInCraft(baseName, flipState);
+            outputPieces.forEach(p => placePieceInCraft(p.baseName, p.flipH));
         } else if (currentSnapCol !== null && currentSnapPos !== null) {
             const canPlace = isPuzzleCol(currentSnapCol) && !gridState[currentSnapCol];
             if (canPlace) {
@@ -3569,11 +4054,13 @@ function finishDrag(clientX, clientY) {
                 const sel = selectRandomIntervals(draggedPiece);
                 gridState[currentSnapCol] = { piece: draggedPiece, position: currentSnapPos, selectedIntervals: sel };
                 sfx('place');
-                // Handle dupe mode: add extra piece to tray
-                if (craftOutputPiece && craftOutputPiece.dupeMode) {
-                    trayAvailable.push(craftOutputPiece.baseName);
-                    trayFlipState.push(craftOutputPiece.flipH);
-                }
+                // Send remaining pieces (all except the one placed) to tray
+                // outputPieces[last] is the dragged top; rest go to tray
+                const extras = outputPieces.slice(0, -1);
+                extras.forEach(p => {
+                    trayAvailable.push(p.baseName);
+                    trayFlipState.push(p.flipH);
+                });
                 clearCraftTable();
                 renderTray();
                 renderGrid();
@@ -3581,7 +4068,7 @@ function finishDrag(clientX, clientY) {
                 checkAnswer(currentSnapCol);
             }
         } else {
-            // Dropped on nothing — just do normal claim to tray
+            // Dropped on nothing — claim all to tray
             claimOutputPiece();
         }
         if (dragPreview) { dragPreview.remove(); dragPreview = null; }
@@ -3592,6 +4079,18 @@ function finishDrag(clientX, clientY) {
 
     // Check if dropped on the craft table drop zone
     if (craftOpen && draggedPiece && clientX && clientY && isCraftDrop(clientX, clientY)) {
+        // If there's an unclaimed output piece, silently claim ALL pieces to tray first
+        // so nothing is lost when the new piece overwrites the craft table
+        if (craftOutputPiece) {
+            const allOut = craftOutputPiece.pieces ||
+                [{ baseName: craftOutputPiece.baseName, flipH: craftOutputPiece.flipH }];
+            allOut.forEach(p => {
+                trayAvailable.push(p.baseName);
+                trayFlipState.push(p.flipH);
+            });
+            clearCraftOutput();
+        }
+
         // Place piece into craft table
         const baseName = draggedPiece.name;
         const flipState = draggedTrayIndex >= 0 ? !!trayFlipState[draggedTrayIndex] : false;
@@ -3694,6 +4193,9 @@ function checkAnswer(col) {
 
         const allSolved = currentLevelData.removeCols.every(c => isSolved(c));
         if (allSolved) {
+            // Stop the timer immediately so score reflects the actual solve moment,
+            // not the end of the celebration animation delay
+            if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
             setTimeout(() => completeLevel(), 500);
         } else {
             const remaining = currentLevelData.removeCols.filter(c => !isSolved(c)).length;
@@ -3710,16 +4212,17 @@ function checkAnswer(col) {
         if (el) {
             el.style.animation = 'shake 0.4s ease';
             setTimeout(() => {
-                // Return piece to tray
+                // Always return the piece to the tray on wrong placement
+                // (regardless of whether it came from grid or tray — a wrong answer should never stay on the board)
                 const baseName = state.piece.name;
                 if (baseName) {
                     const map = FLIP_MAP[baseName];
                     const wasFlipped = map && map.flipH && state.piece.label === map.flipH;
                     trayAvailable.push(baseName);
                     trayFlipState.push(!!wasFlipped);
-                    renderTray();
                 }
                 gridState[col] = null;
+                renderTray();
                 renderGrid();
                 applyHighlights();
             }, 400);
@@ -3728,7 +4231,8 @@ function checkAnswer(col) {
 }
 
 function completeLevel() {
-    if (timerInterval) clearInterval(timerInterval);
+    // Timer was already stopped in checkAnswer at the moment of solve; guard for safety
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
     const elapsed = Math.floor((Date.now() - levelStartTime) / 1000);
     const stars = calculateStars(elapsed);
 
@@ -3744,8 +4248,12 @@ function completeLevel() {
 }
 
 function calculateStars(elapsed) {
-    if (hintsUsed === 0 && wrongPlacements === 0 && elapsed <= (currentLevelData.timeThreshold || 999)) return 3;
-    if (hintsUsed <= 1 && wrongPlacements === 0) return 2;
+    const threshold = currentLevelData.timeThreshold || currentLevelData.time || 999;
+    // 3★: perfect — no hints, no mistakes, within time
+    if (hintsUsed === 0 && wrongPlacements === 0 && elapsed <= threshold) return 3;
+    // 2★: mostly clean — at most 1 hint or 1 mistake (not both), within 2× time
+    if (hintsUsed + wrongPlacements <= 1 && elapsed <= threshold * 2) return 2;
+    // 1★: completed
     return 1;
 }
 
@@ -3766,18 +4274,10 @@ function useHint() {
     if (hintsRemaining <= 0) return;
     sfx('hint');
 
-    // 1st hint globally per level: tempo slider
-    if (currentHintLevel === 0) {
-        currentHintLevel = 1;
-        hintsUsed++;
-        hintsRemaining--;
-        updateHintButton();
-        clearHintVisuals();
-        showTempoHint();
-        return;
-    }
+    // Tempo slider is now always visible — skip straight to position hints
+    if (currentHintLevel === 0) currentHintLevel = 1;
 
-    // 2nd+ hint: position-based hints per column
+    // Position-based hints per column
     const unsolved = currentLevelData.removeCols.filter(c => !isSolved(c));
     if (unsolved.length === 0) return;
 
@@ -3806,7 +4306,6 @@ function useHint() {
 function clearHintVisuals() {
     document.querySelectorAll('.hint-ghost,.hint-options-popup').forEach(el => el.remove());
     document.getElementById('hint-toast').classList.add('hidden');
-    document.getElementById('tempo-hint').classList.add('hidden');
 }
 
 function showTempoHint() {
@@ -3817,16 +4316,17 @@ function showTempoHint() {
     el.classList.remove('hidden');
 }
 
+function hideTempoHint() {
+    document.getElementById('tempo-hint').classList.add('hidden');
+}
+
 function onTempoChange(val) {
     currentBPM = parseInt(val);
     document.getElementById('tempo-value').textContent = currentBPM + ' BPM';
 }
 
 function confirmTempo() {
-    document.getElementById('tempo-hint').classList.add('hidden');
-    // Auto-play at new tempo so user can hear the difference
-    stopPlayback();
-    setTimeout(() => playMelody(), 200);
+    // Legacy — kept for compat, no-op now since slider is persistent
 }
 
 function showHintToast(text) {
@@ -3860,18 +4360,32 @@ function showOptionsHint(answer) {
     const ghostTop = answer.position * (cellH + cellGap);
 
     const correctPiece = findPiece(answer.pieceName, answer.pieceLabel);
-    const candidates = library.filter(p => p.name !== 'Target' && !(p.name === answer.pieceName && p.label === answer.pieceLabel));
+    if (!correctPiece) return; // can't show hint if piece is missing from library
+
+    // Build wrong options from pieces relevant to the current level's pool only —
+    // avoids showing pieces the player hasn't learned yet as decoys
+    const poolNames = new Set(currentLevelData.trayBasePieces || []);
+    poolNames.add(answer.pieceName); // always include the correct piece's type
+    const candidates = library.filter(p =>
+        p.name !== 'Target' &&
+        !(p.name === answer.pieceName && p.label === answer.pieceLabel) &&
+        poolNames.has(p.name)
+    );
     const shuffled = [...candidates].sort(() => Math.random() - 0.5);
     const wrongPieces = shuffled.slice(0, 2);
     const options = [correctPiece, ...wrongPieces].sort(() => Math.random() - 0.5);
 
+    const colRect = colEl.getBoundingClientRect();
     const popup = document.createElement('div');
     popup.className = 'hint-options-popup';
-    popup.style.top = (ghostTop - 80) + 'px';
+    // Position above the ghost, clamped so it stays on-screen
+    const popupTop = Math.max(8, colRect.top + ghostTop - 90);
+    popup.style.top = popupTop + 'px';
     popup.style.left = '50%';
     popup.style.transform = 'translateX(-50%)';
 
     options.forEach(piece => {
+        if (!piece) return; // guard: skip any null entries
         const opt = document.createElement('div');
         opt.className = 'hint-piece-option';
         opt.innerHTML = `<img src="${piece.thumbnail}" style="width:44px;height:44px;border-radius:6px;" draggable="false">
@@ -3893,7 +4407,7 @@ function showOptionsHint(answer) {
         });
         popup.appendChild(opt);
     });
-    colEl.appendChild(popup);
+    document.body.appendChild(popup);
 }
 
 function updateHintButton() {
@@ -3906,7 +4420,7 @@ function updateHintButton() {
 // PLAYBACK
 // ==================================================================
 function playMelody() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    getAudioCtx(); // ensure context is alive
 
     const notes = fullMelodyNotes;
     if (!notes || !notes.targetNote) return;
@@ -3916,21 +4430,26 @@ function playMelody() {
     btn.textContent = '■';
     btn.classList.add('playing');
 
-    let currentTime = audioCtx.currentTime + 0.1;
+    const eighth = getEighth();
+    // Capture AudioContext start time once to anchor all scheduling
+    const originTime = audioCtx.currentTime + 0.1; // audioCtx set by getAudioCtx() above
+    let currentTime = originTime;
 
-    for (let col = 0; col < numCols; col++) {
-        const colNotes = notes.pieceNotes[col] || [];
-        const colStart = currentTime;
-        const delayMs = (colStart - audioCtx.currentTime) * 1000;
-
-        const tOn = setTimeout(() => {
+    // Helper: schedule a DOM update precisely relative to audio clock
+    function schedulePlayhead(audioTime, col) {
+        const delayMs = (audioTime - audioCtx.currentTime) * 1000;
+        const id = setTimeout(() => {
             document.querySelectorAll('.playhead-active').forEach(el => el.classList.remove('playhead-active'));
             const colEl = document.querySelector(`.grid-column[data-col="${col}"]`);
             if (colEl) colEl.querySelectorAll('.grid-cell').forEach(c => c.classList.add('playhead-active'));
-        }, delayMs);
-        playbackTimeouts.push(tOn);
+        }, Math.max(0, delayMs));
+        playbackTimeouts.push(id);
+    }
 
-        const eighth = getEighth();
+    for (let col = 0; col < numCols; col++) {
+        const colNotes = notes.pieceNotes[col] || [];
+        if (colNotes.length === 0) continue; // skip empty columns — no playhead flash either
+        schedulePlayhead(currentTime, col);
         colNotes.forEach(midi => {
             playNote(midiToFreq(midi), currentTime, eighth * 0.9);
             currentTime += eighth;
@@ -3938,15 +4457,7 @@ function playMelody() {
     }
 
     // Target note
-    const eighth = getEighth();
-    const tDelay = (currentTime - audioCtx.currentTime) * 1000;
-    const tT = setTimeout(() => {
-        document.querySelectorAll('.playhead-active').forEach(el => el.classList.remove('playhead-active'));
-        const colEl = document.querySelector(`.grid-column[data-col="${numCols}"]`);
-        if (colEl) colEl.querySelectorAll('.grid-cell').forEach(c => c.classList.add('playhead-active'));
-    }, tDelay);
-    playbackTimeouts.push(tT);
-
+    schedulePlayhead(currentTime, numCols);
     playNote(midiToFreq(notes.targetNote), currentTime, eighth * 2);
     currentTime += eighth * 2;
 
@@ -4025,6 +4536,7 @@ function showSuccessModal(stars, elapsed) {
 
 function retryLevel() {
     document.getElementById('success-overlay').classList.add('hidden');
+    stopPlayback();
     startLevel(currentLevel);
 }
 
@@ -4033,16 +4545,26 @@ function nextLevel() {
     const chapterLevels = LEVELS.filter(l => l.chapter === currentLevelData.chapter);
     const idx = chapterLevels.findIndex(l => l.id === currentLevel);
 
-    // Check if this was the last level in the chapter → show reward if applicable
+    // Check if this was the last level in the chapter
     if (idx === chapterLevels.length - 1) {
-        const ch = CHAPTERS.find(c => c.id === currentLevelData.chapter);
-        const nextCh = CHAPTERS.find(c => c.id === currentLevelData.chapter + 1);
+        const currentChapter = currentLevelData.chapter;
+        const nextCh = CHAPTERS.find(c => c.id === currentChapter + 1);
+
+        // Show reward screen for next chapter's new piece (once only)
         if (nextCh && nextCh.reward && !gameProgress['_reward_' + nextCh.reward]) {
             showRewardScreen(nextCh.reward);
             return;
         }
-        // Navigate to next chapter tab if it exists and is unlocked
-        if (nextCh && getTotalStars() >= nextCh.unlockStars) {
+
+        // No next chapter → game complete
+        if (!nextCh) {
+            showGameComplete();
+            return;
+        }
+
+        // Navigate to next chapter tab if the chapter just became unlocked.
+        // unlockStars threshold checks the *current* chapter's stars, not total stars.
+        if (getChapterStars(currentChapter) >= nextCh.unlockStars) {
             activeChapterTab = nextCh.id;
         }
         goToMap();
@@ -4114,6 +4636,52 @@ function dismissReward() {
 }
 
 // ==================================================================
+// GAME COMPLETE — shown after finishing Ch5 last level
+// ==================================================================
+function showGameComplete() {
+    const overlay = document.getElementById('game-complete-overlay');
+    overlay.classList.remove('hidden');
+
+    // Show total star tally with staggered animation
+    const total = getTotalStars();
+    const max = LEVELS.length * 3;
+    const starsEl = document.getElementById('game-complete-stars');
+    starsEl.innerHTML = '';
+
+    // Show up to 15 gold stars, rest muted (cap display at max meaningful count)
+    const displayCount = Math.min(15, max);
+    const earnedDisplay = Math.round((total / max) * displayCount);
+    for (let i = 0; i < displayCount; i++) {
+        const s = document.createElement('span');
+        s.textContent = '★';
+        s.style.color = i < earnedDisplay ? 'var(--gold)' : 'var(--text-muted)';
+        s.style.animationDelay = (i * 0.04) + 's';
+        s.style.animation = 'none';
+        starsEl.appendChild(s);
+        if (i < earnedDisplay) {
+            setTimeout(() => sfx('star'), i * 80 + 300);
+        }
+    }
+
+    // Particle burst on the modal
+    const modal = overlay.querySelector('.game-complete-modal');
+    spawnRewardParticles(modal);
+    setTimeout(() => spawnRewardParticles(modal), 600);
+}
+
+function gameCompleteReplay() {
+    document.getElementById('game-complete-overlay').classList.add('hidden');
+    // Restart from the very first level
+    startLevel('ch1_01');
+}
+
+function gameCompleteMap() {
+    document.getElementById('game-complete-overlay').classList.add('hidden');
+    activeChapterTab = 5;
+    goToMap();
+}
+
+// ==================================================================
 // KEYBOARD SHORTCUTS
 // ==================================================================
 document.addEventListener('keydown', e => {
@@ -4126,13 +4694,11 @@ document.addEventListener('keydown', e => {
 // ==================================================================
 // SOUND DESIGN — Jazz-flavored SFX engine
 // ==================================================================
-let sfxCtx = null;
 let settings = { volMusic: 0.8, volSfx: 0.8 };
 
 function ensureSfxCtx() {
-    if (!sfxCtx || sfxCtx.state === 'closed') sfxCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (sfxCtx.state === 'suspended') sfxCtx.resume();
-    return sfxCtx;
+    // Reuse the shared audio context — no need for a separate SFX context
+    return getAudioCtx();
 }
 
 function sfx(name) {
@@ -4146,9 +4712,9 @@ function sfx(name) {
             correct:  () => sfxChord(ctx, t, [523.25, 659.25, 783.99], 0.25, vol * 0.3),
             wrong:    () => { sfxTone(ctx, t, [311, 293], 0.08, vol * 0.25, 'sawtooth'); sfxTone(ctx, t + 0.08, [293, 277], 0.08, vol * 0.25, 'sawtooth'); },
             complete: () => sfxArpeggio(ctx, t, [523.25, 659.25, 783.99, 1046.5], 0.1, vol * 0.3),
-            flip:     () => sfxSweep(ctx, t, 400, 800, 0.15, vol * 0.2),
-            dupe:     () => { sfxTone(ctx, t, [523.25], 0.06, vol * 0.2, 'sine'); sfxTone(ctx, t + 0.08, [523.25], 0.06, vol * 0.2, 'sine'); },
-            claim:    () => sfxTone(ctx, t, [783.99, 1046.5], 0.18, vol * 0.25, 'sine'),
+            flip:     () => { sfxNoise(ctx, t, 0.04, vol * 0.18); sfxTone(ctx, t, [1200, 2400], 0.06, vol * 0.12, 'square'); sfxTone(ctx, t + 0.05, [800, 1600], 0.15, vol * 0.1, 'sine'); },
+            dupe:     () => { sfxNoise(ctx, t, 0.03, vol * 0.15); sfxTone(ctx, t, [900, 1800], 0.05, vol * 0.12, 'square'); sfxNoise(ctx, t + 0.12, 0.03, vol * 0.12); sfxTone(ctx, t + 0.12, [1000, 2000], 0.05, vol * 0.1, 'square'); sfxTone(ctx, t + 0.2, [1400, 700], 0.25, vol * 0.08, 'sine'); },
+            claim:    () => { sfxTone(ctx, t, [1200, 600], 0.08, vol * 0.15, 'triangle'); sfxTone(ctx, t + 0.06, [880, 1318.5, 1760], 0.3, vol * 0.15, 'sine'); },
             hint:     () => sfxTone(ctx, t, [440, 523.25], 0.15, vol * 0.15, 'triangle'),
             star:     () => sfxTone(ctx, t, [880, 1108.73], 0.2, vol * 0.2, 'sine'),
             click:    () => sfxNoise(ctx, t, 0.03, vol * 0.08),
@@ -4235,10 +4801,10 @@ function sfxNoise(ctx, t, dur, vol) {
 // Override playNote to respect music volume
 const _origPlayNote = playNote;
 playNote = function(freq, startTime, duration) {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    const filter = audioCtx.createBiquadFilter();
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
     osc.type = 'triangle';
     filter.type = 'lowpass';
     filter.frequency.value = 2000;
@@ -4249,7 +4815,7 @@ playNote = function(freq, startTime, duration) {
     gain.gain.setValueAtTime(v * 0.56, startTime + duration - 0.1);
     gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
     osc.frequency.value = freq;
-    osc.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
+    osc.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
     osc.start(startTime); osc.stop(startTime + duration + 0.1);
 };
 

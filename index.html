@@ -615,23 +615,23 @@
         }
 
         .play-btn {
-            width: 52px; height: 52px;
+            width: 72px; height: 72px;
             border-radius: 50%;
-            border: 2px solid rgba(212,175,55,0.3);
+            border: 3px solid rgba(212,175,55,0.3);
             background: radial-gradient(circle at 35% 35%,
                 #d4af37 0%,
                 #b8941e 40%,
                 #8b6914 100%
             );
             color: #1a0800;
-            font-size: 20px;
+            font-size: 28px;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer;
             transition: all 0.2s ease;
             flex-shrink: 0;
             box-shadow:
-                0 2px 8px rgba(0,0,0,0.4),
-                0 0 16px rgba(212,175,55,0.15),
+                0 3px 12px rgba(0,0,0,0.4),
+                0 0 20px rgba(212,175,55,0.2),
                 inset 0 1px 2px rgba(255,255,255,0.3);
             text-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
@@ -643,6 +643,25 @@
                 inset 0 1px 2px rgba(255,255,255,0.3);
         }
         .play-btn:active { transform: scale(0.95); }
+
+        .listen-counter {
+            position: absolute;
+            top: -4px; right: -4px;
+            min-width: 20px; height: 20px;
+            background: var(--gold);
+            color: #1a1c24;
+            font-size: 10px; font-weight: 900;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 0 5px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+            pointer-events: none;
+            z-index: 5;
+        }
+        .listen-counter.exhausted {
+            background: var(--red);
+            color: #fff;
+        }
         .play-btn.playing {
             background: radial-gradient(circle at 35% 35%,
                 #e25555 0%,
@@ -803,7 +822,7 @@
             max-width: 340px;
             text-align: center;
             box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-            animation: pop-in 0.25s ease-out;
+            animation: pop-in-x 0.25s ease-out;
         }
         .hint-toast.hidden { display: none; }
         .hint-toast-text {
@@ -1159,7 +1178,7 @@
             max-width: 380px;
             width: 90%;
             text-align: center;
-            animation: success-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+            animation: modal-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
         }
 
         .game-complete-badge {
@@ -1192,9 +1211,10 @@
         }
 
         .game-complete-stars {
-            display: flex; gap: 6px; justify-content: center;
+            display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;
             font-size: 22px;
             margin-bottom: 20px;
+            max-width: 100%; overflow: hidden;
             animation: fade-in 0.4s 0.4s ease both;
         }
 
@@ -1843,6 +1863,11 @@
             100% { transform: scale(1); opacity: 1; }
         }
 
+        @keyframes pop-in-x {
+            0% { transform: translateX(-50%) scale(0.7); opacity: 0; }
+            100% { transform: translateX(-50%) scale(1); opacity: 1; }
+        }
+
         @keyframes fade-in { 0% { opacity: 0; } 100% { opacity: 1; } }
 
         @keyframes shake {
@@ -1860,6 +1885,278 @@
             100% { transform: scale(1); opacity: 1; }
         }
         .piece-correct { animation: bounce-correct 0.45s ease-out; }
+
+        /* ---- Sound Panel (vintage amp style) ---- */
+        .sound-panel-overlay {
+            position: fixed; inset: 0;
+            background: rgba(7,9,15,0.85);
+            z-index: 250;
+            display: flex; align-items: center; justify-content: center;
+            animation: fade-in 0.2s ease;
+        }
+        .sound-panel-overlay.hidden { display: none; }
+
+        .sound-panel {
+            background: linear-gradient(180deg, #1a1c24 0%, #12141a 50%, #0d0f14 100%);
+            border: 1px solid var(--border-medium);
+            border-radius: 20px;
+            padding: 28px 24px 24px;
+            max-width: 420px;
+            width: 92%;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
+            animation: modal-pop 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+
+        .sound-panel-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        .sound-panel-title {
+            font-size: 15px; font-weight: 800; letter-spacing: 0.08em;
+            text-transform: uppercase; color: var(--gold);
+        }
+        .sound-panel-subtitle {
+            font-size: 10px; font-weight: 600; letter-spacing: 0.15em;
+            text-transform: uppercase; color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .sound-panel-close {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: rgba(255,255,255,0.06); border: 1px solid var(--border-dim);
+            color: var(--text-muted); font-size: 16px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s;
+        }
+        .sound-panel-close:hover { background: rgba(255,255,255,0.12); color: var(--text-primary); }
+
+        .sound-panel-strip {
+            background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid var(--border-dim);
+            border-radius: 14px;
+            padding: 20px 12px 16px;
+            display: flex; justify-content: space-around; align-items: flex-start;
+            gap: 4px;
+        }
+
+        .knob-group {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 8px; flex: 1; min-width: 0;
+        }
+        .knob-label {
+            font-size: 9px; font-weight: 700; letter-spacing: 0.12em;
+            text-transform: uppercase; color: var(--text-muted);
+            text-align: center;
+        }
+        .knob-container {
+            position: relative; width: 56px; height: 56px;
+            cursor: grab;
+        }
+        .knob-container:active { cursor: grabbing; }
+
+        .knob-ring {
+            position: absolute; inset: 0;
+            border-radius: 50%;
+            background: conic-gradient(from 220deg,
+                var(--border-dim) 0deg,
+                var(--gold) calc(var(--knob-angle, 0) * 1deg),
+                var(--border-dim) calc(var(--knob-angle, 0) * 1deg)
+            );
+            padding: 3px;
+        }
+        .knob-ring::after {
+            content: '';
+            display: block; width: 100%; height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 35%, #2a2d38, #1a1c24 70%);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.05);
+        }
+
+        .knob-indicator {
+            position: absolute;
+            width: 3px; height: 12px;
+            background: var(--gold);
+            border-radius: 2px;
+            top: 6px; left: 50%;
+            transform-origin: 50% calc(28px - 6px);
+            transform: translateX(-50%) rotate(calc(var(--knob-rotation, -135deg)));
+            box-shadow: 0 0 6px rgba(251,191,36,0.4);
+            pointer-events: none;
+            transition: transform 0.08s ease;
+        }
+
+        .knob-value {
+            font-size: 10px; font-weight: 700;
+            color: var(--text-secondary);
+            font-variant-numeric: tabular-nums;
+            text-align: center;
+        }
+
+        .knob-group.slider-group {
+            justify-content: flex-start;
+        }
+        .trem-slider-container {
+            position: relative;
+            width: 28px; height: 56px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .trem-slider-track {
+            position: absolute;
+            width: 4px; height: 100%;
+            background: var(--border-dim);
+            border-radius: 2px;
+        }
+        .trem-slider-fill {
+            position: absolute;
+            bottom: 0; width: 4px;
+            background: var(--gold);
+            border-radius: 2px;
+            transition: height 0.08s ease;
+        }
+        .trem-slider-thumb {
+            position: absolute;
+            width: 16px; height: 16px;
+            background: radial-gradient(circle at 40% 35%, #3a3d48, #1a1c24 80%);
+            border: 2px solid var(--gold);
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(251,191,36,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+            cursor: grab;
+            transition: bottom 0.08s ease;
+        }
+        .trem-slider-thumb:active { cursor: grabbing; }
+
+        .swing-gauge-section {
+            margin-top: 18px;
+            padding: 16px 16px 12px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid var(--border-dim);
+            border-radius: 14px;
+        }
+        .swing-gauge-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .swing-gauge-label {
+            font-size: 9px; font-weight: 700; letter-spacing: 0.12em;
+            text-transform: uppercase; color: var(--text-muted);
+        }
+        .swing-gauge-value {
+            font-size: 12px; font-weight: 800; color: var(--gold);
+            font-variant-numeric: tabular-nums;
+        }
+        .swing-gauge {
+            position: relative;
+            width: 100%; height: 48px;
+            overflow: hidden;
+            cursor: grab;
+        }
+        .swing-gauge:active { cursor: grabbing; }
+
+        .swing-gauge-arc {
+            position: absolute;
+            bottom: 0; left: 50%;
+            width: 200px; height: 100px;
+            transform: translateX(-50%);
+            border-radius: 100px 100px 0 0;
+            border: 3px solid var(--border-dim);
+            border-bottom: none;
+            box-sizing: border-box;
+        }
+        .swing-gauge-arc::before {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 50%;
+            width: 8px; height: 8px;
+            background: var(--gold);
+            border-radius: 50%;
+            transform: translate(-50%, 50%);
+            box-shadow: 0 0 8px rgba(251,191,36,0.5);
+        }
+
+        .swing-gauge-needle {
+            position: absolute;
+            bottom: 0; left: 50%;
+            width: 2px; height: 44px;
+            background: linear-gradient(to top, var(--gold), rgba(251,191,36,0.3));
+            transform-origin: 50% 100%;
+            transform: translateX(-50%) rotate(var(--needle-angle, 0deg));
+            border-radius: 1px;
+            transition: transform 0.1s ease;
+        }
+        .swing-gauge-needle::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%;
+            width: 6px; height: 6px;
+            background: var(--gold);
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 6px rgba(251,191,36,0.4);
+        }
+
+        .swing-gauge-ticks {
+            position: absolute;
+            bottom: 0; left: 50%; width: 200px; height: 100px;
+            transform: translateX(-50%);
+        }
+        .swing-gauge-tick {
+            position: absolute;
+            bottom: 0; left: 50%;
+            width: 1px; height: 8px;
+            background: var(--border-medium);
+            transform-origin: 50% 100%;
+        }
+        .swing-gauge-tick.major {
+            height: 12px;
+            background: var(--text-muted);
+            width: 1.5px;
+        }
+        .swing-gauge-tick-label {
+            position: absolute;
+            font-size: 7px; font-weight: 600;
+            color: var(--text-muted);
+            transform: translateX(-50%);
+        }
+
+        .sound-panel-presets {
+            display: flex; gap: 6px; margin-top: 16px;
+        }
+        .sound-preset-btn {
+            flex: 1; padding: 8px 4px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border-dim);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 10px; font-weight: 700;
+            letter-spacing: 0.05em; text-transform: uppercase;
+            cursor: pointer; transition: all 0.15s;
+            text-align: center;
+        }
+        .sound-preset-btn:hover {
+            background: rgba(251,191,36,0.08);
+            border-color: rgba(251,191,36,0.3);
+            color: var(--gold);
+        }
+        .sound-preset-btn.active {
+            background: rgba(251,191,36,0.12);
+            border-color: rgba(251,191,36,0.4);
+            color: var(--gold);
+        }
+
+        .sound-panel-preview {
+            margin-top: 14px; text-align: center;
+        }
+        .sound-preview-btn {
+            padding: 8px 24px;
+            background: rgba(167,139,250,0.1);
+            border: 1px solid rgba(167,139,250,0.3);
+            border-radius: 10px;
+            color: var(--purple);
+            font-size: 11px; font-weight: 700;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .sound-preview-btn:hover {
+            background: rgba(167,139,250,0.2);
+        }
 
         /* ---- Responsive ---- */
         @media (max-width: 480px) {
@@ -1898,8 +2195,8 @@
            SETTINGS SCREEN
            ============================================= */
         #screen-settings {
-            align-items: center; justify-content: flex-start;
-            padding: 60px 24px 40px;
+            align-items: center; justify-content: center;
+            padding: 24px;
         }
         .settings-card {
             background: var(--bg-card);
@@ -2074,7 +2371,7 @@
                 <button class="settings-btn settings-btn-danger" onclick="confirmResetProgress()">Reset All Progress</button>
             </div>
             <div class="settings-footer">
-                Bebop Puzzle v1.0<br>Made with ♪ for jazz education
+                Bebop Puzzle v1.0<br>Made By Tian Xing
             </div>
         </div>
     </div>
@@ -2121,6 +2418,9 @@
                     <span style="font-size:14px;">💡</span>
                     <span id="hint-count">3</span>
                 </button>
+                <button class="hint-btn" onclick="openSoundPanel()" title="Sound Design" style="font-size:14px;padding:4px 8px;">
+                    🎛️
+                </button>
                 <div class="timer-display" id="timer-display">0:00</div>
             </div>
         </div>
@@ -2135,8 +2435,11 @@
         <div class="puzzle-bottombar">
             <div class="tray-surface">
                 <div class="bottombar-inner">
-                    <button class="play-btn" id="play-btn" onclick="togglePlay()">▶</button>
                     <div class="piece-tray" id="piece-tray"></div>
+                    <div style="position:relative;display:inline-flex;flex-shrink:0;">
+                        <button class="play-btn" id="play-btn" onclick="togglePlay()">▶</button>
+                        <div class="listen-counter hidden" id="listen-counter"></div>
+                    </div>
                     <div class="craft-tray-divider" id="craft-tray-divider"></div>
                     <!-- Craft Table — inline right of tray -->
                     <div class="craft-inline" id="craft-table">
@@ -2214,9 +2517,9 @@
         <div class="game-complete-modal">
             <div class="game-complete-badge">✦ Bebop Legend ✦</div>
             <div class="game-complete-title font-display">All Done!</div>
-            <div class="game-complete-subtitle">You've mastered all 5 chapters of bebop vocabulary.</div>
+            <div class="game-complete-subtitle">You've mastered all 6 chapters of bebop vocabulary.</div>
             <div class="game-complete-stars" id="game-complete-stars"></div>
-            <div class="game-complete-desc">You now know Arpeggios, Neighbors, Approaches, and Enclosures — the core language of bebop improvisation. Keep practicing and you'll sound like Bird himself.</div>
+            <div class="game-complete-desc">You survived the Jam Session. You've earned your place on the bandstand. Keep practicing and you'll sound like Bird himself.</div>
             <div class="game-complete-actions">
                 <button class="success-btn success-btn-retry" onclick="gameCompleteReplay()">Play Again</button>
                 <button class="success-btn success-btn-next" onclick="gameCompleteMap()">Back to Map</button>
@@ -2232,6 +2535,89 @@
     </div>
 
     <!-- tempo-hint is now inside puzzle-bottombar, see below -->
+
+    <!-- =============================================
+         SOUND DESIGN PANEL
+         ============================================= -->
+    <div class="sound-panel-overlay hidden" id="sound-panel-overlay" onclick="if(event.target===this)closeSoundPanel()">
+        <div class="sound-panel">
+            <div class="sound-panel-header">
+                <div>
+                    <div class="sound-panel-title">Rhodes EP</div>
+                    <div class="sound-panel-subtitle">Sound Design</div>
+                </div>
+                <button class="sound-panel-close" onclick="closeSoundPanel()">✕</button>
+            </div>
+
+            <div class="sound-panel-strip">
+                <div class="knob-group">
+                    <div class="knob-container" data-param="tone" data-min="0" data-max="1">
+                        <div class="knob-ring"></div>
+                        <div class="knob-indicator"></div>
+                    </div>
+                    <div class="knob-label">Tone</div>
+                    <div class="knob-value" data-param-display="tone">5.0</div>
+                </div>
+                <div class="knob-group">
+                    <div class="knob-container" data-param="drive" data-min="0" data-max="1">
+                        <div class="knob-ring"></div>
+                        <div class="knob-indicator"></div>
+                    </div>
+                    <div class="knob-label">Drive</div>
+                    <div class="knob-value" data-param-display="drive">0.0</div>
+                </div>
+                <div class="knob-group">
+                    <div class="knob-container" data-param="reverb" data-min="0" data-max="1">
+                        <div class="knob-ring"></div>
+                        <div class="knob-indicator"></div>
+                    </div>
+                    <div class="knob-label">Reverb</div>
+                    <div class="knob-value" data-param-display="reverb">2.0</div>
+                </div>
+                <div class="knob-group">
+                    <div class="knob-container" data-param="tremDepth" data-min="0" data-max="1">
+                        <div class="knob-ring"></div>
+                        <div class="knob-indicator"></div>
+                    </div>
+                    <div class="knob-label">Tremolo</div>
+                    <div class="knob-value" data-param-display="tremDepth">0.0</div>
+                </div>
+                <div class="knob-group slider-group">
+                    <div class="trem-slider-container" id="trem-speed-slider" data-param="tremRate">
+                        <div class="trem-slider-track"></div>
+                        <div class="trem-slider-fill" id="trem-speed-fill"></div>
+                        <div class="trem-slider-thumb" id="trem-speed-thumb"></div>
+                    </div>
+                    <div class="knob-label">Speed</div>
+                    <div class="knob-value" data-param-display="tremRate">2.0</div>
+                </div>
+            </div>
+
+            <div class="swing-gauge-section">
+                <div class="swing-gauge-header">
+                    <div class="swing-gauge-label">Swing</div>
+                    <div class="swing-gauge-value" id="swing-gauge-value">64%</div>
+                </div>
+                <div class="swing-gauge" id="swing-gauge">
+                    <div class="swing-gauge-arc"></div>
+                    <div class="swing-gauge-ticks" id="swing-gauge-ticks"></div>
+                    <div class="swing-gauge-needle" id="swing-gauge-needle"></div>
+                </div>
+            </div>
+
+            <div class="sound-panel-presets">
+                <button class="sound-preset-btn" onclick="applySoundPreset('clean')">Clean</button>
+                <button class="sound-preset-btn" onclick="applySoundPreset('warm')">Warm</button>
+                <button class="sound-preset-btn" onclick="applySoundPreset('driven')">Driven</button>
+                <button class="sound-preset-btn" onclick="applySoundPreset('dreamy')">Dreamy</button>
+                <button class="sound-preset-btn" onclick="applySoundPreset('classic')">Classic</button>
+            </div>
+
+            <div class="sound-panel-preview">
+                <button class="sound-preview-btn" onclick="previewSoundPanel()">♪ Preview Sound</button>
+            </div>
+        </div>
+    </div>
 
     <!-- =============================================
          TUTORIAL BAR
@@ -2398,18 +2784,144 @@ function enrichPieceConnectionData(piece) {
 // AUDIO ENGINE
 // ==================================================================
 let audioCtx = null;
+let masterGain = null;
 let currentBPM = 90;
 function getEighth() { return 60 / currentBPM / 2; }
 let isPlaying = false;
 let playbackTimeouts = [];
 
+// Sound design parameters (0–1 range, persisted)
+let soundParams = { tone: 0.9, drive: 0.0, reverb: 0.03, tremRate: 0.2, tremDepth: 0.1, swing: 0.64 };
+
+// Processing chain nodes (created lazily)
+let _toneFilter = null;
+let _driveShaper = null;
+let _driveInputGain = null;
+let _driveOutputGain = null;
+let _tremLFO = null;
+let _tremGain = null;
+let _tremVCA = null;
+let _reverbConv = null;
+let _reverbDry = null;
+let _reverbWet = null;
+let _chainBuilt = false;
+
 // Shared AudioContext for both melody and SFX — avoids accumulating contexts
 function getAudioCtx() {
     if (!audioCtx || audioCtx.state === 'closed') {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        masterGain = null;
+        _chainBuilt = false;
     }
     if (audioCtx.state === 'suspended') audioCtx.resume();
     return audioCtx;
+}
+
+function buildDriveCurve(amount) {
+    const n = 8192;
+    const curve = new Float32Array(n);
+    const k = amount * 40 + 1; // 1 (clean) to 41 (heavy drive)
+    for (let i = 0; i < n; i++) {
+        const x = (i * 2) / n - 1;
+        curve[i] = Math.tanh(x * k) / Math.tanh(k);
+    }
+    return curve;
+}
+
+function buildReverbImpulse(ctx, duration, decay) {
+    const len = ctx.sampleRate * duration;
+    const buf = ctx.createBuffer(2, len, ctx.sampleRate);
+    for (let ch = 0; ch < 2; ch++) {
+        const data = buf.getChannelData(ch);
+        for (let i = 0; i < len; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay);
+        }
+    }
+    return buf;
+}
+
+function buildProcessingChain() {
+    if (_chainBuilt) return;
+    const ctx = getAudioCtx();
+
+    // Tone: lowpass filter (200 Hz – 8000 Hz mapped from 0–1)
+    _toneFilter = ctx.createBiquadFilter();
+    _toneFilter.type = 'lowpass';
+    _toneFilter.Q.value = 0.7;
+
+    // Drive: waveshaper with input/output gain staging
+    _driveInputGain = ctx.createGain();
+    _driveShaper = ctx.createWaveShaper();
+    _driveShaper.oversample = '2x';
+    _driveOutputGain = ctx.createGain();
+
+    // Tremolo: LFO modulating a VCA
+    _tremLFO = ctx.createOscillator();
+    _tremLFO.type = 'sine';
+    _tremGain = ctx.createGain();
+    _tremVCA = ctx.createGain();
+    _tremVCA.gain.value = 1.0;
+    _tremLFO.connect(_tremGain);
+    _tremGain.connect(_tremVCA.gain);
+    _tremLFO.start();
+
+    // Reverb: convolver with dry/wet mix
+    _reverbConv = ctx.createConvolver();
+    _reverbConv.buffer = buildReverbImpulse(ctx, 1.8, 2.5);
+    _reverbDry = ctx.createGain();
+    _reverbWet = ctx.createGain();
+
+    // Chain: masterGain → tone → drive → tremolo → dry/wet reverb → destination
+    _toneFilter.connect(_driveInputGain);
+    _driveInputGain.connect(_driveShaper);
+    _driveShaper.connect(_driveOutputGain);
+    _driveOutputGain.connect(_tremVCA);
+
+    // Reverb split: tremVCA → dry → dest, tremVCA → conv → wet → dest
+    const mergeNode = ctx.createGain();
+    _tremVCA.connect(_reverbDry);
+    _tremVCA.connect(_reverbConv);
+    _reverbConv.connect(_reverbWet);
+    _reverbDry.connect(mergeNode);
+    _reverbWet.connect(mergeNode);
+    mergeNode.connect(ctx.destination);
+
+    _chainBuilt = true;
+    applySoundParams();
+}
+
+function applySoundParams() {
+    if (!_chainBuilt) return;
+    const p = soundParams;
+
+    // Tone: map 0–1 → 300 Hz – 10000 Hz (logarithmic)
+    const toneFreq = 300 * Math.pow(10000 / 300, p.tone);
+    _toneFilter.frequency.value = toneFreq;
+
+    // Drive: update curve and gain staging (volume-compensated)
+    _driveShaper.curve = buildDriveCurve(p.drive);
+    const driveIn = 1 + p.drive * 3;
+    // Compensate for both the input boost AND the RMS increase from soft-clip compression
+    _driveInputGain.gain.value = driveIn;
+    _driveOutputGain.gain.value = 1 / (driveIn * (1 + p.drive * 0.6));
+
+    // Tremolo: rate 1–10 Hz, depth 0–0.8
+    _tremLFO.frequency.value = 1 + p.tremRate * 9;
+    _tremGain.gain.value = p.tremDepth * 0.8;
+
+    // Reverb: dry/wet mix
+    _reverbDry.gain.value = 1 - p.reverb * 0.5;
+    _reverbWet.gain.value = p.reverb * 0.8;
+}
+
+function getMasterGain() {
+    const ctx = getAudioCtx();
+    if (!masterGain) {
+        masterGain = ctx.createGain();
+        buildProcessingChain();
+        masterGain.connect(_toneFilter);
+    }
+    return masterGain;
 }
 
 function playNote(freq, startTime, duration) {
@@ -2435,6 +2947,14 @@ function stopPlayback() {
     playbackTimeouts.forEach(t => clearTimeout(t));
     playbackTimeouts = [];
     isPlaying = false;
+    // Instantly silence all melody oscillators routed through the master gain
+    if (masterGain && audioCtx) {
+        masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+        masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
+        // Disconnect and recreate so future playback works
+        masterGain.disconnect();
+        masterGain = null;
+    }
     document.querySelectorAll('.playhead-active').forEach(el => el.classList.remove('playhead-active'));
     const btn = document.getElementById('play-btn');
     if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); }
@@ -2513,7 +3033,21 @@ const LEVEL_TEMPLATES = [
     {id:"ch5_12", ch:5, name:"Coltrane Changes", len:4, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:180},
     {id:"ch5_13", ch:5, name:"Dizzy Heights", len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:180},
     {id:"ch5_14", ch:5, name:"Miles Ahead", len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:180},
-    {id:"ch5_15", ch:5, name:"Bebop Legend", len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:180}
+    {id:"ch5_15", ch:5, name:"Bebop Legend", len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:180},
+
+    // Chapter 6: Jam Session — extra pieces + limited listens (listens: 12 down to 1)
+    {id:"ch6_01", ch:6, name:"Sound Check",       len:3, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, time:120, listens:12, extraPieces:2},
+    {id:"ch6_02", ch:6, name:"Opening Act",       len:3, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, time:120, listens:11, extraPieces:2},
+    {id:"ch6_03", ch:6, name:"Head In",           len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, time:120, listens:10, extraPieces:2},
+    {id:"ch6_04", ch:6, name:"First Solo",        len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:150, listens:9,  extraPieces:3},
+    {id:"ch6_05", ch:6, name:"Trading Fours",     len:4, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:150, listens:8,  extraPieces:3},
+    {id:"ch6_06", ch:6, name:"Double Time",       len:4, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:150, listens:7,  extraPieces:3},
+    {id:"ch6_07", ch:6, name:"Rhythm Section",    len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:180, listens:6,  extraPieces:3},
+    {id:"ch6_08", ch:6, name:"Burning Tempo",     len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:0, time:180, listens:5,  extraPieces:4},
+    {id:"ch6_09", ch:6, name:"Cutting Contest",   len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:0, time:180, listens:4,  extraPieces:4},
+    {id:"ch6_10", ch:6, name:"Giant Steps",       len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:0, time:180, listens:3,  extraPieces:4},
+    {id:"ch6_11", ch:6, name:"Last Call",         len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:0, time:200, listens:2,  extraPieces:5},
+    {id:"ch6_12", ch:6, name:"One Shot",          len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:0, time:200, listens:1,  extraPieces:5}
 ];
 
 // Tutorial levels with hardcoded solutions (first level of each chapter)
@@ -2751,6 +3285,17 @@ function generateRandomPuzzle(template) {
                 position: positions[i]
             }));
 
+            // Build base tray from removed cols
+            const baseTray = [...traySet];
+
+            // Jam Session: add extra distractor pieces to tray
+            const extraTray = [];
+            if (template.extraPieces && template.extraPieces > 0) {
+                for (let e = 0; e < template.extraPieces; e++) {
+                    extraTray.push(template.pool[Math.floor(Math.random() * template.pool.length)]);
+                }
+            }
+
             return {
                 id: template.id,
                 chapter: template.ch,
@@ -2760,10 +3305,12 @@ function generateRandomPuzzle(template) {
                 solution,
                 targetPiece: { position: targetPos },
                 removeCols,
-                trayBasePieces,
+                trayBasePieces: [...baseTray, ...extraTray],
                 hints: template.hints,
                 timeThreshold: template.time,
-                tutorial: template.tutorial || ''
+                tutorial: template.tutorial || '',
+                listens: template.listens || 0,
+                extraPieces: template.extraPieces || 0
             };
         }
         // If positions null, retry with new random pieces
@@ -2802,12 +3349,23 @@ function generateRandomPuzzle(template) {
 }
 
 const CHAPTERS = [
-    { id:1, name:"Arpeggios",  icon:"♪", unlockStars:0,  color:"gold",   reward:null },
-    { id:2, name:"Neighbors",  icon:"♫", unlockStars:12, color:"purple", reward:"Neighbor" },
-    { id:3, name:"Approaches", icon:"♬", unlockStars:20, color:"blue",   reward:"Approach" },
-    { id:4, name:"Enclosures", icon:"🎷", unlockStars:20, color:"green",  reward:"Enclosure" },
-    { id:5, name:"All Mixed",  icon:"🎵", unlockStars:20, color:"red",    reward:null }
+    { id:1, name:"Arpeggios",  icon:"Arpeggio",  unlockStars:0,  color:"gold",   reward:null },
+    { id:2, name:"Neighbors",  icon:"Neighbor",   unlockStars:12, color:"purple", reward:"Neighbor" },
+    { id:3, name:"Approaches", icon:"Approach",   unlockStars:20, color:"blue",   reward:"Approach" },
+    { id:4, name:"Enclosures", icon:"Enclosure",  unlockStars:20, color:"green",  reward:"Enclosure" },
+    { id:5, name:"All Mixed",  icon:"🎷", unlockStars:20, color:"red",    reward:null },
+    { id:6, name:"Jam Session", icon:"🎤", unlockStars:20, color:"orange", reward:null }
 ];
+
+// Helper: render a chapter icon — piece thumbnail if available, otherwise emoji
+function renderChapterIcon(iconStr, size) {
+    size = size || 18;
+    const piece = library.find(p => p.name === iconStr);
+    if (piece && piece.thumbnail) {
+        return `<img src="${piece.thumbnail}" style="width:${size}px;height:${size}px;border-radius:3px;object-fit:cover;vertical-align:middle;" draggable="false">`;
+    }
+    return iconStr;
+}
 
 // ==================================================================
 // FLIP MAPPING — base piece → flipped variants
@@ -2857,6 +3415,7 @@ let currentSnapPos = null;
 let cellSize = 0;
 let fullMelodyNotes = null;
 let gameProgress = {};
+let listensRemaining = 0;
 
 function initGridState() {
     gridState = {};
@@ -2942,6 +3501,7 @@ const COLOR_MAP = {
     purple: { bg: 'rgba(167,139,250,0.08)', border: 'rgba(167,139,250,0.15)', css: '#a78bfa' },
     green:  { bg: 'rgba(52,211,153,0.08)',  border: 'rgba(52,211,153,0.15)', css: '#34d399' },
     red:    { bg: 'rgba(248,113,113,0.08)', border: 'rgba(248,113,113,0.15)', css: '#f87171' },
+    orange: { bg: 'rgba(251,146,60,0.08)',  border: 'rgba(251,146,60,0.15)',  css: '#fb923c' },
 };
 
 function renderMap() {
@@ -2954,7 +3514,7 @@ function renderMap() {
         const isActive = ch.id === activeChapterTab;
         const cls = 'map-tab' + (isActive ? ' active' : '') + (unlocked ? '' : ' locked');
         return `<button class="${cls}" onclick="switchChapterTab(${ch.id})" data-chapter="${ch.id}">
-            <span class="tab-icon">${ch.icon}</span>
+            <span class="tab-icon">${renderChapterIcon(ch.icon, 14)}</span>
             ${ch.name}
             ${unlocked ? '' : '<span class="tab-lock">🔒</span>'}
         </button>`;
@@ -3007,7 +3567,7 @@ function renderChapterContent(chapterId) {
         <div class="chapter-info">
             <div class="chapter-info-header">
                 <div class="chapter-info-icon" style="background:${colors.bg}; border: 1px solid ${colors.border};">
-                    ${ch.icon}
+                    ${renderChapterIcon(ch.icon, 24)}
                 </div>
                 <div style="flex:1;">
                     <div class="chapter-info-name" style="color:${colors.css};">${ch.name}</div>
@@ -3082,11 +3642,13 @@ function startLevel(levelId) {
     numCols = currentLevelData.chords.length;
     initGridState();
 
-    // Place solution pieces
+    // Place solution pieces — store selected intervals in the solution so they
+    // are deterministic for the lifetime of this puzzle (fixes ear-training mismatch)
     currentLevelData.solution.forEach(s => {
         const piece = findPiece(s.pieceName, s.pieceLabel);
         if (piece) {
-            gridState[s.col] = { piece, position: s.position, selectedIntervals: selectRandomIntervals(piece) };
+            if (!s.selectedIntervals) s.selectedIntervals = selectRandomIntervals(piece);
+            gridState[s.col] = { piece, position: s.position, selectedIntervals: s.selectedIntervals };
         } else {
             console.warn(`startLevel: solution piece not found in library — ${s.pieceName} ${s.pieceLabel}`);
         }
@@ -3119,6 +3681,10 @@ function startLevel(levelId) {
     currentHintLevel = 0;
     levelStartTime = Date.now();
 
+    // Jam Session: listen limit
+    listensRemaining = currentLevelData.listens || 0;
+    updateListenCounter();
+
     showScreen('puzzle');
     document.getElementById('puzzle-level-name').textContent = `Ch.${currentLevelData.chapter} — ${currentLevelData.name}`;
     updateStarsDisplay();
@@ -3145,6 +3711,12 @@ function startLevel(levelId) {
 
 function findPiece(name, label) {
     return library.find(p => p.name === name && p.label === label);
+}
+
+function getSolutionIntervals(col) {
+    if (!currentLevelData) return null;
+    const s = currentLevelData.solution.find(s => s.col === col);
+    return s ? s.selectedIntervals : null;
 }
 
 function computeFullMelodyNotes() {
@@ -3445,7 +4017,16 @@ function clearCraftOutput() {
 }
 
 function placePieceInCraft(baseName, flipState) {
-    // Add to stack instead of replacing
+    // Only allow one piece at a time to prevent infinite duplication exploit
+    if (craftStack.length >= 1) {
+        // Return existing stack pieces to tray before accepting the new one
+        craftStack.forEach(e => {
+            trayAvailable.push(e.baseName);
+            trayFlipState.push(e.flipH);
+        });
+        craftStack = [];
+        renderTray();
+    }
     craftStack.push({ baseName, flipH: !!flipState });
     // Keep compat aliases pointing at first stack entry
     craftBaseName = craftStack[0].baseName;
@@ -4044,14 +4625,20 @@ function finishDrag(clientX, clientY) {
             (craftOutputPiece ? [{ baseName: craftOutputPiece.baseName, flipH: craftOutputPiece.flipH }] : []);
 
         if (craftOpen && clientX && clientY && isCraftDrop(clientX, clientY)) {
-            // Dropped back on the craft drop zone — re-stack all output pieces
+            // Dropped back on the craft drop zone — place first piece, send extras to tray
             clearCraftOutput();
-            outputPieces.forEach(p => placePieceInCraft(p.baseName, p.flipH));
+            if (outputPieces.length > 0) {
+                placePieceInCraft(outputPieces[0].baseName, outputPieces[0].flipH);
+                outputPieces.slice(1).forEach(p => {
+                    trayAvailable.push(p.baseName);
+                    trayFlipState.push(p.flipH);
+                });
+                renderTray();
+            }
         } else if (currentSnapCol !== null && currentSnapPos !== null) {
             const canPlace = isPuzzleCol(currentSnapCol) && !gridState[currentSnapCol];
             if (canPlace) {
-                sfx('claim');
-                const sel = selectRandomIntervals(draggedPiece);
+                const sel = getSolutionIntervals(currentSnapCol) || selectRandomIntervals(draggedPiece);
                 gridState[currentSnapCol] = { piece: draggedPiece, position: currentSnapPos, selectedIntervals: sel };
                 sfx('place');
                 // Send remaining pieces (all except the one placed) to tray
@@ -4122,7 +4709,7 @@ function finishDrag(clientX, clientY) {
         if (draggedFromGrid) gridState[draggedFromGrid.col] = null;
         const canPlace = isPuzzleCol(currentSnapCol) && (!gridState[currentSnapCol] || (draggedFromGrid && draggedFromGrid.col === currentSnapCol));
         if (canPlace) {
-            const sel = selectRandomIntervals(draggedPiece);
+            const sel = getSolutionIntervals(currentSnapCol) || selectRandomIntervals(draggedPiece);
             gridState[currentSnapCol] = { piece: draggedPiece, position: currentSnapPos, selectedIntervals: sel };
             sfx('place');
 
@@ -4138,7 +4725,7 @@ function finishDrag(clientX, clientY) {
             checkAnswer(currentSnapCol);
         } else if (draggedFromGrid) {
             // Can't place here, put piece back
-            gridState[draggedFromGrid.col] = { piece: draggedPiece, position: draggedFromGrid.position, selectedIntervals: selectRandomIntervals(draggedPiece) };
+            gridState[draggedFromGrid.col] = { piece: draggedPiece, position: draggedFromGrid.position, selectedIntervals: getSolutionIntervals(draggedFromGrid.col) || selectRandomIntervals(draggedPiece) };
             renderGrid();
             applyHighlights();
         }
@@ -4207,7 +4794,7 @@ function checkAnswer(col) {
     } else {
         wrongPlacements++;
         sfx('wrong');
-        showToast('Not quite — try again', 'error');
+        showToast('Not Quite — Try Sing Along', 'error');
         const el = document.querySelector(`.grid-column[data-col="${col}"] .placed-piece`);
         if (el) {
             el.style.animation = 'shake 0.4s ease';
@@ -4416,6 +5003,22 @@ function updateHintButton() {
     btn.classList.toggle('disabled', hintsRemaining <= 0);
 }
 
+function updateListenCounter() {
+    const el = document.getElementById('listen-counter');
+    if (!el) return;
+    // Only show for Jam Session levels with listen limits
+    if (!currentLevelData || !currentLevelData.listens || currentLevelData.listens <= 0) {
+        el.classList.add('hidden');
+        return;
+    }
+    el.classList.remove('hidden');
+    el.textContent = listensRemaining;
+    el.classList.toggle('exhausted', listensRemaining <= 0);
+    // Dim play button when no listens left
+    const playBtn = document.getElementById('play-btn');
+    if (playBtn) playBtn.style.opacity = listensRemaining <= 0 ? '0.4' : '';
+}
+
 // ==================================================================
 // PLAYBACK
 // ==================================================================
@@ -4425,15 +5028,31 @@ function playMelody() {
     const notes = fullMelodyNotes;
     if (!notes || !notes.targetNote) return;
 
+    // Jam Session: enforce listen limit
+    if (currentLevelData && currentLevelData.listens > 0) {
+        if (listensRemaining <= 0) {
+            showToast('No listens remaining!', 'info');
+            return;
+        }
+        listensRemaining--;
+        updateListenCounter();
+    }
+
     isPlaying = true;
     const btn = document.getElementById('play-btn');
     btn.textContent = '■';
     btn.classList.add('playing');
 
     const eighth = getEighth();
+    // Swing ratio: 0.5 = straight, 0.67 ≈ triplet swing (2:1), 0.6 = light swing
+    const swingRatio = soundParams.swing;
+    const swingLong = eighth * 2 * swingRatio;   // first of each pair (longer)
+    const swingShort = eighth * 2 * (1 - swingRatio); // second of each pair (shorter)
+
     // Capture AudioContext start time once to anchor all scheduling
     const originTime = audioCtx.currentTime + 0.1; // audioCtx set by getAudioCtx() above
     let currentTime = originTime;
+    let globalNoteIdx = 0; // tracks even/odd across all columns for swing
 
     // Helper: schedule a DOM update precisely relative to audio clock
     function schedulePlayhead(audioTime, col) {
@@ -4451,8 +5070,11 @@ function playMelody() {
         if (colNotes.length === 0) continue; // skip empty columns — no playhead flash either
         schedulePlayhead(currentTime, col);
         colNotes.forEach(midi => {
-            playNote(midiToFreq(midi), currentTime, eighth * 0.9);
-            currentTime += eighth;
+            const isOnBeat = (globalNoteIdx % 2 === 0);
+            const noteDur = isOnBeat ? swingLong : swingShort;
+            playNote(midiToFreq(midi), currentTime, noteDur * 0.9);
+            currentTime += noteDur;
+            globalNoteIdx++;
         });
     }
 
@@ -4798,26 +5420,406 @@ function sfxNoise(ctx, t, dur, vol) {
     src.start(t); src.stop(t + dur + 0.01);
 }
 
-// Override playNote to respect music volume
+// Override playNote — Sample-based Rhodes electric piano
+// Loads real recorded Rhodes samples from a free soundfont CDN
 const _origPlayNote = playNote;
+
+// CDN soundfont uses flat names (Db not C#)
+const _SAMPLE_NOTE_NAMES = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+const _sampleCache = {}; // midi number → AudioBuffer
+let _samplesLoading = false;
+let _samplesReady = false;
+
+function midiToSampleName(midi) {
+    const octave = Math.floor(midi / 12) - 1;
+    const note = _SAMPLE_NOTE_NAMES[midi % 12];
+    return note + octave;
+}
+
+function freqToMidiNum(freq) {
+    return Math.round(12 * Math.log2(freq / 440) + 69);
+}
+
+async function loadRhodesSamples() {
+    if (_samplesLoading || _samplesReady) return;
+    _samplesLoading = true;
+    const ctx = getAudioCtx();
+    // Load Rhodes samples for MIDI 48 (C3) to 84 (C6) — covers the game's range
+    const BASE = 'https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM/electric_piano_1-mp3/';
+    const promises = [];
+    for (let midi = 48; midi <= 84; midi++) {
+        const name = midiToSampleName(midi);
+        const url = BASE + encodeURIComponent(name) + '.mp3';
+        promises.push(
+            fetch(url)
+                .then(r => r.ok ? r.arrayBuffer() : null)
+                .then(buf => buf ? ctx.decodeAudioData(buf) : null)
+                .then(decoded => { if (decoded) _sampleCache[midi] = decoded; })
+                .catch(() => {}) // silently skip failed samples
+        );
+    }
+    await Promise.all(promises);
+    _samplesReady = Object.keys(_sampleCache).length > 10;
+    _samplesLoading = false;
+    if (_samplesReady) console.log('Rhodes samples loaded:', Object.keys(_sampleCache).length, 'notes');
+    else console.warn('Rhodes sample loading incomplete, using synth fallback');
+}
+
+function findClosestSample(midi) {
+    if (_sampleCache[midi]) return { buffer: _sampleCache[midi], detune: 0 };
+    // Find nearest loaded sample
+    let bestDist = Infinity, bestMidi = null;
+    for (const key in _sampleCache) {
+        const d = Math.abs(parseInt(key) - midi);
+        if (d < bestDist) { bestDist = d; bestMidi = parseInt(key); }
+    }
+    if (bestMidi === null || bestDist > 12) return null; // too far, no good match
+    // Cents to shift: 100 cents per semitone
+    return { buffer: _sampleCache[bestMidi], detune: (midi - bestMidi) * 100 };
+}
+
 playNote = function(freq, startTime, duration) {
     const ctx = getAudioCtx();
+    const dest = getMasterGain();
+    const v = settings.volMusic;
+
+    // Try sample-based playback
+    if (_samplesReady) {
+        const midi = freqToMidiNum(freq);
+        const sample = findClosestSample(midi);
+        if (sample) {
+            const src = ctx.createBufferSource();
+            src.buffer = sample.buffer;
+            src.detune.value = sample.detune;
+
+            // Envelope: shape the sample's amplitude to fit the note duration
+            const env = ctx.createGain();
+            env.gain.setValueAtTime(0, startTime);
+            env.gain.linearRampToValueAtTime(v * 0.7, startTime + 0.005);
+            // Sustain then release
+            const releaseStart = Math.max(startTime + 0.01, startTime + duration - 0.06);
+            env.gain.setValueAtTime(v * 0.7, releaseStart);
+            env.gain.exponentialRampToValueAtTime(0.001, startTime + duration + 0.05);
+
+            src.connect(env);
+            env.connect(dest);
+            src.start(startTime);
+            src.stop(startTime + duration + 0.1);
+            return;
+        }
+    }
+
+    // Fallback: simple warm synth tone (triangle + sine)
     const osc = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
     const gain = ctx.createGain();
     const filter = ctx.createBiquadFilter();
     osc.type = 'triangle';
-    filter.type = 'lowpass';
-    filter.frequency.value = 2000;
-    const v = settings.volMusic * 0.45;
-    gain.gain.setValueAtTime(0, startTime);
-    gain.gain.linearRampToValueAtTime(v, startTime + 0.02);
-    gain.gain.exponentialRampToValueAtTime(v * 0.56, startTime + 0.1);
-    gain.gain.setValueAtTime(v * 0.56, startTime + duration - 0.1);
-    gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
     osc.frequency.value = freq;
-    osc.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+    osc2.type = 'sine';
+    osc2.frequency.value = freq;
+    filter.type = 'lowpass';
+    filter.frequency.value = 2500;
+    const fv = v * 0.35;
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(fv, startTime + 0.01);
+    gain.gain.exponentialRampToValueAtTime(fv * 0.5, startTime + 0.08);
+    const sp = Math.max(0.05, Math.min(duration * 0.5, duration - 0.05));
+    gain.gain.exponentialRampToValueAtTime(fv * 0.3, startTime + sp);
+    gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+    const mix = ctx.createGain();
+    mix.gain.value = 0.5;
+    osc.connect(mix); osc2.connect(gain);
+    mix.connect(gain);
+    gain.connect(filter); filter.connect(dest);
     osc.start(startTime); osc.stop(startTime + duration + 0.1);
+    osc2.start(startTime); osc2.stop(startTime + duration + 0.1);
 };
+
+// ==================================================================
+// SOUND DESIGN PANEL
+// ==================================================================
+const SOUND_PRESETS = {
+    clean:   { tone: 0.6,  drive: 0.0,  reverb: 0.1,  tremRate: 0.3, tremDepth: 0.0 },
+    warm:    { tone: 0.3,  drive: 0.1,  reverb: 0.25, tremRate: 0.3, tremDepth: 0.0 },
+    driven:  { tone: 0.7,  drive: 0.55, reverb: 0.15, tremRate: 0.3, tremDepth: 0.0 },
+    dreamy:  { tone: 0.35, drive: 0.05, reverb: 0.7,  tremRate: 0.25, tremDepth: 0.4 },
+    classic: { tone: 0.5,  drive: 0.15, reverb: 0.2,  tremRate: 0.45, tremDepth: 0.35 },
+};
+
+function openSoundPanel() {
+    document.getElementById('sound-panel-overlay').classList.remove('hidden');
+    syncAllKnobs();
+}
+
+function closeSoundPanel() {
+    document.getElementById('sound-panel-overlay').classList.add('hidden');
+    saveSoundParams();
+}
+
+function saveSoundParams() {
+    try { localStorage.setItem('bebopSoundParams', JSON.stringify(soundParams)); } catch(e) {}
+}
+
+function loadSoundParams() {
+    try {
+        const s = JSON.parse(localStorage.getItem('bebopSoundParams'));
+        if (s) Object.assign(soundParams, s);
+    } catch(e) {}
+}
+
+// Map a 0–1 value to knob rotation (-135° to +135°, 270° sweep)
+function valueToRotation(val) { return -135 + val * 270; }
+function valueToAngle(val) { return val * 260; }
+
+function updateSliderVisual(param, val) {
+    const fill = document.getElementById('trem-speed-fill');
+    const thumb = document.getElementById('trem-speed-thumb');
+    if (!fill || !thumb) return;
+    const pct = val * 100;
+    fill.style.height = pct + '%';
+    thumb.style.bottom = 'calc(' + pct + '% - 8px)';
+    const display = document.querySelector(`[data-param-display="${param}"]`);
+    if (display) display.textContent = (val * 10).toFixed(1);
+}
+
+// Swing gauge: maps 0.50–0.75 swing to needle angle (-90° to +90°)
+function swingToNeedleAngle(swing) {
+    // 0.50 = straight = -90° (left), 0.667 = triplet = ~37°, 0.75 = hard = +90° (right)
+    const t = (swing - 0.50) / 0.25; // 0–1 over the range
+    return -90 + t * 180;
+}
+
+function updateSwingGauge() {
+    const needle = document.getElementById('swing-gauge-needle');
+    const display = document.getElementById('swing-gauge-value');
+    if (!needle) return;
+    const angle = swingToNeedleAngle(soundParams.swing);
+    needle.style.setProperty('--needle-angle', angle + 'deg');
+    if (display) display.textContent = Math.round(soundParams.swing * 100) + '%';
+}
+
+function buildSwingTicks() {
+    const container = document.getElementById('swing-gauge-ticks');
+    if (!container) return;
+    container.innerHTML = '';
+    // Ticks at 50%, 55%, 60%, 65%, 67%(triplet), 70%, 75%
+    const ticks = [0.50, 0.55, 0.60, 0.65, 0.667, 0.70, 0.75];
+    const labels = { 0.50: '50%', 0.667: '⅔', 0.75: '75%' };
+    const majors = [0.50, 0.667, 0.75];
+    ticks.forEach(sw => {
+        const angle = swingToNeedleAngle(sw);
+        const tick = document.createElement('div');
+        tick.className = 'swing-gauge-tick' + (majors.includes(sw) ? ' major' : '');
+        tick.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+        // Position tick at the arc edge: 92px radius from bottom-center
+        tick.style.transformOrigin = '50% 92px';
+        tick.style.bottom = '0';
+        tick.style.left = '50%';
+        container.appendChild(tick);
+    });
+}
+
+function syncAllKnobs() {
+    document.querySelectorAll('.knob-container').forEach(knob => {
+        const param = knob.dataset.param;
+        const val = soundParams[param] ?? 0;
+        updateKnobVisual(knob, val);
+    });
+    // Sync the tremolo speed slider
+    updateSliderVisual('tremRate', soundParams.tremRate ?? 0);
+    // Sync the swing gauge
+    updateSwingGauge();
+    // Update preset button highlights
+    document.querySelectorAll('.sound-preset-btn').forEach(btn => btn.classList.remove('active'));
+    for (const [name, preset] of Object.entries(SOUND_PRESETS)) {
+        const match = Object.keys(preset).every(k => Math.abs(soundParams[k] - preset[k]) < 0.02);
+        if (match) {
+            const btn = [...document.querySelectorAll('.sound-preset-btn')].find(b => b.textContent.toLowerCase() === name);
+            if (btn) btn.classList.add('active');
+        }
+    }
+}
+
+function updateKnobVisual(knobEl, val) {
+    const param = knobEl.dataset.param;
+    const rotation = valueToRotation(val);
+    const angle = valueToAngle(val);
+
+    knobEl.querySelector('.knob-ring').style.setProperty('--knob-angle', angle);
+    knobEl.querySelector('.knob-indicator').style.setProperty('--knob-rotation', rotation + 'deg');
+
+    const display = document.querySelector(`[data-param-display="${param}"]`);
+    if (display) display.textContent = (val * 10).toFixed(1);
+}
+
+// Knob drag interaction (mouse + touch)
+let _activeKnob = null;
+let _knobStartY = 0;
+let _knobStartVal = 0;
+
+let _activeSlider = null;
+let _sliderRect = null;
+
+let _activeSwingGauge = null;
+let _swingGaugeRect = null;
+
+function initKnobInteraction() {
+    document.querySelectorAll('.knob-container').forEach(knob => {
+        knob.addEventListener('mousedown', e => startKnobDrag(e, knob));
+        knob.addEventListener('touchstart', e => startKnobDragTouch(e, knob), { passive: false });
+    });
+    // Vertical slider for tremolo speed
+    const slider = document.getElementById('trem-speed-slider');
+    if (slider) {
+        slider.addEventListener('mousedown', e => startSliderDrag(e, slider));
+        slider.addEventListener('touchstart', e => startSliderDragTouch(e, slider), { passive: false });
+    }
+    // Swing gauge
+    const gauge = document.getElementById('swing-gauge');
+    if (gauge) {
+        gauge.addEventListener('mousedown', e => startSwingDrag(e));
+        gauge.addEventListener('touchstart', e => startSwingDragTouch(e), { passive: false });
+    }
+    // Build swing ticks once
+    buildSwingTicks();
+
+    document.addEventListener('mousemove', onKnobDrag);
+    document.addEventListener('mouseup', endKnobDrag);
+    document.addEventListener('touchmove', onKnobDragTouch, { passive: false });
+    document.addEventListener('touchend', endKnobDrag);
+}
+
+function startSwingDrag(e) {
+    e.preventDefault();
+    _activeSwingGauge = true;
+    _swingGaugeRect = document.getElementById('swing-gauge').getBoundingClientRect();
+    applySwingFromX(e.clientX);
+}
+
+function startSwingDragTouch(e) {
+    e.preventDefault();
+    _activeSwingGauge = true;
+    _swingGaugeRect = document.getElementById('swing-gauge').getBoundingClientRect();
+    applySwingFromX(e.touches[0].clientX);
+}
+
+function applySwingFromX(clientX) {
+    if (!_activeSwingGauge || !_swingGaugeRect) return;
+    // Map X position across gauge width to 0.50–0.75
+    const pct = (clientX - _swingGaugeRect.left) / _swingGaugeRect.width;
+    const swing = 0.50 + Math.max(0, Math.min(1, pct)) * 0.25;
+    soundParams.swing = Math.round(swing * 100) / 100; // round to 1%
+    updateSwingGauge();
+    saveSoundParams();
+}
+
+function startSliderDrag(e, slider) {
+    e.preventDefault();
+    _activeSlider = slider;
+    _sliderRect = slider.getBoundingClientRect();
+    applySliderFromY(e.clientY);
+}
+
+function startSliderDragTouch(e, slider) {
+    e.preventDefault();
+    _activeSlider = slider;
+    _sliderRect = slider.getBoundingClientRect();
+    applySliderFromY(e.touches[0].clientY);
+}
+
+function applySliderFromY(clientY) {
+    if (!_activeSlider || !_sliderRect) return;
+    // Invert: top of slider = 1.0, bottom = 0.0
+    const pct = 1 - (clientY - _sliderRect.top) / _sliderRect.height;
+    const val = Math.max(0, Math.min(1, pct));
+    const param = _activeSlider.dataset.param;
+    soundParams[param] = val;
+    updateSliderVisual(param, val);
+    applySoundParams();
+    document.querySelectorAll('.sound-preset-btn').forEach(btn => btn.classList.remove('active'));
+}
+
+function startKnobDrag(e, knob) {
+    e.preventDefault();
+    _activeKnob = knob;
+    _knobStartY = e.clientY;
+    _knobStartVal = soundParams[knob.dataset.param] ?? 0;
+}
+
+function startKnobDragTouch(e, knob) {
+    e.preventDefault();
+    _activeKnob = knob;
+    _knobStartY = e.touches[0].clientY;
+    _knobStartVal = soundParams[knob.dataset.param] ?? 0;
+}
+
+function onKnobDrag(e) {
+    if (_activeSwingGauge) { applySwingFromX(e.clientX); return; }
+    if (_activeSlider) { applySliderFromY(e.clientY); return; }
+    if (!_activeKnob) return;
+    const dy = _knobStartY - e.clientY;
+    applyKnobDelta(dy);
+}
+
+function onKnobDragTouch(e) {
+    if (_activeSwingGauge) { e.preventDefault(); applySwingFromX(e.touches[0].clientX); return; }
+    if (_activeSlider) { e.preventDefault(); applySliderFromY(e.touches[0].clientY); return; }
+    if (!_activeKnob) return;
+    e.preventDefault();
+    const dy = _knobStartY - e.touches[0].clientY;
+    applyKnobDelta(dy);
+}
+
+function applyKnobDelta(dy) {
+    const sensitivity = 0.005;
+    const newVal = Math.max(0, Math.min(1, _knobStartVal + dy * sensitivity));
+    const param = _activeKnob.dataset.param;
+    soundParams[param] = newVal;
+    updateKnobVisual(_activeKnob, newVal);
+    applySoundParams();
+    // Clear preset highlight
+    document.querySelectorAll('.sound-preset-btn').forEach(btn => btn.classList.remove('active'));
+}
+
+function endKnobDrag() {
+    if (_activeKnob || _activeSlider || _activeSwingGauge) {
+        _activeKnob = null;
+        _activeSlider = null;
+        _sliderRect = null;
+        _activeSwingGauge = null;
+        _swingGaugeRect = null;
+        saveSoundParams();
+    }
+}
+
+function applySoundPreset(name) {
+    const preset = SOUND_PRESETS[name];
+    if (!preset) return;
+    Object.assign(soundParams, preset);
+    applySoundParams();
+    syncAllKnobs();
+    saveSoundParams();
+    sfx('click');
+}
+
+function previewSoundPanel() {
+    getAudioCtx();
+    getMasterGain(); // ensure chain is built
+    const ctx = audioCtx;
+    const eighth = getEighth();
+    const sw = soundParams.swing;
+    const swingLong = eighth * 2 * sw;
+    const swingShort = eighth * 2 * (1 - sw);
+    // Play a short ii-V-I lick: D4 F4 A4 C5 B4 G4
+    const previewNotes = [62, 65, 69, 72, 71, 67];
+    let t = ctx.currentTime + 0.05;
+    previewNotes.forEach((midi, i) => {
+        const dur = (i % 2 === 0) ? swingLong : swingShort;
+        playNote(midiToFreq(midi), t, dur * 0.85);
+        t += dur;
+    });
+}
 
 // ==================================================================
 // SETTINGS
@@ -4963,7 +5965,7 @@ const ONBOARD_STEPS = [
     {
         icon: '🎷',
         title: 'Ready to Play!',
-        desc: 'Start with <strong>Arpeggios</strong> and work your way up through all 5 chapters. Press <strong>▶</strong> anytime to hear how your melody sounds!'
+        desc: 'Start with <strong>Arpeggios</strong> and work your way up through all 6 chapters. Press <strong>▶</strong> anytime to hear how your melody sounds!'
     }
 ];
 
@@ -5030,6 +6032,8 @@ function onPlayPressed() {
 async function init() {
     loadProgress();
     loadSettings();
+    loadSoundParams();
+    initKnobInteraction();
 
     // Try inline data first (works from file://), fallback to fetch
     if (typeof DEFAULT_LIBRARY_DATA !== 'undefined' && DEFAULT_LIBRARY_DATA.library) {
@@ -5047,9 +6051,45 @@ async function init() {
     library.forEach(p => enrichPieceConnectionData(p));
     initCraftOutput();
     showScreen('landing');
+
+    // Start loading Rhodes samples in background (non-blocking)
+    loadRhodesSamples();
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+// Secret unlock code: type "676767" anywhere to unlock all levels
+(function() {
+    let _secretBuf = '';
+    const SECRET_CODE = '676767';
+    document.addEventListener('keydown', e => {
+        if (e.key >= '0' && e.key <= '9') {
+            _secretBuf += e.key;
+            if (_secretBuf.length > SECRET_CODE.length) _secretBuf = _secretBuf.slice(-SECRET_CODE.length);
+            if (_secretBuf === SECRET_CODE) {
+                _secretBuf = '';
+                // Unlock all levels: mark every level as completed with 3 stars
+                LEVELS.forEach(l => {
+                    gameProgress[l.id] = { completed: true, stars: 3, bestTime: 30 };
+                });
+                saveProgress();
+                renderMap();
+                // Show confirmation overlay
+                const overlay = document.createElement('div');
+                overlay.style.cssText = 'position:fixed;inset:0;background:rgba(7,9,15,0.85);z-index:400;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.3s ease;';
+                overlay.innerHTML = `
+                    <div style="background:var(--bg-card);border:2px solid var(--gold);border-radius:20px;padding:32px 28px;max-width:320px;width:90%;text-align:center;animation:modal-pop 0.4s ease;">
+                        <div style="font-size:36px;margin-bottom:12px;">🔓</div>
+                        <div style="font-size:18px;font-weight:900;color:var(--gold);margin-bottom:8px;">All Levels Unlocked</div>
+                        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:20px;">All ${LEVELS.length} levels are now completed with 3 stars. Happy testing!</div>
+                        <button style="padding:10px 28px;background:rgba(251,191,36,0.15);color:var(--gold);border:1px solid rgba(251,191,36,0.3);border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;" onclick="this.closest('div[style]').parentElement.remove()">Got it</button>
+                    </div>`;
+                document.body.appendChild(overlay);
+                sfx('complete');
+            }
+        }
+    });
+})();
 
 window.addEventListener('resize', () => {
     if (document.getElementById('screen-puzzle').classList.contains('active')) {

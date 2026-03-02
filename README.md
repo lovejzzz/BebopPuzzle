@@ -26,7 +26,7 @@ Pieces can sit at 4 vertical positions in each column (0, 0.5, 1.0, 1.5). Draggi
 
 ### The Craft Table
 
-The craft table sits on the left side of the puzzle screen. Drag any piece from the tray onto it to:
+The craft table sits to the right of the tray. Drag any piece from the tray onto it to:
 
 - **Flip** — mirror the piece horizontally (e.g. Ascending becomes Descending)
 - **Duplicate** — make a copy so you can use the same piece type twice
@@ -48,7 +48,7 @@ Earn 1–3 stars per level based on speed, hint usage, and wrong placements. Sta
 
 ## Chapters
 
-The game has 5 chapters with 68 levels total. Each chapter introduces a new piece type:
+The game has 6 chapters with 80 levels total. Each chapter introduces a new piece type or challenge:
 
 **Chapter 1 — Arpeggios**
 Start with ascending and descending arpeggios. Learn the grid, snapping, and connection rules.
@@ -64,6 +64,22 @@ Unlock enclosures that surround the target from both sides. The bebop secret wea
 
 **Chapter 5 — All Mixed**
 All four piece types in play. True improvisation territory.
+
+**Chapter 6 — Jam Session**
+The ultimate challenge. Extra distractor pieces in the tray and a limited number of listens (12 down to 1). You need sharp ears and fast thinking.
+
+---
+
+## Sound Design
+
+Open the sound panel (🎛️) during any puzzle to customize the Rhodes EP tone:
+
+- **Tone / Drive / Reverb** — shape your sound with rotary knobs
+- **Tremolo** — adjust depth and speed
+- **Swing** — vintage gauge from 50% (straight) to 75% (hard shuffle)
+- **Presets** — Clean, Warm, Driven, Dreamy, Classic
+
+All settings persist across sessions.
 
 ---
 
@@ -108,4 +124,4 @@ Single-file game. No build step, no dependencies, no server. Just open `index.ht
 
 ---
 
-Vanilla HTML/CSS/JS. Made with jazz.
+Vanilla HTML/CSS/JS. Made by Tian Xing.

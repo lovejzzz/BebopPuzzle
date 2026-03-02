@@ -1486,7 +1486,7 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             pointer-events: none;
-            animation: tooltip-float 2s ease-in-out infinite, pop-in 0.3s ease-out;
+            animation: tooltip-float 2s ease-in-out infinite, tooltip-pop 0.3s ease-out;
             font-size: 12px; font-weight: 700;
             color: var(--blue);
             line-height: 1.4;
@@ -1512,6 +1512,10 @@
         @keyframes tooltip-float {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-5px); }
+        }
+        @keyframes tooltip-pop {
+            0% { opacity: 0; scale: 0.85; }
+            100% { opacity: 1; scale: 1; }
         }
 
         /* =============================================
@@ -5457,8 +5461,8 @@ function showTooltipAt(targetEl, text, arrowDir) {
     document.body.appendChild(tip);
     activeTutorialTooltip = tip;
 
-    // Measure after layout
-    requestAnimationFrame(() => {
+    // Double-rAF to ensure layout is fully computed before positioning
+    requestAnimationFrame(() => { requestAnimationFrame(() => {
         if (!activeTutorialTooltip || activeTutorialTooltip !== tip) return;
         const rect = targetEl.getBoundingClientRect();
         const tipRect = tip.getBoundingClientRect();
@@ -5479,7 +5483,7 @@ function showTooltipAt(targetEl, text, arrowDir) {
         // Now reveal with animation
         tip.style.visibility = '';
         tip.style.animation = '';
-    });
+    }); });
 }
 
 function showTutorialStep1() {

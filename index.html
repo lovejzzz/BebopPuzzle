@@ -3950,7 +3950,7 @@ function startLevel(levelId) {
     hideCraftTable();
     trayAvailable = [...(currentLevelData.trayBasePieces || [])];
     trayFlipState = new Array(trayAvailable.length).fill(false);
-    maxTraySize = trayAvailable.length;
+    maxTraySize = 4;
 
     // Reset stats
     hintsUsed = 0;

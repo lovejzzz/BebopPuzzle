@@ -5611,12 +5611,14 @@ function showRewardScreen(pieceName) {
     // Spawn particles around the piece frame
     spawnRewardParticles(frame);
 
-    // Achievement trophy for new piece
-    showAchievement(
-        piece.thumbnail,
-        `New Piece: ${pieceName}`,
-        PIECE_DESCRIPTIONS[pieceName] || 'A new melodic pattern unlocked!'
-    );
+    // Achievement trophy for new chapter unlock
+    if (nextCh) {
+        showAchievement(
+            nextCh.icon.length <= 2 ? nextCh.icon : (library.find(p => p.name === nextCh.icon)?.thumbnail || '🎵'),
+            `Chapter ${nextCh.id}: ${nextCh.name}`,
+            'A new chapter is now available!'
+        );
+    }
 }
 
 function spawnRewardParticles(container) {

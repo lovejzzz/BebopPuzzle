@@ -1115,6 +1115,136 @@
         }
         .success-btn-next:hover { transform: translateY(-1px); box-shadow: 0 6px 24px var(--gold-glow); }
 
+        .success-btn-composer {
+            background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(167,139,250,0.3);
+        }
+        .success-btn-composer:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(167,139,250,0.4); }
+
+        /* =============================================
+           ACHIEVEMENT TROPHY — Xbox 360 style
+           ============================================= */
+        .achievement-toast {
+            position: fixed;
+            top: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%);
+            border: 2px solid var(--gold-dim);
+            border-radius: 12px;
+            padding: 12px 24px 12px 16px;
+            min-width: 320px;
+            max-width: 420px;
+            box-shadow:
+                0 0 30px rgba(212,175,55,0.3),
+                0 0 60px rgba(212,175,55,0.1),
+                inset 0 1px 0 rgba(255,255,255,0.05);
+            animation: achievement-slide-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .achievement-toast.out {
+            animation: achievement-slide-out 0.5s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+        }
+        .achievement-toast-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            background: radial-gradient(circle at 30% 30%, rgba(212,175,55,0.3), rgba(212,175,55,0.05));
+            border: 1px solid rgba(212,175,55,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .achievement-toast-icon::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 40%,
+                rgba(255,255,255,0.15) 50%,
+                transparent 60%
+            );
+            animation: achievement-shine 2s ease-in-out infinite;
+        }
+        .achievement-toast-icon img {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+            border-radius: 4px;
+            position: relative;
+            z-index: 1;
+        }
+        .achievement-toast-body {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .achievement-toast-label {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--gold);
+            opacity: 0.9;
+        }
+        .achievement-toast-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.3;
+        }
+        .achievement-toast-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.3;
+        }
+        .achievement-toast-xp {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(212,175,55,0.1);
+            overflow: hidden;
+        }
+        .achievement-toast-xp-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold), var(--gold-dim));
+            width: 0%;
+            animation: achievement-xp-fill 2s 0.6s ease forwards;
+        }
+
+        @keyframes achievement-slide-in {
+            0% { top: -80px; opacity: 0; }
+            100% { top: 20px; opacity: 1; }
+        }
+        @keyframes achievement-slide-out {
+            0% { top: 20px; opacity: 1; }
+            100% { top: -80px; opacity: 0; }
+        }
+        @keyframes achievement-shine {
+            0%, 100% { transform: translateX(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) rotate(45deg); }
+        }
+        @keyframes achievement-xp-fill {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
         /* =============================================
            REWARD OVERLAY — New Piece Unlocked
            ============================================= */
@@ -1317,10 +1447,10 @@
         }
 
         .game-complete-actions {
-            display: flex; gap: 10px;
+            display: flex; gap: 10px; flex-wrap: wrap;
             animation: fade-in 0.4s 0.6s ease both;
         }
-        .game-complete-actions .success-btn { flex: 1; }
+        .game-complete-actions .success-btn { flex: 1; min-width: 100px; }
 
         /* ---- Tutorial overlay ---- */
         .tutorial-bar {
@@ -2651,10 +2781,11 @@
             <div class="game-complete-title font-display">All Done!</div>
             <div class="game-complete-subtitle">You've mastered all 6 chapters of bebop vocabulary.</div>
             <div class="game-complete-stars" id="game-complete-stars"></div>
-            <div class="game-complete-desc">You survived the Jam Session. You've earned your place on the bandstand. Keep practicing and you'll sound like Bird himself.</div>
+            <div class="game-complete-desc">You are a real jazz musician now! You unlocked Composer Mode — try it!</div>
             <div class="game-complete-actions">
                 <button class="success-btn success-btn-retry" onclick="gameCompleteReplay()">Play Again</button>
                 <button class="success-btn success-btn-next" onclick="gameCompleteMap()">Back to Map</button>
+                <button class="success-btn success-btn-composer" onclick="gameCompleteComposer()">🎹 Composer Mode</button>
             </div>
         </div>
     </div>
@@ -5479,6 +5610,13 @@ function showRewardScreen(pieceName) {
 
     // Spawn particles around the piece frame
     spawnRewardParticles(frame);
+
+    // Achievement trophy for new piece
+    showAchievement(
+        piece.thumbnail,
+        `New Piece: ${pieceName}`,
+        PIECE_DESCRIPTIONS[pieceName] || 'A new melodic pattern unlocked!'
+    );
 }
 
 function spawnRewardParticles(container) {
@@ -5540,6 +5678,15 @@ function showGameComplete() {
     const modal = overlay.querySelector('.game-complete-modal');
     spawnRewardParticles(modal);
     setTimeout(() => spawnRewardParticles(modal), 600);
+
+    // Achievement trophy for completing all chapters
+    setTimeout(() => {
+        showAchievement(
+            '🎹',
+            'Composer Mode Unlocked',
+            'You mastered all 6 chapters. The stage is yours!'
+        );
+    }, 800);
 }
 
 function gameCompleteReplay() {
@@ -5552,6 +5699,59 @@ function gameCompleteMap() {
     document.getElementById('game-complete-overlay').classList.add('hidden');
     activeChapterTab = 5;
     goToMap();
+}
+
+function gameCompleteComposer() {
+    document.getElementById('game-complete-overlay').classList.add('hidden');
+    startComposerMode(composerChordLen);
+}
+
+// ==================================================================
+// ACHIEVEMENT TROPHY SYSTEM
+// ==================================================================
+let achievementQueue = [];
+let achievementShowing = false;
+
+function showAchievement(icon, title, desc) {
+    achievementQueue.push({ icon, title, desc });
+    if (!achievementShowing) processAchievementQueue();
+}
+
+function processAchievementQueue() {
+    if (achievementQueue.length === 0) { achievementShowing = false; return; }
+    achievementShowing = true;
+    const { icon, title, desc } = achievementQueue.shift();
+
+    // Remove any existing toast
+    document.querySelectorAll('.achievement-toast').forEach(el => el.remove());
+
+    const toast = document.createElement('div');
+    toast.className = 'achievement-toast';
+
+    const iconHtml = icon.startsWith('<') ? icon :
+        (icon.includes('/') || icon.includes('.') ?
+            `<img src="${icon}" draggable="false">` : icon);
+
+    toast.innerHTML = `
+        <div class="achievement-toast-icon">${iconHtml}</div>
+        <div class="achievement-toast-body">
+            <div class="achievement-toast-label">Achievement Unlocked</div>
+            <div class="achievement-toast-title">${title}</div>
+            <div class="achievement-toast-desc">${desc}</div>
+        </div>
+        <div class="achievement-toast-xp"><div class="achievement-toast-xp-bar"></div></div>
+    `;
+    document.body.appendChild(toast);
+    sfx('complete');
+
+    // Slide out after 3.5s, then process next
+    setTimeout(() => {
+        toast.classList.add('out');
+        setTimeout(() => {
+            toast.remove();
+            processAchievementQueue();
+        }, 500);
+    }, 3500);
 }
 
 // ==================================================================

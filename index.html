@@ -3420,10 +3420,13 @@ function generateRandomPuzzle(template) {
             // Build base tray from removed cols
             const baseTray = [...traySet];
 
-            // Jam Session: add extra distractor pieces to tray
+            // Jam Session: add extra distractor pieces to tray (cap total at 4)
+            const MAX_TRAY = 4;
             const extraTray = [];
             if (template.extraPieces && template.extraPieces > 0) {
-                for (let e = 0; e < template.extraPieces; e++) {
+                const maxExtras = Math.max(0, MAX_TRAY - baseTray.length);
+                const extraCount = Math.min(template.extraPieces, maxExtras);
+                for (let e = 0; e < extraCount; e++) {
                     extraTray.push(template.pool[Math.floor(Math.random() * template.pool.length)]);
                 }
             }
@@ -3437,7 +3440,7 @@ function generateRandomPuzzle(template) {
                 solution,
                 targetPiece: { position: targetPos },
                 removeCols,
-                trayBasePieces: [...baseTray, ...extraTray],
+                trayBasePieces: [...baseTray, ...extraTray].slice(0, MAX_TRAY),
                 hints: template.hints,
                 timeThreshold: template.time,
                 tutorial: template.tutorial || '',
@@ -3548,6 +3551,7 @@ let cellSize = 0;
 let fullMelodyNotes = null;
 let gameProgress = {};
 let listensRemaining = 0;
+let maxTraySize = 0;
 
 function initGridState() {
     gridState = {};
@@ -3815,6 +3819,7 @@ function startLevel(levelId) {
     hideCraftTable();
     trayAvailable = [...(currentLevelData.trayBasePieces || [])];
     trayFlipState = new Array(trayAvailable.length).fill(false);
+    maxTraySize = trayAvailable.length;
 
     // Reset stats
     hintsUsed = 0;
@@ -4336,10 +4341,16 @@ function craftOutputTouchStart(e) {
 function claimOutputPiece() {
     const output = document.getElementById('craft-output');
     if (!craftOutputPiece || !output.classList.contains('claimable')) return;
-    sfx('claim');
 
     // Collect ALL pieces in the output
     const allPieces = craftOutputPiece.pieces || [{ baseName: craftOutputPiece.baseName, flipH: craftOutputPiece.flipH }];
+
+    // Tray overflow check (skip in composer mode)
+    if (!composerMode && maxTraySize > 0 && trayAvailable.length + allPieces.length > maxTraySize) {
+        showToast('Hand is full! Drag a piece to the board first.', 'info');
+        return;
+    }
+    sfx('claim');
 
     // Hide claim hint
     const hint = document.getElementById('craft-claim-hint');
@@ -4818,6 +4829,15 @@ function finishDrag(clientX, clientY) {
         if (craftOutputPiece) {
             const allOut = craftOutputPiece.pieces ||
                 [{ baseName: craftOutputPiece.baseName, flipH: craftOutputPiece.flipH }];
+            // Check if claiming would overflow the tray (account for the piece being consumed from tray)
+            const trayAfterDrag = draggedTrayIndex >= 0 ? trayAvailable.length - 1 : trayAvailable.length;
+            if (!composerMode && maxTraySize > 0 && trayAfterDrag + allOut.length > maxTraySize) {
+                showToast('Hand is full! Place a piece on the board first.', 'info');
+                if (dragPreview) { dragPreview.remove(); dragPreview = null; }
+                draggedPiece = null; draggedFromGrid = null; draggedFromCraft = false;
+                currentSnapCol = null; currentSnapPos = null; draggedTrayIndex = -1;
+                return;
+            }
             allOut.forEach(p => {
                 trayAvailable.push(p.baseName);
                 trayFlipState.push(p.flipH);

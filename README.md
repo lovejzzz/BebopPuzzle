@@ -70,6 +70,19 @@ The ultimate challenge. Extra distractor pieces in the tray and a limited number
 
 ---
 
+## Composer Mode
+
+Unlock Composer Mode by completing all 6 chapters. This is your free-play sandbox:
+
+- **Empty canvas** — start with a blank grid and all 4 piece types
+- **Editable chords** — type any chord symbol (Dm7, G7alt, Cmaj7, etc.) directly into the chord row
+- **Randomize** — generate a fresh chord progression with one tap
+- **Adjustable length** — 2 to 8 chords
+- **No rules** — place pieces anywhere, flip and duplicate freely
+- **Playback** — hear your composed bebop line through the Rhodes EP
+
+---
+
 ## Sound Design
 
 Open the sound panel (🎛️) during any puzzle to customize the Rhodes EP tone:

@@ -154,6 +154,95 @@
             transform: translateY(-1px);
         }
 
+        .landing-btn-composer {
+            background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+            color: #fff;
+            box-shadow: 0 4px 24px rgba(167,139,250,0.25), inset 0 1px 0 rgba(255,255,255,0.15);
+        }
+        .landing-btn-composer:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 40px rgba(167,139,250,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+        }
+        .landing-btn-composer.locked {
+            background: var(--bg-card);
+            color: var(--text-muted);
+            border: 1px solid var(--border-medium);
+            box-shadow: none;
+            cursor: default;
+            opacity: 0.5;
+        }
+        .landing-btn-composer.locked:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Composer mode chord inputs */
+        .composer-chord-input {
+            background: transparent;
+            border: 1px solid rgba(167,139,250,0.3);
+            border-radius: 6px;
+            color: var(--purple);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            text-align: center;
+            width: 100%;
+            padding: 3px 2px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .composer-chord-input:focus {
+            border-color: var(--purple);
+            box-shadow: 0 0 8px rgba(167,139,250,0.2);
+        }
+        .composer-chord-input.target-chord {
+            color: var(--gold);
+            border-color: rgba(212,175,55,0.3);
+        }
+        .composer-chord-input.target-chord:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 8px rgba(212,175,55,0.2);
+        }
+
+        .composer-toolbar {
+            display: flex; gap: 8px; align-items: center;
+        }
+        .composer-toolbar-btn {
+            background: rgba(167,139,250,0.1);
+            border: 1px solid rgba(167,139,250,0.25);
+            color: var(--purple);
+            border-radius: 8px;
+            padding: 4px 10px;
+            font-size: 11px; font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .composer-toolbar-btn:hover {
+            background: rgba(167,139,250,0.2);
+            transform: translateY(-1px);
+        }
+
+        .composer-length-controls {
+            display: flex; align-items: center; gap: 6px;
+        }
+        .composer-length-btn {
+            width: 24px; height: 24px;
+            border-radius: 6px;
+            border: 1px solid rgba(167,139,250,0.25);
+            background: rgba(167,139,250,0.08);
+            color: var(--purple);
+            font-size: 14px; font-weight: 800;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .composer-length-btn:hover { background: rgba(167,139,250,0.2); }
+        .composer-length-label {
+            font-size: 11px; font-weight: 700;
+            color: var(--text-secondary);
+            min-width: 50px; text-align: center;
+        }
+
         /* =============================================
            SCREEN: CHAPTER MAP
            ============================================= */
@@ -658,6 +747,7 @@
             pointer-events: none;
             z-index: 5;
         }
+        .listen-counter.hidden { display: none; }
         .listen-counter.exhausted {
             background: var(--red);
             color: #fff;
@@ -1251,6 +1341,47 @@
             font-size: 13px; font-weight: 600;
             color: var(--blue);
             line-height: 1.5;
+        }
+
+        /* ---- Floating tutorial tooltip ---- */
+        .tutorial-tooltip {
+            position: fixed;
+            z-index: 50;
+            background: rgba(91,141,239,0.15);
+            border: 1px solid rgba(91,141,239,0.35);
+            border-radius: 12px;
+            padding: 10px 16px;
+            max-width: 220px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            pointer-events: none;
+            animation: tooltip-float 2s ease-in-out infinite, pop-in 0.3s ease-out;
+            font-size: 12px; font-weight: 700;
+            color: var(--blue);
+            line-height: 1.4;
+        }
+        .tutorial-tooltip::after {
+            content: '';
+            position: absolute;
+            width: 10px; height: 10px;
+            background: rgba(91,141,239,0.15);
+            border-right: 1px solid rgba(91,141,239,0.35);
+            border-bottom: 1px solid rgba(91,141,239,0.35);
+            transform: rotate(45deg);
+            bottom: -6px; left: 50%; margin-left: -5px;
+        }
+        .tutorial-tooltip.arrow-up::after {
+            top: -6px; bottom: auto;
+            transform: rotate(-135deg);
+        }
+        .tutorial-tooltip.arrow-left::after {
+            left: -6px; top: 50%; bottom: auto; margin-left: 0; margin-top: -5px;
+            transform: rotate(135deg);
+        }
+        @keyframes tooltip-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
         }
 
         /* =============================================
@@ -2344,6 +2475,7 @@
         </div>
         <div style="display: flex; flex-direction: column; gap: 12px; align-items: center;">
             <button class="landing-btn landing-btn-primary" onclick="onPlayPressed()">Play</button>
+            <button class="landing-btn landing-btn-composer" id="composer-btn" onclick="onComposerPressed()">🎹 Composer Mode</button>
             <button class="landing-btn landing-btn-secondary" onclick="showScreen('settings')">Settings</button>
         </div>
     </div>
@@ -3475,15 +3607,21 @@ function showScreen(name) {
         target.classList.add('active');
     }
     if (name === 'map') renderMap();
+    if (name === 'landing') updateComposerButton();
 }
 
 function goToMap() {
+    if (composerMode) {
+        exitComposerMode();
+        return;
+    }
     stopPlayback();
     hideCraftTable();
     trayFlipState = [];
     trayAvailable = [];
     if (timerInterval) clearInterval(timerInterval);
     document.getElementById('tutorial-bar').classList.add('hidden');
+    removeTutorialTooltip();
     hideTempoHint();
     // Remember which chapter tab to show
     if (currentLevelData) activeChapterTab = currentLevelData.chapter;
@@ -3625,6 +3763,11 @@ function renderLevelNode(level) {
 // PUZZLE: LOAD LEVEL
 // ==================================================================
 function startLevel(levelId) {
+    composerMode = false; // reset composer mode when starting a normal level
+    hideComposerToolbar();
+    document.getElementById('hint-btn').style.display = '';
+    document.getElementById('timer-display').style.display = '';
+    document.getElementById('puzzle-stars').style.display = '';
     stopPlayback(); // ensure any ongoing playback is halted before loading new level
     clearHintVisuals();
     if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
@@ -3704,7 +3847,7 @@ function startLevel(levelId) {
         showTempoHint();
 
         if (currentLevelData.tutorial) {
-            showTutorial(currentLevelData.tutorial);
+            showTutorialStep1();
         }
     });
 }
@@ -3864,10 +4007,12 @@ function applyHighlights() {
 }
 
 function isEmptyCol(col) {
+    if (composerMode) return col < numCols && !gridState[col];
     return currentLevelData && currentLevelData.removeCols.includes(col) && !gridState[col];
 }
 
 function isPuzzleCol(col) {
+    if (composerMode) return col < numCols; // all non-target columns
     return currentLevelData && currentLevelData.removeCols.includes(col);
 }
 
@@ -4498,6 +4643,7 @@ function getValidSnapPositions(piece, colIndex) {
 
 function startDrag(e, piece, fromGrid) {
     e.preventDefault();
+    removeTutorialTooltip();
     draggedPiece = piece;
     draggedFromGrid = fromGrid;
     const firstCell = document.querySelector('.grid-cell');
@@ -4520,6 +4666,7 @@ function startDrag(e, piece, fromGrid) {
 
 function startDragTouch(e, piece, fromGrid) {
     e.preventDefault();
+    removeTutorialTooltip();
     const touch = e.touches[0];
     draggedPiece = piece;
     draggedFromGrid = fromGrid;
@@ -4763,6 +4910,13 @@ function onTouchEnd(e) {
 // ANSWER CHECKING
 // ==================================================================
 function checkAnswer(col) {
+    if (composerMode) {
+        // In composer mode: recompute melody, replenish tray, no validation
+        composerRecomputeMelody();
+        composerReplenishTray();
+        renderTray();
+        return;
+    }
     const answer = currentLevelData.solution.find(s => s.col === col);
     if (!answer) return;
     const state = gridState[col];
@@ -5023,6 +5177,7 @@ function updateListenCounter() {
 // PLAYBACK
 // ==================================================================
 function playMelody() {
+    removeTutorialTooltip(); // dismiss step-1 tooltip when user presses play
     getAudioCtx(); // ensure context is alive
 
     const notes = fullMelodyNotes;
@@ -5084,7 +5239,7 @@ function playMelody() {
     currentTime += eighth * 2;
 
     const totalMs = (currentTime - audioCtx.currentTime) * 1000 + 200;
-    playbackTimeouts.push(setTimeout(() => stopPlayback(), totalMs));
+    playbackTimeouts.push(setTimeout(() => { stopPlayback(); onTutorialMelodyPlayed(); }, totalMs));
 }
 
 // ==================================================================
@@ -5127,6 +5282,82 @@ function showTutorial(text) {
     document.getElementById('tutorial-text').textContent = text;
     bar.classList.remove('hidden');
     setTimeout(() => bar.classList.add('hidden'), 5000);
+}
+
+// ---- Floating tutorial tooltip system ----
+let activeTutorialTooltip = null;
+let tutorialListenDone = false;
+
+function removeTutorialTooltip() {
+    if (activeTutorialTooltip && activeTutorialTooltip.parentNode) {
+        activeTutorialTooltip.remove();
+    }
+    activeTutorialTooltip = null;
+}
+
+function showTooltipAt(targetEl, text, arrowDir) {
+    removeTutorialTooltip();
+    const tip = document.createElement('div');
+    tip.className = 'tutorial-tooltip' + (arrowDir ? ' ' + arrowDir : '');
+    tip.textContent = text;
+    // Hide offscreen to measure, then position correctly before showing
+    tip.style.visibility = 'hidden';
+    tip.style.animation = 'none';
+    document.body.appendChild(tip);
+    activeTutorialTooltip = tip;
+
+    // Measure after layout
+    requestAnimationFrame(() => {
+        if (!activeTutorialTooltip || activeTutorialTooltip !== tip) return;
+        const rect = targetEl.getBoundingClientRect();
+        const tipRect = tip.getBoundingClientRect();
+
+        if (arrowDir === 'arrow-up') {
+            tip.style.left = (rect.left + rect.width / 2 - tipRect.width / 2) + 'px';
+            tip.style.top = (rect.bottom + 10) + 'px';
+        } else {
+            tip.style.left = (rect.left + rect.width / 2 - tipRect.width / 2) + 'px';
+            tip.style.top = (rect.top - tipRect.height - 10) + 'px';
+        }
+
+        // Clamp to viewport
+        const finalRect = tip.getBoundingClientRect();
+        if (finalRect.left < 8) tip.style.left = '8px';
+        if (finalRect.right > window.innerWidth - 8) tip.style.left = (window.innerWidth - 8 - tipRect.width) + 'px';
+
+        // Now reveal with animation
+        tip.style.visibility = '';
+        tip.style.animation = '';
+    });
+}
+
+function showTutorialStep1() {
+    // Step 1: point at the play button — "Listen first!"
+    tutorialListenDone = false;
+    const playBtn = document.getElementById('play-btn');
+    if (playBtn) {
+        setTimeout(() => showTooltipAt(playBtn, '👆 Press ▶ to listen to the melody first!', ''), 400);
+    }
+}
+
+function onTutorialMelodyPlayed() {
+    // Called after melody finishes — if this is a tutorial level, show step 2
+    if (!currentLevelData || !currentLevelData.tutorial || tutorialListenDone) return;
+    tutorialListenDone = true;
+    showTutorialStep2();
+}
+
+function showTutorialStep2() {
+    // Step 2: point at the first tray piece
+    removeTutorialTooltip();
+    const firstPiece = document.querySelector('#piece-tray .tray-piece');
+    if (firstPiece) {
+        setTimeout(() => {
+            showTooltipAt(firstPiece, 'Now drag this piece into the highlighted column. Use the Craft Table to flip or duplicate.', '');
+        }, 300);
+        // Auto-dismiss after 8 seconds
+        setTimeout(() => removeTutorialTooltip(), 8500);
+    }
 }
 
 function showSuccessModal(stars, elapsed) {
@@ -6027,6 +6258,260 @@ function onPlayPressed() {
 }
 
 // ==================================================================
+// COMPOSER MODE
+// ==================================================================
+let composerMode = false;
+let composerChordLen = 4;
+
+function isComposerUnlocked() {
+    return CHAPTERS.every(ch => {
+        const chLevels = LEVELS.filter(l => l.chapter === ch.id);
+        return chLevels.every(l => getLevelProgress(l.id).completed);
+    });
+}
+
+function updateComposerButton() {
+    const btn = document.getElementById('composer-btn');
+    if (!btn) return;
+    const unlocked = isComposerUnlocked();
+    btn.classList.toggle('locked', !unlocked);
+    if (!unlocked) {
+        btn.textContent = '🔒 Composer Mode';
+    } else {
+        btn.textContent = '🎹 Composer Mode';
+    }
+}
+
+function onComposerPressed() {
+    if (!isComposerUnlocked()) {
+        showToast('Complete all chapters to unlock Composer Mode', 'info');
+        return;
+    }
+    sfx('click');
+    startComposerMode(composerChordLen);
+}
+
+function startComposerMode(len) {
+    stopPlayback();
+    clearHintVisuals();
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    composerMode = true;
+    composerChordLen = len || 4;
+
+    // Generate random chords
+    const { chords, targetChord } = pickRandomChords(composerChordLen);
+
+    // Build synthetic level data — all columns are empty (removeCols = all)
+    const removeCols = Array.from({ length: composerChordLen }, (_, i) => i);
+    currentLevelData = {
+        id: '_composer',
+        chapter: 0,
+        name: 'Composer Mode',
+        chords,
+        targetChord,
+        solution: [],
+        targetPiece: { position: 0.5 },
+        removeCols,
+        trayBasePieces: ['Arpeggio', 'Neighbor', 'Approach', 'Enclosure'],
+        hints: 0,
+        timeThreshold: 9999,
+        tutorial: '',
+        listens: 0,
+        extraPieces: 0
+    };
+    currentLevel = '_composer';
+    numCols = composerChordLen;
+    initGridState();
+
+    // Place target
+    const targetPiece = library.find(p => p.name === 'Target');
+    if (targetPiece) {
+        gridState[numCols] = { piece: targetPiece, position: 0.5, selectedIntervals: {} };
+    }
+
+    // Compute initial melody
+    fullMelodyNotes = computeFullMelodyNotes();
+
+    // All columns empty
+    trayAvailable = ['Arpeggio', 'Neighbor', 'Approach', 'Enclosure'];
+    trayFlipState = [false, false, false, false];
+
+    hintsUsed = 0;
+    wrongPlacements = 0;
+    hintsRemaining = 0;
+    listensRemaining = 0;
+    updateListenCounter();
+
+    showScreen('puzzle');
+
+    // Topbar: show composer UI
+    document.getElementById('puzzle-level-name').innerHTML = '<span style="color:var(--purple);">Composer Mode</span>';
+    document.getElementById('puzzle-stars').style.display = 'none';
+
+    // Hide hint btn and timer, show composer toolbar
+    document.getElementById('hint-btn').style.display = 'none';
+    document.getElementById('timer-display').style.display = 'none';
+    showComposerToolbar();
+
+    requestAnimationFrame(() => {
+        buildComposerGrid();
+        renderGrid();
+        applyHighlights();
+        renderTray();
+        showCraftTable();
+        showTempoHint();
+    });
+}
+
+function showComposerToolbar() {
+    // Remove old toolbar if present
+    let tb = document.getElementById('composer-toolbar');
+    if (tb) tb.remove();
+
+    const topRight = document.querySelector('.topbar-right');
+    tb = document.createElement('div');
+    tb.id = 'composer-toolbar';
+    tb.className = 'composer-toolbar';
+    tb.innerHTML = `
+        <div class="composer-length-controls">
+            <button class="composer-length-btn" onclick="composerChangeLen(-1)">−</button>
+            <span class="composer-length-label" id="composer-len-label">${composerChordLen} chords</span>
+            <button class="composer-length-btn" onclick="composerChangeLen(1)">+</button>
+        </div>
+        <button class="composer-toolbar-btn" onclick="composerRandomize()">🎲 Randomize</button>
+        <button class="composer-toolbar-btn" onclick="composerClear()">✕ Clear</button>
+    `;
+    // Insert before the sound panel button (second child) so sound panel stays visible
+    const soundBtn = topRight.querySelectorAll('.hint-btn')[1];
+    topRight.insertBefore(tb, soundBtn);
+}
+
+function hideComposerToolbar() {
+    const tb = document.getElementById('composer-toolbar');
+    if (tb) tb.remove();
+}
+
+function composerRandomize() {
+    sfx('click');
+    const { chords, targetChord } = pickRandomChords(composerChordLen);
+    currentLevelData.chords = chords;
+    currentLevelData.targetChord = targetChord;
+    // Update chord inputs
+    const inputs = document.querySelectorAll('.composer-chord-input');
+    const allChords = [...chords, targetChord];
+    inputs.forEach((inp, i) => { inp.value = allChords[i] || ''; });
+    composerRecomputeMelody();
+}
+
+function composerClear() {
+    sfx('click');
+    // Return all grid pieces to tray
+    for (let col = 0; col < numCols; col++) {
+        if (gridState[col] && gridState[col].piece && gridState[col].piece.name !== 'Target') {
+            const p = gridState[col].piece;
+            const map = FLIP_MAP[p.name];
+            const wasFlipped = map && map.flipH && p.label === map.flipH;
+            trayAvailable.push(p.name);
+            trayFlipState.push(!!wasFlipped);
+            gridState[col] = null;
+        }
+    }
+    renderTray();
+    renderGrid();
+    applyHighlights();
+    composerRecomputeMelody();
+}
+
+function composerChangeLen(delta) {
+    const newLen = Math.max(2, Math.min(8, composerChordLen + delta));
+    if (newLen === composerChordLen) return;
+    sfx('click');
+    startComposerMode(newLen);
+}
+
+function composerRecomputeMelody() {
+    fullMelodyNotes = computeFullMelodyNotes();
+}
+
+function composerReplenishTray() {
+    // Ensure all 4 base piece types are always in the tray
+    const baseTypes = ['Arpeggio', 'Neighbor', 'Approach', 'Enclosure'];
+    baseTypes.forEach(name => {
+        if (!trayAvailable.includes(name)) {
+            trayAvailable.push(name);
+            trayFlipState.push(false);
+        }
+    });
+}
+
+function buildComposerGrid() {
+    const totalCols = numCols + 1;
+
+    // Chord row — editable inputs
+    const chordRow = document.getElementById('chord-row');
+    chordRow.innerHTML = '';
+    chordRow.style.gridTemplateColumns = `repeat(${totalCols}, minmax(0, 1fr))`;
+    const allChords = [...currentLevelData.chords, currentLevelData.targetChord];
+    for (let i = 0; i < totalCols; i++) {
+        const wrapper = document.createElement('div');
+        wrapper.style.textAlign = 'center';
+        const inp = document.createElement('input');
+        inp.type = 'text';
+        inp.className = 'composer-chord-input' + (i === numCols ? ' target-chord' : '');
+        inp.value = allChords[i];
+        inp.dataset.col = i;
+        inp.addEventListener('change', onComposerChordChange);
+        wrapper.appendChild(inp);
+        chordRow.appendChild(wrapper);
+    }
+
+    // Grid — same as buildGrid but all columns are puzzle columns
+    const grid = document.getElementById('melody-grid');
+    grid.innerHTML = '';
+    grid.style.gridTemplateColumns = `repeat(${totalCols}, minmax(0, 1fr))`;
+
+    for (let col = 0; col < totalCols; col++) {
+        const colDiv = document.createElement('div');
+        colDiv.className = 'grid-column' + (col === numCols ? ' target-column' : '');
+        colDiv.dataset.col = col;
+        for (let row = 0; row < 3; row++) {
+            const cell = document.createElement('div');
+            cell.className = 'grid-cell';
+            cell.dataset.col = col;
+            cell.dataset.row = row;
+            colDiv.appendChild(cell);
+        }
+        grid.appendChild(colDiv);
+    }
+    sizeCells();
+}
+
+function onComposerChordChange(e) {
+    const col = parseInt(e.target.dataset.col);
+    const val = e.target.value.trim();
+    if (col === numCols) {
+        currentLevelData.targetChord = val;
+    } else {
+        currentLevelData.chords[col] = val;
+    }
+    composerRecomputeMelody();
+}
+
+function exitComposerMode() {
+    composerMode = false;
+    stopPlayback();
+    hideComposerToolbar();
+    hideCraftTable();
+    hideTempoHint();
+    trayFlipState = [];
+    trayAvailable = [];
+    if (timerInterval) clearInterval(timerInterval);
+    document.getElementById('hint-btn').style.display = '';
+    document.getElementById('timer-display').style.display = '';
+    showScreen('landing');
+}
+
+// ==================================================================
 // INIT
 // ==================================================================
 async function init() {
@@ -6051,6 +6536,7 @@ async function init() {
     library.forEach(p => enrichPieceConnectionData(p));
     initCraftOutput();
     showScreen('landing');
+    updateComposerButton();
 
     // Start loading Rhodes samples in background (non-blocking)
     loadRhodesSamples();
@@ -6074,6 +6560,7 @@ document.addEventListener('DOMContentLoaded', init);
                 });
                 saveProgress();
                 renderMap();
+                updateComposerButton();
                 // Show confirmation overlay
                 const overlay = document.createElement('div');
                 overlay.style.cssText = 'position:fixed;inset:0;background:rgba(7,9,15,0.85);z-index:400;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.3s ease;';

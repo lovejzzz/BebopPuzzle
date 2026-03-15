@@ -98,13 +98,33 @@
             font-weight: 900;
             font-size: clamp(42px, 8vw, 72px);
             letter-spacing: -0.02em;
-            background: linear-gradient(135deg, var(--gold) 0%, #fde68a 40%, var(--gold) 80%);
+            background:
+                linear-gradient(
+                    135deg,
+                    #8b6914 0%,
+                    #b8941e 15%,
+                    #fde68a 30%,
+                    #fffbe6 42%,
+                    #fde68a 50%,
+                    #d4af37 60%,
+                    #b8941e 75%,
+                    #fde68a 88%,
+                    #8b6914 100%
+                );
+            background-size: 200% 200%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             text-align: center;
             line-height: 1.05;
-            text-shadow: 0 0 60px var(--gold-glow);
+            filter: drop-shadow(0 0 40px rgba(240,168,48,0.25));
+            animation: gold-shimmer 4s ease-in-out infinite;
+        }
+
+        @keyframes gold-shimmer {
+            0%   { background-position: 0% 0%; }
+            50%  { background-position: 100% 100%; }
+            100% { background-position: 0% 0%; }
         }
 
         .landing-subtitle {
@@ -484,6 +504,16 @@
             text-transform: uppercase;
             letter-spacing: 0.08em;
             color: var(--text-secondary);
+            transition: opacity 0.4s ease, color 0.4s ease;
+        }
+        .topbar-level-name.sing-back {
+            color: var(--gold);
+            font-style: italic;
+            animation: topbar-sing-pulse 2s ease-in-out infinite;
+        }
+        @keyframes topbar-sing-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
         }
         .topbar-stars {
             display: flex; gap: 4px; justify-content: center; margin-top: 2px;
@@ -855,6 +885,31 @@
             text-align: center;
             font-family: 'Inter', sans-serif;
             margin-top: -2px;
+        }
+
+        /* Piece type color accents */
+        .tray-piece[data-base-name="Arpeggio"]  { border-bottom: 3px solid rgba(240,168,48,0.6); }
+        .tray-piece[data-base-name="Neighbor"]  { border-bottom: 3px solid rgba(167,139,250,0.6); }
+        .tray-piece[data-base-name="Approach"]  { border-bottom: 3px solid rgba(91,141,239,0.6); }
+        .tray-piece[data-base-name="Enclosure"] { border-bottom: 3px solid rgba(52,211,153,0.6); }
+        .tray-piece[data-base-name="Arpeggio"]  .tray-piece-label { color: #b8860b; }
+        .tray-piece[data-base-name="Neighbor"]  .tray-piece-label { color: #7c5cbf; }
+        .tray-piece[data-base-name="Approach"]  .tray-piece-label { color: #4a6eb5; }
+        .tray-piece[data-base-name="Enclosure"] .tray-piece-label { color: #2a9d6e; }
+
+        /* Subtle glow on placed pieces by type */
+        .placed-piece[data-piece-type="Arpeggio"]  { box-shadow: 0 0 8px rgba(240,168,48,0.15); }
+        .placed-piece[data-piece-type="Neighbor"]  { box-shadow: 0 0 8px rgba(167,139,250,0.15); }
+        .placed-piece[data-piece-type="Approach"]  { box-shadow: 0 0 8px rgba(91,141,239,0.15); }
+        .placed-piece[data-piece-type="Enclosure"] { box-shadow: 0 0 8px rgba(52,211,153,0.15); }
+
+        /* Tray piece note pulse (for ch1_01 arpeggio echo) */
+        .tray-piece.note-pulse {
+            box-shadow:
+                0 2px 6px rgba(0,0,0,0.35),
+                0 0 16px rgba(240,168,48,0.4),
+                inset 0 0 0 1px rgba(240,168,48,0.3);
+            transform: translateY(-2px) scale(1.03);
         }
 
         /* ---- Hint visuals ---- */
@@ -1357,6 +1412,59 @@
             line-height: 1.6;
             margin-bottom: 32px;
             animation: fade-in 0.5s 0.7s ease both;
+        }
+
+        .reward-note-dots {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .reward-note-dot {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--gold);
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.2s ease;
+            box-shadow: 0 0 12px var(--gold-glow);
+        }
+        .reward-note-dot.active {
+            opacity: 1;
+            transform: scale(1);
+            box-shadow: 0 0 20px var(--gold-glow), 0 0 40px rgba(240,168,48,0.2);
+        }
+        .reward-note-dot.fading {
+            opacity: 0.3;
+            transform: scale(0.7);
+        }
+        .reward-piece-tagline {
+            font-size: 18px;
+            font-weight: 700;
+            font-style: italic;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            letter-spacing: 0.06em;
+            animation: fade-in 0.5s 0.7s ease both;
+        }
+        .reward-replay-btn {
+            background: none;
+            border: 1px solid rgba(240,168,48,0.2);
+            border-radius: 20px;
+            color: var(--gold);
+            font-size: 12px;
+            font-weight: 700;
+            padding: 8px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 16px;
+            animation: fade-in 0.5s 1.2s ease both;
+        }
+        .reward-replay-btn:hover {
+            background: rgba(240,168,48,0.08);
+            border-color: rgba(240,168,48,0.4);
         }
 
         .reward-continue-btn {
@@ -2769,9 +2877,16 @@
             <div class="reward-badge">✦ New Piece Unlocked ✦</div>
             <div class="reward-piece-frame" id="reward-piece-frame">
                 <img id="reward-piece-img" src="" alt="">
+                <div class="reward-note-dots" id="reward-note-dots">
+                    <div class="reward-note-dot" data-note="0"></div>
+                    <div class="reward-note-dot" data-note="1"></div>
+                    <div class="reward-note-dot" data-note="2"></div>
+                    <div class="reward-note-dot" data-note="3"></div>
+                </div>
             </div>
             <div class="reward-piece-name" id="reward-piece-name"></div>
-            <div class="reward-piece-desc" id="reward-piece-desc"></div>
+            <div class="reward-piece-tagline" id="reward-piece-tagline"></div>
+            <button class="reward-replay-btn" id="reward-replay-btn" onclick="replayRewardPiece()">🔊 Tap to hear again</button>
             <button class="reward-continue-btn" onclick="dismissReward()">Continue</button>
         </div>
     </div>
@@ -3233,74 +3348,84 @@ function togglePlay() { if (isPlaying) { stopPlayback(); return; } playMelody();
 // LEVEL TEMPLATES — constraints only, puzzles generated dynamically
 // ==================================================================
 const LEVEL_TEMPLATES = [
-    {id:"ch1_01", ch:1, name:"First Steps", len:2, rem:1, pool:["Arpeggio"], newPc:null, hints:3, time:60, tutorial:"Drag the Arpeggio piece into the highlighted column. Use the Craft Table to flip or duplicate."},
-    {id:"ch1_02", ch:1, name:"Going Down", len:2, rem:1, pool:["Arpeggio"], newPc:null, hints:3, time:60},
-    {id:"ch1_03", ch:1, name:"Three's Company", len:3, rem:1, pool:["Arpeggio"], newPc:null, hints:3, time:90},
-    {id:"ch1_04", ch:1, name:"High Wire", len:3, rem:1, pool:["Arpeggio"], newPc:null, hints:3, time:90},
-    {id:"ch1_05", ch:1, name:"Double Up", len:3, rem:2, pool:["Arpeggio"], newPc:null, hints:2, time:120},
-    {id:"ch1_06", ch:1, name:"Mirror Image", len:4, rem:2, pool:["Arpeggio"], newPc:null, hints:2, time:120},
-    {id:"ch1_07", ch:1, name:"Zigzag", len:4, rem:2, pool:["Arpeggio"], newPc:null, hints:2, time:120},
-    {id:"ch1_08", ch:1, name:"Grand Finale", len:4, rem:3, pool:["Arpeggio"], newPc:null, hints:1, time:180},
-    {id:"ch2_01", ch:2, name:"New Friend", len:2, rem:1, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:3, time:60, tutorial:"You unlocked the Neighbor piece! It stays close to the target — great for smooth lines."},
-    {id:"ch2_02", ch:2, name:"From Below", len:2, rem:1, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:3, time:60},
-    {id:"ch2_03", ch:2, name:"Smooth Landing", len:3, rem:1, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:3, time:90},
-    {id:"ch2_04", ch:2, name:"Pick & Choose", len:3, rem:1, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:3, time:90},
-    {id:"ch2_05", ch:2, name:"Twin Steps", len:3, rem:2, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:3, time:120},
-    {id:"ch2_06", ch:2, name:"Neighbors Unite", len:4, rem:2, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:3, time:120},
-    {id:"ch2_07", ch:2, name:"Full Palette", len:3, rem:2, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:2, time:120},
-    {id:"ch2_08", ch:2, name:"Zigzag", len:4, rem:2, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:2, time:120},
-    {id:"ch2_09", ch:2, name:"Conversation", len:4, rem:2, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:2, time:120},
-    {id:"ch2_10", ch:2, name:"Switchback", len:4, rem:2, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:2, time:120},
-    {id:"ch2_11", ch:2, name:"Deep Dive", len:4, rem:3, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:1, time:180},
-    {id:"ch2_12", ch:2, name:"Winding Road", len:4, rem:3, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:1, time:180},
-    {id:"ch2_13", ch:2, name:"Long Line", len:5, rem:3, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:1, time:180},
-    {id:"ch2_14", ch:2, name:"Mirror Path", len:5, rem:3, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:1, time:180},
-    {id:"ch2_15", ch:2, name:"Neighbor Mastery", len:5, rem:3, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:1, time:180},
-    {id:"ch3_01", ch:3, name:"Stepping In", len:2, rem:1, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:3, time:60, tutorial:"The Approach piece walks chromatically into the target — a bebop classic!"},
-    {id:"ch3_02", ch:3, name:"Down the Steps", len:2, rem:1, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:3, time:60},
-    {id:"ch3_03", ch:3, name:"Approach & Arp", len:3, rem:1, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:3, time:90},
-    {id:"ch3_04", ch:3, name:"Three Flavors", len:3, rem:1, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:3, time:90},
-    {id:"ch3_05", ch:3, name:"Double Approach", len:3, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:3, time:120},
-    {id:"ch3_06", ch:3, name:"Chromatic Pair", len:4, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:3, time:120},
-    {id:"ch3_07", ch:3, name:"Toolkit", len:3, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:2, time:120},
-    {id:"ch3_08", ch:3, name:"Interleave", len:4, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:2, time:120},
-    {id:"ch3_09", ch:3, name:"Crossroads", len:4, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:2, time:120},
-    {id:"ch3_10", ch:3, name:"Flowing River", len:4, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:2, time:120},
-    {id:"ch3_11", ch:3, name:"Jazz Standard", len:4, rem:3, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:1, time:180},
-    {id:"ch3_12", ch:3, name:"Chromatic Journey", len:4, rem:3, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:1, time:180},
-    {id:"ch3_13", ch:3, name:"Long Approach", len:5, rem:3, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:1, time:180},
-    {id:"ch3_14", ch:3, name:"Triple Play", len:5, rem:3, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:1, time:180},
-    {id:"ch3_15", ch:3, name:"Approach Mastery", len:5, rem:3, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:1, time:180},
-    {id:"ch4_01", ch:4, name:"Encircle", len:2, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:3, time:60, tutorial:"Enclosures surround the target note from above and below — the bebop secret weapon!"},
-    {id:"ch4_02", ch:4, name:"Below & Above", len:2, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:3, time:60},
-    {id:"ch4_03", ch:4, name:"Surround Sound", len:3, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:3, time:90},
-    {id:"ch4_04", ch:4, name:"Four Voices", len:3, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:3, time:90},
-    {id:"ch4_05", ch:4, name:"Double Enclosure", len:3, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:3, time:120},
-    {id:"ch4_06", ch:4, name:"Cage Match", len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:3, time:120},
-    {id:"ch4_07", ch:4, name:"The Works", len:3, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:2, time:120},
-    {id:"ch4_08", ch:4, name:"Bebop Line", len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:2, time:120},
-    {id:"ch4_09", ch:4, name:"Jazz Weave", len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:2, time:120},
-    {id:"ch4_10", ch:4, name:"Enclosure Groove", len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:2, time:120},
-    {id:"ch4_11", ch:4, name:"Full Toolkit", len:4, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:1, time:180},
-    {id:"ch4_12", ch:4, name:"Bebop Master", len:4, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:1, time:180},
-    {id:"ch4_13", ch:4, name:"Grand Design", len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:1, time:180},
-    {id:"ch4_14", ch:4, name:"Parker's Path", len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:1, time:180},
-    {id:"ch4_15", ch:4, name:"Enclosure Mastery", len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:1, time:180},
-    {id:"ch5_01", ch:5, name:"Free Jazz", len:2, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:3, time:60, tutorial:"All four piece types are in play now. Think about entry and exit points!"},
-    {id:"ch5_02", ch:5, name:"Improvisation", len:2, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:3, time:60},
-    {id:"ch5_03", ch:5, name:"Smooth Operator", len:3, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:3, time:90},
-    {id:"ch5_04", ch:5, name:"Bird's Eye", len:3, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:3, time:90},
-    {id:"ch5_05", ch:5, name:"Jazz Fusion", len:3, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:3, time:120},
-    {id:"ch5_06", ch:5, name:"Chromatic Run", len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:3, time:120},
-    {id:"ch5_07", ch:5, name:"Giant Steps", len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, time:120},
-    {id:"ch5_08", ch:5, name:"Autumn Leaves", len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, time:120},
-    {id:"ch5_09", ch:5, name:"Blue Monk", len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, time:120},
-    {id:"ch5_10", ch:5, name:"Rhythm Changes", len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, time:120},
-    {id:"ch5_11", ch:5, name:"Monk's Dream", len:4, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:180},
-    {id:"ch5_12", ch:5, name:"Coltrane Changes", len:4, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:180},
-    {id:"ch5_13", ch:5, name:"Dizzy Heights", len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:180},
-    {id:"ch5_14", ch:5, name:"Miles Ahead", len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:180},
-    {id:"ch5_15", ch:5, name:"Bebop Legend", len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:180},
+    // Chapter 1: Arpeggios — progressive mechanics introduction
+    // Levels 1-2: craft hidden, Levels 3-5: flip only, Levels 6-8: full craft
+    {id:"ch1_01", ch:1, name:"First Chorus",    len:2, rem:1, pool:["Arpeggio"], newPc:null, hints:3, time:60,  craft:'hidden', tutorial:"Listen to the melody, then drag the piece into the highlighted column."},
+    {id:"ch1_02", ch:1, name:"Turnaround",      len:3, rem:1, pool:["Arpeggio"], newPc:null, hints:3, time:90,  craft:'hidden', tutorial:"Listen again — where does this piece fit?"},
+    {id:"ch1_03", ch:1, name:"Going Down",      len:2, rem:1, pool:["Arpeggio"], newPc:null, hints:3, time:60,  craft:'flip',   tutorial:"This piece needs to go the other way!"},
+    {id:"ch1_04", ch:1, name:"High Wire",       len:3, rem:1, pool:["Arpeggio"], newPc:null, hints:3, time:90,  craft:'flip'},
+    {id:"ch1_05", ch:1, name:"Walking Bass",    len:4, rem:1, pool:["Arpeggio"], newPc:null, hints:3, time:100, craft:'flip'},
+    {id:"ch1_06", ch:1, name:"Double Up",       len:3, rem:2, pool:["Arpeggio"], newPc:null, hints:3, time:120, craft:'full',   tutorial:"You need two pieces but only have one!"},
+    {id:"ch1_07", ch:1, name:"Contrary Motion", len:4, rem:2, pool:["Arpeggio"], newPc:null, hints:2, time:120, craft:'full'},
+    {id:"ch1_08", ch:1, name:"Blowing Session", len:4, rem:3, pool:["Arpeggio"], newPc:null, hints:1, time:180, craft:'full'},
+
+    // Chapter 2: Neighbors — "The Smooth Chapter" (longer chains, fewer removals)
+    {id:"ch2_01", ch:2, name:"Close Quarters",    len:2, rem:1, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:3, time:60,  tutorial:"You unlocked the Neighbor piece! Sing the melody back — can you hear where it stays close?"},
+    {id:"ch2_02", ch:2, name:"Half Step Away",    len:3, rem:1, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:3, time:75},
+    {id:"ch2_03", ch:2, name:"Grace Note",        len:3, rem:1, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:3, time:75},
+    {id:"ch2_04", ch:2, name:"Long Tone",         len:4, rem:1, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:3, time:90},
+    {id:"ch2_05", ch:2, name:"Ballad Tempo",      len:4, rem:2, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:3, time:110},
+    {id:"ch2_06", ch:2, name:"Lean In",           len:3, rem:2, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:2, time:100},
+    {id:"ch2_07", ch:2, name:"Passing Tone",      len:4, rem:2, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:2, time:120},
+    {id:"ch2_08", ch:2, name:"Sustained Line",    len:5, rem:2, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:2, time:130},
+    {id:"ch2_09", ch:2, name:"Free Choice",       len:4, rem:2, pool:["Arpeggio","Neighbor"], newPc:null,       hints:2, time:110},
+    {id:"ch2_10", ch:2, name:"Vibrato",           len:5, rem:2, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:2, time:130},
+    {id:"ch2_11", ch:2, name:"Open Voicing",      len:4, rem:3, pool:["Arpeggio","Neighbor"], newPc:null,       hints:1, time:160},
+    {id:"ch2_12", ch:2, name:"Body and Soul",     len:5, rem:3, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:1, time:170},
+    {id:"ch2_13", ch:2, name:"Round Midnight",    len:5, rem:3, pool:["Arpeggio","Neighbor"], newPc:null,       hints:1, time:170},
+    {id:"ch2_14", ch:2, name:"Tenderly",          len:5, rem:3, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:1, time:180},
+    {id:"ch2_15", ch:2, name:"Neighbor Mastery",  len:5, rem:3, pool:["Arpeggio","Neighbor"], newPc:null,       hints:0, time:180},
+
+    // Chapter 3: Approaches — "The Precision Chapter" (high fill ratio, directional choices)
+    {id:"ch3_01", ch:3, name:"Leading Tone",      len:2, rem:1, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:3, time:60,  tutorial:"The Approach walks chromatically into the target. Sing the line — hear the steps leading in?"},
+    {id:"ch3_02", ch:3, name:"Chromatic Slide",   len:2, rem:1, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:3, time:60},
+    {id:"ch3_03", ch:3, name:"Half Step Hustle",  len:3, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:3, time:100},
+    {id:"ch3_04", ch:3, name:"Sidestep",          len:3, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:3, time:100},
+    {id:"ch3_05", ch:3, name:"No Safety Net",     len:3, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:null,       hints:3, time:100},
+    {id:"ch3_06", ch:3, name:"Donna Lee",         len:4, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:2, time:120},
+    {id:"ch3_07", ch:3, name:"Outside In",        len:4, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:null,       hints:2, time:120},
+    {id:"ch3_08", ch:3, name:"Fill Every Bar",    len:3, rem:3, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:2, time:130},
+    {id:"ch3_09", ch:3, name:"Confirmation",      len:4, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:2, time:120},
+    {id:"ch3_10", ch:3, name:"Anthropology",      len:4, rem:3, pool:["Arpeggio","Neighbor","Approach"], newPc:null,       hints:1, time:160},
+    {id:"ch3_11", ch:3, name:"Cherokee",          len:4, rem:3, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:1, time:160},
+    {id:"ch3_12", ch:3, name:"The Long Walk",     len:5, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:null,       hints:1, time:150},
+    {id:"ch3_13", ch:3, name:"Epistrophy",        len:5, rem:3, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:1, time:180},
+    {id:"ch3_14", ch:3, name:"Salt Peanuts",      len:5, rem:3, pool:["Arpeggio","Neighbor","Approach"], newPc:null,       hints:0, time:180},
+    {id:"ch3_15", ch:3, name:"Approach Mastery",  len:5, rem:3, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:0, time:180},
+
+    // Chapter 4: Enclosures — "The Asymmetry Chapter" (aggressive mixing, rem:4 boss)
+    {id:"ch4_01", ch:4, name:"The Cage",          len:2, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:3, time:60,  tutorial:"Enclosures surround the target from both sides. Hum it back — notice how it circles the note?"},
+    {id:"ch4_02", ch:4, name:"Upper & Lower",     len:2, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:3, time:60},
+    {id:"ch4_03", ch:4, name:"Orbiting",          len:3, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:3, time:90},
+    {id:"ch4_04", ch:4, name:"Double Bind",       len:3, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:3, time:110},
+    {id:"ch4_05", ch:4, name:"Birdland",          len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:3, time:120},
+    {id:"ch4_06", ch:4, name:"Wild Card",         len:3, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null,        hints:2, time:110},
+    {id:"ch4_07", ch:4, name:"Dizzy's Club",      len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:2, time:120},
+    {id:"ch4_08", ch:4, name:"Three Deep",        len:4, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:2, time:150},
+    {id:"ch4_09", ch:4, name:"Catch and Release", len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null,        hints:2, time:120},
+    {id:"ch4_10", ch:4, name:"Thelonious",        len:4, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:1, time:160},
+    {id:"ch4_11", ch:4, name:"Coast to Coast",    len:5, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null,        hints:1, time:150},
+    {id:"ch4_12", ch:4, name:"52nd Street",       len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:1, time:180},
+    {id:"ch4_13", ch:4, name:"Night in Tunisia",  len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null,        hints:1, time:180},
+    {id:"ch4_14", ch:4, name:"Minton's Playhouse",len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:0, time:180},
+    {id:"ch4_15", ch:4, name:"Enclosure Mastery", len:5, rem:4, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null,        hints:0, time:200},
+
+    // Chapter 5: All Mixed — jazz legends
+    {id:"ch5_01", ch:5, name:"Open Mic",          len:2, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:3, time:60,  tutorial:"All four piece types are in play. Sing the melody first, then match the shapes to what you hear."},
+    {id:"ch5_02", ch:5, name:"Warm Up",           len:2, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:3, time:60},
+    {id:"ch5_03", ch:5, name:"Blue in Green",     len:3, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:3, time:90},
+    {id:"ch5_04", ch:5, name:"Bird's Eye View",   len:3, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:3, time:90},
+    {id:"ch5_05", ch:5, name:"Nardis",            len:3, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:3, time:120},
+    {id:"ch5_06", ch:5, name:"Hot House",         len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:3, time:120},
+    {id:"ch5_07", ch:5, name:"Giant Steps",       len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, time:120},
+    {id:"ch5_08", ch:5, name:"Autumn Leaves",     len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, time:120},
+    {id:"ch5_09", ch:5, name:"Billie's Bounce",   len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, time:120},
+    {id:"ch5_10", ch:5, name:"Rhythm Changes",    len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, time:120},
+    {id:"ch5_11", ch:5, name:"Monk's Dream",      len:4, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:180},
+    {id:"ch5_12", ch:5, name:"Countdown",         len:4, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:180},
+    {id:"ch5_13", ch:5, name:"Dizzy Atmosphere",  len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:180},
+    {id:"ch5_14", ch:5, name:"Miles Ahead",       len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:180},
+    {id:"ch5_15", ch:5, name:"Bebop Legend",      len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:180},
 
     // Chapter 6: Jam Session — extra pieces + limited listens (listens: 12 down to 1)
     {id:"ch6_01", ch:6, name:"Sound Check",       len:3, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, time:120, listens:12, extraPieces:2},
@@ -3319,8 +3444,9 @@ const LEVEL_TEMPLATES = [
 
 // Tutorial levels with hardcoded solutions (first level of each chapter)
 const TUTORIAL_LEVELS = {
+    // Ch1 Level 1: pure drag-and-place, no craft table
     "ch1_01": {
-        id:"ch1_01", chapter:1, name:"First Steps",
+        id:"ch1_01", chapter:1, name:"First Chorus",
         chords:["Dm7","G7"], targetChord:"Cmaj7",
         solution:[
             {col:0, pieceName:"Arpeggio", pieceLabel:"Ascending", position:1},
@@ -3329,11 +3455,56 @@ const TUTORIAL_LEVELS = {
         targetPiece:{position:1.5},
         removeCols:[0],
         trayBasePieces:["Arpeggio"],
-        hints:3, timeThreshold:60,
-        tutorial:"Drag the Arpeggio piece into the highlighted column. Use the Craft Table to flip or duplicate."
+        hints:3, timeThreshold:60, craft:'hidden',
+        tutorial:"Listen to the melody, then drag the piece into the highlighted column."
     },
+    // Ch1 Level 2: slightly longer chain, still no craft table
+    "ch1_02": {
+        id:"ch1_02", chapter:1, name:"Turnaround",
+        chords:["Am7","Dm7","G7"], targetChord:"Cmaj7",
+        solution:[
+            {col:0, pieceName:"Arpeggio", pieceLabel:"Ascending",  position:1},
+            {col:1, pieceName:"Arpeggio", pieceLabel:"Descending", position:1},
+            {col:2, pieceName:"Arpeggio", pieceLabel:"Ascending",  position:1}
+        ],
+        targetPiece:{position:0.5},
+        removeCols:[2],
+        trayBasePieces:["Arpeggio"],
+        hints:3, timeThreshold:90, craft:'hidden',
+        tutorial:"Listen again — where does this piece fit?"
+    },
+    // Ch1 Level 3: flip introduction — answer needs Descending, tray gives Ascending
+    "ch1_03": {
+        id:"ch1_03", chapter:1, name:"Going Down",
+        chords:["Dm7","G7"], targetChord:"Cmaj7",
+        solution:[
+            {col:0, pieceName:"Arpeggio", pieceLabel:"Descending", position:0.5},
+            {col:1, pieceName:"Arpeggio", pieceLabel:"Ascending",  position:0.5}
+        ],
+        targetPiece:{position:0},
+        removeCols:[0],
+        trayBasePieces:["Arpeggio"],
+        hints:3, timeThreshold:60, craft:'flip',
+        tutorial:"This piece needs to go the other way!"
+    },
+    // Ch1 Level 6: duplicate introduction — 2 holes, 1 tray card, both Ascending
+    "ch1_06": {
+        id:"ch1_06", chapter:1, name:"Double Up",
+        chords:["Dm7","Am7","G7"], targetChord:"Cmaj7",
+        solution:[
+            {col:0, pieceName:"Arpeggio", pieceLabel:"Ascending",  position:1.5},
+            {col:1, pieceName:"Arpeggio", pieceLabel:"Ascending",  position:0.5},
+            {col:2, pieceName:"Arpeggio", pieceLabel:"Descending", position:0.5}
+        ],
+        targetPiece:{position:1.0},
+        removeCols:[0, 1],
+        trayBasePieces:["Arpeggio"],
+        hints:3, timeThreshold:120, craft:'full',
+        tutorial:"You need two pieces but only have one!"
+    },
+    // Ch2 Level 1: Neighbor introduction
     "ch2_01": {
-        id:"ch2_01", chapter:2, name:"New Friend",
+        id:"ch2_01", chapter:2, name:"Close Quarters",
         chords:["Dm7","G7"], targetChord:"Cmaj7",
         solution:[
             {col:0, pieceName:"Neighbor", pieceLabel:"From Above", position:1},
@@ -3343,10 +3514,11 @@ const TUTORIAL_LEVELS = {
         removeCols:[0],
         trayBasePieces:["Neighbor"],
         hints:3, timeThreshold:60,
-        tutorial:"You unlocked the Neighbor piece! It stays close to the target — great for smooth lines."
+        tutorial:"You unlocked the Neighbor piece! Sing the melody back — can you hear where it stays close?"
     },
+    // Ch3 Level 1: Approach introduction
     "ch3_01": {
-        id:"ch3_01", chapter:3, name:"Stepping In",
+        id:"ch3_01", chapter:3, name:"Leading Tone",
         chords:["Dm7","G7"], targetChord:"Cmaj7",
         solution:[
             {col:0, pieceName:"Approach", pieceLabel:"Ascending", position:1},
@@ -3356,10 +3528,11 @@ const TUTORIAL_LEVELS = {
         removeCols:[0],
         trayBasePieces:["Approach"],
         hints:3, timeThreshold:60,
-        tutorial:"The Approach piece walks chromatically into the target — a bebop classic!"
+        tutorial:"The Approach walks chromatically into the target. Sing the line — hear the steps leading in?"
     },
+    // Ch4 Level 1: Enclosure introduction
     "ch4_01": {
-        id:"ch4_01", chapter:4, name:"Encircle",
+        id:"ch4_01", chapter:4, name:"The Cage",
         chords:["Dm7","G7"], targetChord:"Cmaj7",
         solution:[
             {col:0, pieceName:"Enclosure", pieceLabel:"From Below", position:0},
@@ -3369,10 +3542,11 @@ const TUTORIAL_LEVELS = {
         removeCols:[0],
         trayBasePieces:["Enclosure"],
         hints:3, timeThreshold:60,
-        tutorial:"Enclosures surround the target note from above and below — the bebop secret weapon!"
+        tutorial:"Enclosures surround the target from both sides. Hum it back — notice how it circles the note?"
     },
+    // Ch5 Level 1: All Mixed
     "ch5_01": {
-        id:"ch5_01", chapter:5, name:"Free Jazz",
+        id:"ch5_01", chapter:5, name:"Open Mic",
         chords:["Dm7","G7"], targetChord:"Cmaj7",
         solution:[
             {col:0, pieceName:"Enclosure", pieceLabel:"From Below", position:1},
@@ -3382,7 +3556,7 @@ const TUTORIAL_LEVELS = {
         removeCols:[0],
         trayBasePieces:["Enclosure"],
         hints:3, timeThreshold:60,
-        tutorial:"All four piece types are in play now. Think about entry and exit points!"
+        tutorial:"All four piece types are in play. Sing the melody first, then match the shapes to what you hear."
     }
 };
 
@@ -3404,31 +3578,61 @@ const PIECE_RULES = {
 };
 
 // ==================================================================
-// CHORD POOL — for random chord selection
+// CHORD POOL — key-center based ii-V-I progressions
 // ==================================================================
-const CHORD_POOL = {
-    maj7: ['Cmaj7','Fmaj7','Bbmaj7','Ebmaj7','Gmaj7','Dmaj7','Abmaj7'],
-    min7: ['Dm7','Am7','Em7','Gm7','Cm7','Fm7','Bm7'],
-    dom7: ['G7','C7','D7','A7','F7','Bb7','Eb7','E7']
+const KEY_PROGRESSIONS = {
+    'C':  { ii: 'Dm7',  V: 'G7',   I: 'Cmaj7' },
+    'F':  { ii: 'Gm7',  V: 'C7',   I: 'Fmaj7' },
+    'Bb': { ii: 'Cm7',  V: 'F7',   I: 'Bbmaj7' },
+    'Eb': { ii: 'Fm7',  V: 'Bb7',  I: 'Ebmaj7' },
+    'Ab': { ii: 'Bbm7', V: 'Eb7',  I: 'Abmaj7' },
+    'G':  { ii: 'Am7',  V: 'D7',   I: 'Gmaj7' },
+    'D':  { ii: 'Em7',  V: 'A7',   I: 'Dmaj7' },
+};
+
+const SECONDARY_IIVS = {
+    'C':  { ii: 'Gm7',  V: 'C7'  },
+    'F':  { ii: 'Cm7',  V: 'F7'  },
+    'Bb': { ii: 'Fm7',  V: 'Bb7' },
+    'Eb': { ii: 'Bbm7', V: 'Eb7' },
+    'Ab': { ii: 'Bbm7', V: 'Eb7' },
+    'G':  { ii: 'Dm7',  V: 'G7'  },
+    'D':  { ii: 'Am7',  V: 'D7'  },
 };
 
 function pickRandomChords(count) {
-    const chords = [];
-    const allMin = [...CHORD_POOL.min7];
-    const allDom = [...CHORD_POOL.dom7];
-    const allMaj = [...CHORD_POOL.maj7];
-    for (let i = 0; i < count; i++) {
-        // Last chord tends to be dom7 for ii-V feel
-        let pool;
-        if (i === count - 1) pool = allDom;
-        else if (i === 0 && count > 2) pool = allMin;
-        else pool = [...allMin, ...allDom];
-        const pick = pool[Math.floor(Math.random() * pool.length)];
-        chords.push(pick);
+    const keys = Object.keys(KEY_PROGRESSIONS);
+    const key = keys[Math.floor(Math.random() * keys.length)];
+    const prog = KEY_PROGRESSIONS[key];
+    const secKeys = Object.keys(SECONDARY_IIVS);
+    const secKey = secKeys[Math.floor(Math.random() * secKeys.length)];
+    const sec = SECONDARY_IIVS[secKey];
+
+    let chords;
+    switch (count) {
+        case 2:
+            chords = [prog.ii, prog.V];
+            break;
+        case 3:
+            chords = Math.random() < 0.5
+                ? [prog.ii, prog.ii, prog.V]
+                : [sec.ii, sec.V, prog.V];
+            break;
+        case 4:
+            chords = Math.random() < 0.6
+                ? [prog.ii, prog.V, prog.ii, prog.V]
+                : [sec.ii, sec.V, prog.ii, prog.V];
+            break;
+        default: {
+            chords = Math.random() < 0.5
+                ? [sec.ii, sec.V, prog.ii, prog.V, prog.ii]
+                : [prog.ii, prog.V, prog.ii, prog.V, prog.ii];
+            while (chords.length < count) chords.unshift(Math.random() < 0.5 ? prog.ii : prog.V);
+            chords = chords.slice(0, count);
+            break;
+        }
     }
-    // Target chord is maj7
-    const target = allMaj[Math.floor(Math.random() * allMaj.length)];
-    return { chords, targetChord: target };
+    return { chords, targetChord: prog.I };
 }
 
 // ==================================================================
@@ -3619,12 +3823,12 @@ function generateRandomPuzzle(template) {
 }
 
 const CHAPTERS = [
-    { id:1, name:"Arpeggios",  icon:"Arpeggio",  unlockStars:0,  color:"gold",   reward:null },
-    { id:2, name:"Neighbors",  icon:"Neighbor",   unlockStars:12, color:"purple", reward:"Neighbor" },
-    { id:3, name:"Approaches", icon:"Approach",   unlockStars:20, color:"blue",   reward:"Approach" },
-    { id:4, name:"Enclosures", icon:"Enclosure",  unlockStars:20, color:"green",  reward:"Enclosure" },
-    { id:5, name:"All Mixed",  icon:"🎷", unlockStars:20, color:"red",    reward:null },
-    { id:6, name:"Jam Session", icon:"🎤", unlockStars:20, color:"orange", reward:null }
+    { id:1, name:"Arpeggios",   icon:"Arpeggio",  unlockStars:0,  color:"gold",   reward:null },
+    { id:2, name:"Neighbors",   icon:"Neighbor",   unlockStars:10, color:"purple", reward:"Neighbor" },
+    { id:3, name:"Approaches",  icon:"Approach",   unlockStars:18, color:"blue",   reward:"Approach" },
+    { id:4, name:"Enclosures",  icon:"Enclosure",  unlockStars:20, color:"green",  reward:"Enclosure" },
+    { id:5, name:"All Mixed",   icon:"🎷",         unlockStars:22, color:"red",    reward:null },
+    { id:6, name:"Jam Session",  icon:"🎤",         unlockStars:25, color:"orange", reward:null }
 ];
 
 // Helper: render a chapter icon — piece thumbnail if available, otherwise emoji
@@ -3762,6 +3966,11 @@ function goToMap() {
     document.getElementById('tutorial-bar').classList.add('hidden');
     removeTutorialTooltip();
     hideTempoHint();
+    if (craftProactiveTimeout) { clearTimeout(craftProactiveTimeout); craftProactiveTimeout = null; }
+    if (dupeProactiveTimeout) { clearTimeout(dupeProactiveTimeout); dupeProactiveTimeout = null; }
+    if (singBackTimeout) { clearTimeout(singBackTimeout); singBackTimeout = null; }
+    const levelNameEl = document.getElementById('puzzle-level-name');
+    if (levelNameEl) levelNameEl.classList.remove('sing-back');
     // Remember which chapter tab to show
     if (currentLevelData) activeChapterTab = currentLevelData.chapter;
     showScreen('map');
@@ -3980,11 +4189,22 @@ function startLevel(levelId) {
         renderTray();
         startTimer();
 
-        // Always show craft table — needed for flipping and duplicating
-        showCraftTable();
+        // Show craft table based on level's craft mode (hidden / flip / full)
+        const craftMode = (template && template.craft) || (currentLevelData.craft) || 'full';
+        if (craftMode === 'hidden') {
+            hideCraftTable();
+        } else {
+            showCraftTable();
+            const dupeBtn = document.getElementById('craft-dupe-btn');
+            if (dupeBtn) dupeBtn.style.display = craftMode === 'flip' ? 'none' : '';
+        }
 
         // Show persistent tempo slider
         showTempoHint();
+
+        // Schedule proactive craft tooltips
+        if (craftMode === 'flip') scheduleFlipProactiveHint();
+        if (craftMode === 'full' && currentLevelData.removeCols.length >= 2) scheduleDupeProactiveHint();
 
         if (currentLevelData.tutorial) {
             showTutorialStep1();
@@ -4114,6 +4334,7 @@ function renderGrid() {
 
         const el = document.createElement('div');
         el.className = 'placed-piece';
+        el.dataset.pieceType = piece.name;
         if (col === numCols && position < 0) el.classList.add('glass');
         el.style.top = topOffset + 'px';
         el.style.height = cellHeight + 'px';
@@ -4238,27 +4459,94 @@ function showCraftTable() {
     if (table) table.classList.add('visible');
     if (divider) divider.classList.add('visible');
     craftOpen = true;
+    // Old static onboarding overlay removed — craft table is taught contextually
+    // via flip tooltip (3.4) and duplicate tooltip (3.7)
+}
 
-    // Show onboarding hint the first time
-    if (!localStorage.getItem('bebopCraftOnboard')) {
-        setTimeout(() => {
-            const hint = document.createElement('div');
-            hint.className = 'craft-onboard';
-            hint.innerHTML = `
-                <div class="craft-onboard-icon">🔨</div>
-                <div class="craft-onboard-title">Craft Table</div>
-                <div class="craft-onboard-desc">Drag a piece here to <strong>flip</strong> its direction or <strong>duplicate</strong> it to get extra copies.</div>
-                <div class="craft-onboard-tap">tap to continue</div>
-            `;
-            hint.addEventListener('click', () => {
-                hint.style.opacity = '0';
-                hint.style.transition = 'opacity 0.3s ease';
-                setTimeout(() => hint.remove(), 300);
-                localStorage.setItem('bebopCraftOnboard', '1');
-            });
-            table.appendChild(hint);
-        }, 100);
-    }
+// ==================================================================
+// CRAFT TABLE CONTEXTUAL TOOLTIPS
+// ==================================================================
+let craftFlipTooltipShown = false;
+let craftDupeTooltipShown = false;
+let craftProactiveTimeout = null;
+let dupeProactiveTimeout = null;
+
+function shouldShowFlipTooltip() {
+    return !craftFlipTooltipShown && !localStorage.getItem('bebopCraftFlipDone');
+}
+function markFlipTooltipDone() {
+    craftFlipTooltipShown = true;
+    localStorage.setItem('bebopCraftFlipDone', '1');
+    if (craftProactiveTimeout) { clearTimeout(craftProactiveTimeout); craftProactiveTimeout = null; }
+}
+function shouldShowDupeTooltip() {
+    return !craftDupeTooltipShown && !localStorage.getItem('bebopDupeTooltipDone');
+}
+function markDupeTooltipDone() {
+    craftDupeTooltipShown = true;
+    localStorage.setItem('bebopDupeTooltipDone', '1');
+    if (dupeProactiveTimeout) { clearTimeout(dupeProactiveTimeout); dupeProactiveTimeout = null; }
+}
+
+// Flip tooltip: fires on wrong placement with right type, wrong direction
+function showCraftFlipTooltip() {
+    if (!shouldShowFlipTooltip()) return;
+    const dropZone = document.getElementById('craft-drop-zone');
+    if (!dropZone) return;
+    showTooltipAt(dropZone, 'Right piece, wrong direction! Drag it here to flip it ⇌', 'arrow-up');
+    markFlipTooltipDone();
+    setTimeout(() => removeTutorialTooltip(), 6000);
+}
+
+// Proactive flip tooltip: fires after 15s on a level requiring flip
+function scheduleFlipProactiveHint() {
+    if (!shouldShowFlipTooltip()) return;
+    if (craftProactiveTimeout) clearTimeout(craftProactiveTimeout);
+    if (!currentLevelData) return;
+    // Check if any solution piece in removeCols needs non-default label
+    const needsFlip = currentLevelData.solution.some(s => {
+        if (!currentLevelData.removeCols.includes(s.col)) return false;
+        const map = FLIP_MAP[s.pieceName];
+        return map && s.pieceLabel !== map.defaultLabel;
+    });
+    if (!needsFlip) return;
+    craftProactiveTimeout = setTimeout(() => {
+        if (shouldShowFlipTooltip() && craftStack.length === 0 && craftOpen) {
+            const dropZone = document.getElementById('craft-drop-zone');
+            if (dropZone) {
+                showTooltipAt(dropZone, 'Need a different direction? Drag a piece here to flip it ⇌', 'arrow-up');
+                markFlipTooltipDone();
+                setTimeout(() => removeTutorialTooltip(), 6000);
+            }
+        }
+    }, 15000);
+}
+
+// Dupe tooltip: fires when tray is empty but unsolved columns remain
+function showCraftDupeTooltip() {
+    if (!shouldShowDupeTooltip()) return;
+    const target = craftStack.length > 0
+        ? document.getElementById('craft-dupe-btn')
+        : document.getElementById('craft-drop-zone');
+    if (!target) return;
+    const text = craftStack.length > 0
+        ? 'Press Duplicate to make a copy!'
+        : 'Need more pieces? Drag one here, then duplicate it!';
+    showTooltipAt(target, text, 'arrow-up');
+    markDupeTooltipDone();
+    setTimeout(() => removeTutorialTooltip(), 6000);
+}
+
+function scheduleDupeProactiveHint() {
+    if (!shouldShowDupeTooltip()) return;
+    if (dupeProactiveTimeout) clearTimeout(dupeProactiveTimeout);
+    dupeProactiveTimeout = setTimeout(() => {
+        if (!shouldShowDupeTooltip()) return;
+        const unsolved = currentLevelData ? currentLevelData.removeCols.filter(c => !gridState[c]) : [];
+        if (trayAvailable.length === 0 && unsolved.length > 0 && craftOpen) {
+            showCraftDupeTooltip();
+        }
+    }, 8000);
 }
 
 function hideCraftTable() {
@@ -4302,6 +4590,10 @@ function clearCraftOutput() {
 }
 
 function placePieceInCraft(baseName, flipState) {
+    // Dismiss craft tooltips
+    removeTutorialTooltip();
+    markFlipTooltipDone();
+    markDupeTooltipDone();
     // Only allow one piece at a time to prevent infinite duplication exploit
     if (craftStack.length >= 1) {
         // Return existing stack pieces to tray before accepting the new one
@@ -5103,7 +5395,18 @@ function checkAnswer(col) {
     } else {
         wrongPlacements++;
         sfx('wrong');
-        showToast('Not Quite — Try Sing Along', 'error');
+        const WRONG_MESSAGES = [
+            'Not quite — try singing it first',
+            'Close! Hum the melody and compare',
+            'Listen again and sing along',
+            'Almost — does it match what you sang?',
+            'Sing the line, then find the shape',
+        ];
+        showToast(WRONG_MESSAGES[Math.floor(Math.random() * WRONG_MESSAGES.length)], 'error');
+        // Detect "right piece, wrong direction" → show flip tooltip
+        if (nameMatch && !labelMatch && shouldShowFlipTooltip()) {
+            setTimeout(() => showCraftFlipTooltip(), 500);
+        }
         const el = document.querySelector(`.grid-column[data-col="${col}"] .placed-piece`);
         if (el) {
             el.style.animation = 'shake 0.4s ease';
@@ -5394,7 +5697,7 @@ function playMelody() {
     currentTime += eighth * 2;
 
     const totalMs = (currentTime - audioCtx.currentTime) * 1000 + 200;
-    playbackTimeouts.push(setTimeout(() => { stopPlayback(); onTutorialMelodyPlayed(); }, totalMs));
+    playbackTimeouts.push(setTimeout(() => { stopPlayback(); onTutorialMelodyPlayed(); showSingBackPrompt(); }, totalMs));
 }
 
 // ==================================================================
@@ -5420,6 +5723,60 @@ function startTimer() {
         const s = elapsed % 60;
         display.textContent = `${m}:${s.toString().padStart(2,'0')}`;
     }, 1000);
+}
+
+// ==================================================================
+// SING IT BACK — post-playback encouragement
+// ==================================================================
+const SING_BACK_MESSAGES = [
+    'Sing it back...',
+    'Hum the melody...',
+    'Can you hear it? Sing along...',
+    'Your turn — sing it...',
+    'Hear it, sing it, solve it...',
+];
+
+function getSingBackDuration() {
+    if (!currentLevelData) return 0;
+    const ch = currentLevelData.chapter;
+    if (ch <= 2) return 3500;
+    if (ch <= 4) return 2000;
+    return 0;
+}
+
+let singBackTimeout = null;
+
+function showSingBackPrompt() {
+    const duration = getSingBackDuration();
+    if (duration <= 0) return;
+    if (singBackTimeout) clearTimeout(singBackTimeout);
+
+    const el = document.getElementById('puzzle-level-name');
+    if (!el) return;
+
+    // Save original text
+    const originalText = el.textContent;
+    const originalHTML = el.innerHTML;
+
+    // Swap to sing-back message
+    const msg = SING_BACK_MESSAGES[Math.floor(Math.random() * SING_BACK_MESSAGES.length)];
+    el.style.opacity = '0';
+    setTimeout(() => {
+        el.textContent = '🎤 ' + msg;
+        el.classList.add('sing-back');
+        el.style.opacity = '';
+    }, 400);
+
+    // Restore after duration
+    singBackTimeout = setTimeout(() => {
+        el.style.opacity = '0';
+        setTimeout(() => {
+            el.innerHTML = originalHTML;
+            el.classList.remove('sing-back');
+            el.style.opacity = '';
+        }, 400);
+        singBackTimeout = null;
+    }, duration);
 }
 
 function showToast(msg, type) {
@@ -5499,7 +5856,39 @@ function onTutorialMelodyPlayed() {
     // Called after melody finishes — if this is a tutorial level, show step 2
     if (!currentLevelData || !currentLevelData.tutorial || tutorialListenDone) return;
     tutorialListenDone = true;
-    showTutorialStep2();
+
+    // ch1_01 special: replay just the arpeggio column's notes with tray piece pulse
+    if (currentLevel === 'ch1_01') {
+        highlightTrayPieceNotes(0);
+        // Delay step 2 so the echo finishes first
+        setTimeout(() => showTutorialStep2(), 1500);
+    } else {
+        showTutorialStep2();
+    }
+}
+
+function highlightTrayPieceNotes(solutionCol) {
+    const notes = fullMelodyNotes?.pieceNotes[solutionCol];
+    if (!notes || notes.length === 0) return;
+    const trayPiece = document.querySelector('#piece-tray .tray-piece');
+    if (!trayPiece) return;
+    getAudioCtx();
+    getMasterGain();
+    const eighth = getEighth();
+    const sw = soundParams.swing;
+    const swL = eighth * 2 * sw;
+    const swS = eighth * 2 * (1 - sw);
+    let t = audioCtx.currentTime + 0.3;
+    notes.forEach((midi, i) => {
+        const dur = (i % 2 === 0) ? swL : swS;
+        playNote(midiToFreq(midi), t, dur * 0.9);
+        const delayMs = (t - audioCtx.currentTime) * 1000;
+        setTimeout(() => {
+            trayPiece.classList.add('note-pulse');
+            setTimeout(() => trayPiece.classList.remove('note-pulse'), 150);
+        }, Math.max(0, delayMs));
+        t += dur;
+    });
 }
 
 function showTutorialStep2() {
@@ -5507,10 +5896,10 @@ function showTutorialStep2() {
     removeTutorialTooltip();
     const firstPiece = document.querySelector('#piece-tray .tray-piece');
     if (firstPiece) {
+        const text = currentLevelData.tutorial || 'Drag the piece into the highlighted column.';
         setTimeout(() => {
-            showTooltipAt(firstPiece, 'Now drag this piece into the highlighted column. Use the Craft Table to flip or duplicate.', '');
+            showTooltipAt(firstPiece, text, '');
         }, 300);
-        // Auto-dismiss after 8 seconds
         setTimeout(() => removeTutorialTooltip(), 8500);
     }
 }
@@ -5590,17 +5979,87 @@ const PIECE_DESCRIPTIONS = {
     'Enclosure': 'Surrounds the target note from both sides before landing on it. The ultimate bebop secret weapon for hip lines.',
 };
 
+const PIECE_TAGLINES = {
+    'Neighbor':  'Smooth',
+    'Approach':  'Chromatic',
+    'Enclosure': 'Surrounding',
+};
+
+// Dot positions (x%, y%) tracing each piece type's melodic contour
+const PIECE_DOT_CONTOURS = {
+    'Neighbor':  [{x:10,y:50},{x:35,y:25},{x:60,y:50},{x:85,y:75}],
+    'Approach':  [{x:10,y:85},{x:35,y:65},{x:60,y:45},{x:85,y:25}],
+    'Enclosure': [{x:10,y:15},{x:35,y:35},{x:60,y:85},{x:85,y:65}],
+};
+
 let rewardNextChapter = null;
+let rewardPieceName = null;
+let rewardNotes = [];
+
+// Generate reference notes for a piece demo (over G7 resolving to C)
+function generateRewardNotes(pieceName) {
+    const chord = parseChord('G7');
+    const targetNote = 60; // middle C
+    const map = FLIP_MAP[pieceName];
+    if (!map) return [];
+    const piece = findPiece(pieceName, map.defaultLabel);
+    if (!piece) return [];
+    const sel = selectRandomIntervals(piece);
+    return calculatePieceNotes(piece, chord, targetNote, sel);
+}
+
+function positionRewardDots(pieceName) {
+    const contour = PIECE_DOT_CONTOURS[pieceName];
+    if (!contour) return;
+    const dots = document.querySelectorAll('#reward-note-dots .reward-note-dot');
+    contour.forEach((pos, i) => {
+        if (dots[i]) {
+            dots[i].style.left = pos.x + '%';
+            dots[i].style.top = pos.y + '%';
+            dots[i].style.transform = 'translate(-50%, -50%) scale(0)';
+            dots[i].classList.remove('active', 'fading');
+        }
+    });
+}
+
+function playRewardPieceNotes() {
+    if (rewardNotes.length === 0) return;
+    getAudioCtx();
+    getMasterGain();
+    const eighth = getEighth();
+    const sw = soundParams.swing;
+    const swL = eighth * 2 * sw;
+    const swS = eighth * 2 * (1 - sw);
+    let t = audioCtx.currentTime + 0.1;
+    const dots = document.querySelectorAll('#reward-note-dots .reward-note-dot');
+    rewardNotes.forEach((midi, i) => {
+        const dur = (i % 2 === 0) ? swL : swS;
+        playNote(midiToFreq(midi), t, dur * 0.9);
+        const delayMs = (t - audioCtx.currentTime) * 1000;
+        setTimeout(() => {
+            if (i > 0 && dots[i - 1]) { dots[i - 1].classList.remove('active'); dots[i - 1].classList.add('fading'); }
+            if (dots[i]) dots[i].classList.add('active');
+        }, Math.max(0, delayMs));
+        t += dur;
+    });
+    const totalMs = (t - audioCtx.currentTime) * 1000 + 200;
+    setTimeout(() => { dots.forEach(d => { d.classList.remove('active'); d.classList.add('fading'); }); }, totalMs);
+}
+
+function replayRewardPiece() {
+    document.querySelectorAll('#reward-note-dots .reward-note-dot').forEach(d => d.classList.remove('active', 'fading'));
+    rewardNotes = generateRewardNotes(rewardPieceName);
+    playRewardPieceNotes();
+}
 
 function showRewardScreen(pieceName) {
     const piece = library.find(p => p.name === pieceName);
     if (!piece) { goToMap(); return; }
 
-    // Remember which chapter is being unlocked
     const nextCh = CHAPTERS.find(c => c.reward === pieceName);
     rewardNextChapter = nextCh ? nextCh.id : null;
+    rewardPieceName = pieceName;
 
-    // Mark as seen
     gameProgress['_reward_' + pieceName] = true;
     saveProgress();
 
@@ -5608,14 +6067,22 @@ function showRewardScreen(pieceName) {
     const frame = document.getElementById('reward-piece-frame');
     document.getElementById('reward-piece-img').src = piece.thumbnail;
     document.getElementById('reward-piece-name').textContent = pieceName;
-    document.getElementById('reward-piece-desc').textContent = PIECE_DESCRIPTIONS[pieceName] || 'A new melodic pattern to add to your vocabulary!';
+
+    // Tagline instead of paragraph
+    const taglineEl = document.getElementById('reward-piece-tagline');
+    if (taglineEl) taglineEl.textContent = PIECE_TAGLINES[pieceName] || '';
+    // Hide old desc if it exists
+    const descEl = document.getElementById('reward-piece-desc');
+    if (descEl) descEl.style.display = 'none';
 
     overlay.classList.remove('hidden');
-
-    // Spawn particles around the piece frame
     spawnRewardParticles(frame);
 
-    // Achievement trophy for new chapter unlock
+    // Position dots and auto-play after entrance animation
+    positionRewardDots(pieceName);
+    rewardNotes = generateRewardNotes(pieceName);
+    setTimeout(() => playRewardPieceNotes(), 1500);
+
     if (nextCh) {
         showAchievement(
             nextCh.icon.length <= 2 ? nextCh.icon : (library.find(p => p.name === nextCh.icon)?.thumbnail || '🎵'),
@@ -5767,6 +6234,18 @@ document.addEventListener('keydown', e => {
     if (document.getElementById('screen-puzzle').classList.contains('active')) {
         if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
         if (e.code === 'KeyH') useHint();
+        // Craft table shortcuts
+        if (e.code === 'KeyF' && craftOpen && craftStack.length > 0) {
+            const flipBtn = document.getElementById('craft-flip-btn');
+            if (flipBtn && flipBtn.classList.contains('ready')) { e.preventDefault(); craftToggleFlip(); }
+        }
+        if (e.code === 'KeyD' && craftOpen && craftStack.length > 0) {
+            const dupeBtn = document.getElementById('craft-dupe-btn');
+            if (dupeBtn && dupeBtn.style.display !== 'none' && dupeBtn.classList.contains('ready')) { e.preventDefault(); craftDuplicate(); }
+        }
+        if (e.code === 'KeyC' && craftOpen && craftOutputPiece) {
+            e.preventDefault(); claimOutputPiece();
+        }
     }
 });
 
@@ -6407,12 +6886,12 @@ const ONBOARD_STEPS = [
     {
         icon: '🧩',
         title: 'Connect the Pieces',
-        desc: 'Drag pieces from the <strong>tray</strong> onto the grid. Each piece has <strong>entry and exit points</strong> that must align with neighboring pieces to form a valid melodic line.'
+        desc: 'Drag pieces from the <strong>tray</strong> onto the grid. Each piece has <strong>entry and exit points</strong> that must align with neighboring pieces.'
     },
     {
-        icon: '⇌',
-        title: 'The Craft Table',
-        desc: 'Drop a piece on the <strong>Craft Table</strong> to <strong>flip</strong> it (reverse direction) or <strong>duplicate</strong> it (make a copy). Tap the result to claim it back.'
+        icon: '🎤',
+        title: 'Sing It Back',
+        desc: 'After hearing the melody, <strong>sing or hum it back</strong> before placing pieces. Your ear is your best tool — if you can sing it, you can solve it!'
     },
     {
         icon: '⭐',
@@ -6422,7 +6901,7 @@ const ONBOARD_STEPS = [
     {
         icon: '🎷',
         title: 'Ready to Play!',
-        desc: 'Start with <strong>Arpeggios</strong> and work your way up through all 6 chapters. Press <strong>▶</strong> anytime to hear how your melody sounds!'
+        desc: 'Start with <strong>Arpeggios</strong> and work your way up through all 6 chapters. Press <strong>▶</strong> anytime to hear the melody!'
     }
 ];
 

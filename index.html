@@ -335,13 +335,6 @@
         }
         .map-tab.locked { opacity: 0.35; }
         .map-tab.locked:hover { opacity: 0.5; }
-        .map-tab.mastered {
-            border-bottom-color: var(--gold-dim);
-            box-shadow: 0 2px 8px rgba(240,168,48,0.15);
-        }
-        .map-tab.mastered.active {
-            box-shadow: 0 2px 12px rgba(240,168,48,0.25);
-        }
         .map-tab .tab-icon { font-size: 14px; }
         .map-tab .tab-lock { font-size: 9px; margin-left: 2px; }
 
@@ -2637,76 +2630,6 @@
         }
 
         /* =============================================
-           LEVEL NODE — 3-star gold glow
-           ============================================= */
-        .level-node.perfected {
-            background: linear-gradient(135deg, rgba(240,168,48,0.14), rgba(240,168,48,0.05));
-            border-color: var(--gold-dim);
-            box-shadow: 0 0 16px rgba(240,168,48,0.15), inset 0 0 12px rgba(240,168,48,0.05);
-        }
-        .level-node.perfected .level-num { color: var(--gold); text-shadow: 0 0 8px var(--gold-glow); }
-        .level-node.perfected:hover {
-            border-color: var(--gold);
-            box-shadow: 0 0 24px rgba(240,168,48,0.25);
-        }
-        .level-node.perfected {
-            position: relative;
-            overflow: hidden;
-        }
-        .level-node.perfected::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: inherit;
-            background: linear-gradient(
-                105deg,
-                transparent 40%,
-                rgba(240,168,48,0.08) 45%,
-                rgba(240,168,48,0.14) 50%,
-                rgba(240,168,48,0.08) 55%,
-                transparent 60%
-            );
-            background-size: 250% 100%;
-            animation: perfected-shimmer 4s ease-in-out infinite;
-            pointer-events: none;
-        }
-        @keyframes perfected-shimmer {
-            0%   { background-position: 200% 0; }
-            100% { background-position: -50% 0; }
-        }
-
-        /* =============================================
-           CHAPTER BADGES — mastery & completion
-           ============================================= */
-        .chapter-mastered-badge {
-            font-size: 9px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--gold);
-            background: rgba(240,168,48,0.1);
-            border: 1px solid rgba(240,168,48,0.2);
-            border-radius: 12px;
-            padding: 3px 10px;
-            animation: mastered-glow 2s ease-in-out infinite;
-        }
-        @keyframes mastered-glow {
-            0%, 100% { box-shadow: 0 0 8px rgba(240,168,48,0.1); }
-            50% { box-shadow: 0 0 16px rgba(240,168,48,0.3); }
-        }
-        .chapter-complete-badge {
-            font-size: 9px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--text-muted);
-            background: rgba(255,255,255,0.04);
-            border: 1px solid var(--border-subtle);
-            border-radius: 12px;
-            padding: 3px 10px;
-        }
-
-        /* =============================================
            SCREEN TRANSITIONS — directional
            ============================================= */
         .screen.slide-out-left  { opacity: 0; transform: translateX(-40px) scale(0.97); pointer-events: none; }
@@ -4141,16 +4064,6 @@ function getTotalStars() {
     return LEVELS.reduce((sum, l) => sum + (getLevelProgress(l.id).stars || 0), 0);
 }
 
-function isChapterMastered(chapterId) {
-    const levels = LEVELS.filter(l => l.chapter === chapterId);
-    return levels.length > 0 && levels.every(l => getLevelProgress(l.id).stars === 3);
-}
-
-function isChapterComplete(chapterId) {
-    const levels = LEVELS.filter(l => l.chapter === chapterId);
-    return levels.length > 0 && levels.every(l => getLevelProgress(l.id).completed);
-}
-
 function isChapterUnlocked(chapterId) {
     if (chapterId === 1) return true;
     const prev = chapterId - 1;
@@ -4227,8 +4140,7 @@ function renderMap() {
     tabsEl.innerHTML = CHAPTERS.map(ch => {
         const unlocked = isChapterUnlocked(ch.id);
         const isActive = ch.id === activeChapterTab;
-        const mastered = unlocked && isChapterMastered(ch.id);
-        const cls = 'map-tab' + (isActive ? ' active' : '') + (unlocked ? '' : ' locked') + (mastered ? ' mastered' : '');
+        const cls = 'map-tab' + (isActive ? ' active' : '') + (unlocked ? '' : ' locked');
         return `<button class="${cls}" onclick="switchChapterTab(${ch.id})" data-chapter="${ch.id}">
             <span class="tab-icon">${renderChapterIcon(ch.icon, 14)}</span>
             ${ch.name}
@@ -4278,14 +4190,6 @@ function renderChapterContent(chapterId) {
     const maxStars = levels.length * 3;
     const colors = COLOR_MAP[ch.color] || COLOR_MAP.gold;
     const pct = maxStars > 0 ? Math.round((stars / maxStars) * 100) : 0;
-    const mastered = isChapterMastered(chapterId);
-    const complete = !mastered && isChapterComplete(chapterId);
-    const badgeHtml = mastered
-        ? '<span class="chapter-mastered-badge">★ Mastered</span>'
-        : complete
-            ? '<span class="chapter-complete-badge">✓ Complete</span>'
-            : '';
-
     content.innerHTML = `
         <div class="chapter-info">
             <div class="chapter-info-header">
@@ -4293,7 +4197,7 @@ function renderChapterContent(chapterId) {
                     ${renderChapterIcon(ch.icon, 24)}
                 </div>
                 <div style="flex:1;">
-                    <div class="chapter-info-name" style="color:${colors.css};">${ch.name} ${badgeHtml}</div>
+                    <div class="chapter-info-name" style="color:${colors.css};">${ch.name}</div>
                     <div class="chapter-info-stars">★ ${stars} / ${maxStars}</div>
                 </div>
             </div>

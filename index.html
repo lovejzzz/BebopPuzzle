@@ -635,6 +635,12 @@
             50% { border-color: rgba(167,139,250,0.5); box-shadow: 0 0 20px rgba(167,139,250,0.08); }
         }
 
+        .col-empty:active .grid-cell {
+            border-color: rgba(167,139,250,0.6);
+            background: rgba(167,139,250,0.08);
+            transition: all 0.1s;
+        }
+
         .col-locked .grid-cell {
             opacity: 0.5;
         }
@@ -4588,12 +4594,24 @@ function renderGrid() {
 function applyHighlights() {
     document.querySelectorAll('.col-empty,.col-locked').forEach(el => {
         el.classList.remove('col-empty','col-locked');
+        el.removeAttribute('data-preview-col');
+        el.style.cursor = '';
     });
     const emptyCols = new Set(currentLevelData.removeCols.filter(c => !gridState[c]));
     for (let c = 0; c <= numCols; c++) {
         const colEl = document.querySelector(`.grid-column[data-col="${c}"]`);
         if (!colEl) continue;
-        if (emptyCols.has(c)) colEl.classList.add('col-empty');
+        if (emptyCols.has(c)) {
+            colEl.classList.add('col-empty');
+            // Tap empty column to hear what belongs there
+            colEl.style.cursor = 'pointer';
+            colEl.dataset.previewCol = c;
+            colEl.onclick = function(e) {
+                // Don't fire during drag
+                if (draggedPiece) return;
+                playColumnPreview(parseInt(this.dataset.previewCol));
+            };
+        }
         else if (gridState[c] && !isPuzzleCol(c)) colEl.classList.add('col-locked');
     }
 }
@@ -5470,7 +5488,7 @@ function finishDrag(clientX, clientY) {
                 { const _snapEl = document.querySelector(`.grid-column[data-col="${currentSnapCol}"] .placed-piece`);
                   if (_snapEl) { _snapEl.classList.add('snap-in'); _snapEl.addEventListener('animationend', () => _snapEl.classList.remove('snap-in'), {once:true}); } }
                 applyHighlights();
-                flashConnectedNeighbors(currentSnapCol);
+                setTimeout(() => flashConnectedNeighbors(currentSnapCol), 250);
                 checkAnswer(currentSnapCol);
             }
         } else {
@@ -5552,7 +5570,8 @@ function finishDrag(clientX, clientY) {
             { const _snapEl = document.querySelector(`.grid-column[data-col="${currentSnapCol}"] .placed-piece`);
               if (_snapEl) { _snapEl.classList.add('snap-in'); _snapEl.addEventListener('animationend', () => _snapEl.classList.remove('snap-in'), {once:true}); } }
             applyHighlights();
-            flashConnectedNeighbors(currentSnapCol);
+            // Delay connection flash so it doesn't clash with snap-in animation
+            setTimeout(() => flashConnectedNeighbors(currentSnapCol), 250);
             checkAnswer(currentSnapCol);
         } else if (draggedFromGrid) {
             // Can't place here, put piece back
@@ -5663,17 +5682,18 @@ function checkAnswer(col) {
 
     if (nameMatch && labelMatch && posMatch) {
         clearHintVisuals();
-        sfx('correct');
-        const el = document.querySelector(`.grid-column[data-col="${col}"] .placed-piece`);
-        if (el) el.classList.add('piece-correct');
-
         const allSolved = currentLevelData.removeCols.every(c => isSolved(c));
+
         if (allSolved) {
-            // Stop the timer immediately so score reflects the actual solve moment,
-            // not the end of the celebration animation delay
+            // Final piece — skip intermediate effects, go straight to celebration
             if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-            setTimeout(() => completeLevel(), 500);
+            sfx('correct');
+            setTimeout(() => completeLevel(), 600);
         } else {
+            // Non-final correct piece — show feedback
+            sfx('correct');
+            const el = document.querySelector(`.grid-column[data-col="${col}"] .placed-piece`);
+            if (el) el.classList.add('piece-correct');
             const remaining = currentLevelData.removeCols.filter(c => !isSolved(c)).length;
             showToast(`Correct! ${remaining} more to go`, 'success');
             currentHintCol = null;
@@ -5720,6 +5740,11 @@ function checkAnswer(col) {
 function playCelebrationMelody(callback) {
     const notes = fullMelodyNotes;
     if (!notes || !notes.targetNote) { callback(); return; }
+
+    // Clear any lingering placement animations before celebrating
+    document.querySelectorAll('.snap-in, .connected-flash, .piece-correct').forEach(el => {
+        el.classList.remove('snap-in', 'connected-flash', 'piece-correct');
+    });
 
     getAudioCtx(); // ensure context is alive
     getMasterGain();
@@ -5998,7 +6023,7 @@ function showOptionsHint(answer) {
                 const sel = answer.selectedIntervals || selectRandomIntervals(piece);
                 gridState[answer.col] = { piece, position: answer.position, selectedIntervals: sel };
                 renderGrid(); applyHighlights();
-                flashConnectedNeighbors(answer.col);
+                setTimeout(() => flashConnectedNeighbors(answer.col), 250);
                 checkAnswer(answer.col);
             } else {
                 opt.style.animation = 'none'; opt.offsetHeight;
@@ -6298,39 +6323,41 @@ function onTutorialMelodyPlayed() {
     // Called after melody finishes — if this is a tutorial level, show step 2
     if (!currentLevelData || !currentLevelData.tutorial || tutorialListenDone) return;
     tutorialListenDone = true;
-
-    // ch1_01 special: replay just the arpeggio column's notes with tray piece pulse
-    if (currentLevel === 'ch1_01') {
-        highlightTrayPieceNotes(0);
-        // Delay step 2 so the echo finishes first
-        setTimeout(() => showTutorialStep2(), 1500);
-    } else {
-        showTutorialStep2();
-    }
+    showTutorialStep2();
 }
 
-function highlightTrayPieceNotes(solutionCol) {
-    const notes = fullMelodyNotes?.pieceNotes[solutionCol];
+// Play the solution notes for a specific column when user taps an empty column
+function playColumnPreview(col) {
+    if (!fullMelodyNotes || isPlaying) return;
+    const notes = fullMelodyNotes.pieceNotes[col];
     if (!notes || notes.length === 0) return;
-    const trayPiece = document.querySelector('#piece-tray .tray-piece');
-    if (!trayPiece) return;
+
     getAudioCtx();
     getMasterGain();
     const eighth = getEighth();
     const sw = soundParams.swing;
     const swL = eighth * 2 * sw;
     const swS = eighth * 2 * (1 - sw);
-    let t = audioCtx.currentTime + 0.3;
+
+    // Highlight the column briefly
+    const colEl = document.querySelector(`.grid-column[data-col="${col}"]`);
+    if (colEl) {
+        colEl.querySelectorAll('.grid-cell').forEach(c => c.classList.add('playhead-active'));
+        spawnNoteParticles(col);
+    }
+
+    let t = audioCtx.currentTime + 0.05;
     notes.forEach((midi, i) => {
         const dur = (i % 2 === 0) ? swL : swS;
         playNote(midiToFreq(midi), t, dur * 0.9);
-        const delayMs = (t - audioCtx.currentTime) * 1000;
-        setTimeout(() => {
-            trayPiece.classList.add('note-pulse');
-            setTimeout(() => trayPiece.classList.remove('note-pulse'), 150);
-        }, Math.max(0, delayMs));
         t += dur;
     });
+
+    // Remove highlight after notes finish
+    const totalMs = (t - audioCtx.currentTime) * 1000 + 100;
+    setTimeout(() => {
+        if (colEl) colEl.querySelectorAll('.grid-cell').forEach(c => c.classList.remove('playhead-active'));
+    }, totalMs);
 }
 
 function showTutorialStep2() {

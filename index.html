@@ -335,6 +335,13 @@
         }
         .map-tab.locked { opacity: 0.35; }
         .map-tab.locked:hover { opacity: 0.5; }
+        .map-tab.mastered {
+            border-bottom-color: var(--gold-dim);
+            box-shadow: 0 2px 8px rgba(240,168,48,0.15);
+        }
+        .map-tab.mastered.active {
+            box-shadow: 0 2px 12px rgba(240,168,48,0.25);
+        }
         .map-tab .tab-icon { font-size: 14px; }
         .map-tab .tab-lock { font-size: 9px; margin-left: 2px; }
 
@@ -676,6 +683,20 @@
             transition: all 0.08s ease;
         }
 
+        /* Note particles */
+        .note-particle {
+            position: fixed;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 30;
+            opacity: 0;
+            animation: note-float 1.2s ease-out forwards;
+        }
+        @keyframes note-float {
+            0% { opacity: 0.8; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-40px) scale(0.6); }
+        }
+
         /* ---- Bottom bar: Jazz bar snack tray ---- */
         .puzzle-bottombar {
             padding: 0;
@@ -902,6 +923,32 @@
         .placed-piece[data-piece-type="Neighbor"]  { box-shadow: 0 0 8px rgba(167,139,250,0.15); }
         .placed-piece[data-piece-type="Approach"]  { box-shadow: 0 0 8px rgba(91,141,239,0.15); }
         .placed-piece[data-piece-type="Enclosure"] { box-shadow: 0 0 8px rgba(52,211,153,0.15); }
+
+        /* Placement spring animation */
+        @keyframes piece-snap {
+            0%   { transform: scale(1.1); }
+            50%  { transform: scale(0.95); }
+            100% { transform: scale(1.0); }
+        }
+        @keyframes snap-shadow-pulse {
+            0%   { box-shadow: 0 0 0 0 rgba(167,139,250,0.45); }
+            70%  { box-shadow: 0 0 12px 6px rgba(167,139,250,0.0); }
+            100% { box-shadow: 0 0 0 0 rgba(167,139,250,0.0); }
+        }
+        .placed-piece.snap-in {
+            animation: piece-snap 0.4s cubic-bezier(0.34,1.56,0.64,1),
+                       snap-shadow-pulse 0.45s ease-out;
+        }
+
+        /* Connection flash — green/gold glow when placed piece connects to neighbor */
+        @keyframes connection-glow {
+            0%   { box-shadow: 0 0 6px 2px rgba(76,217,100,0.7), 0 0 18px 6px rgba(255,215,0,0.35); }
+            40%  { box-shadow: 0 0 12px 4px rgba(76,217,100,0.5), 0 0 24px 8px rgba(255,215,0,0.2); }
+            100% { box-shadow: 0 0 0 0 rgba(76,217,100,0.0), 0 0 0 0 rgba(255,215,0,0.0); }
+        }
+        .placed-piece.connected-flash {
+            animation: connection-glow 0.6s ease-out forwards;
+        }
 
         /* Tray piece note pulse (for ch1_01 arpeggio echo) */
         .tray-piece.note-pulse {
@@ -2259,6 +2306,47 @@
         }
         .piece-correct { animation: bounce-correct 0.45s ease-out; }
 
+        /* ---- Celebration melody auto-play on solve ---- */
+        @keyframes celebrate-gold-flash {
+            0%   { box-shadow: 0 0 0 0 rgba(255,215,0,0); filter: brightness(1); }
+            30%  { box-shadow: 0 0 18px 8px rgba(255,215,0,0.6); filter: brightness(1.3); }
+            100% { box-shadow: 0 0 4px 2px rgba(255,215,0,0); filter: brightness(1); }
+        }
+        .placed-piece.celebrate-gold {
+            animation: celebrate-gold-flash 0.5s ease-out;
+            z-index: 10;
+        }
+        @keyframes celebrate-pulse-arpeggio {
+            0%   { box-shadow: 0 0 0 0 rgba(240,168,48,0); }
+            35%  { box-shadow: 0 0 20px 10px rgba(240,168,48,0.55); }
+            100% { box-shadow: 0 0 6px 2px rgba(240,168,48,0); }
+        }
+        @keyframes celebrate-pulse-neighbor {
+            0%   { box-shadow: 0 0 0 0 rgba(167,139,250,0); }
+            35%  { box-shadow: 0 0 20px 10px rgba(167,139,250,0.55); }
+            100% { box-shadow: 0 0 6px 2px rgba(167,139,250,0); }
+        }
+        @keyframes celebrate-pulse-approach {
+            0%   { box-shadow: 0 0 0 0 rgba(91,141,239,0); }
+            35%  { box-shadow: 0 0 20px 10px rgba(91,141,239,0.55); }
+            100% { box-shadow: 0 0 6px 2px rgba(91,141,239,0); }
+        }
+        @keyframes celebrate-pulse-enclosure {
+            0%   { box-shadow: 0 0 0 0 rgba(52,211,153,0); }
+            35%  { box-shadow: 0 0 20px 10px rgba(52,211,153,0.55); }
+            100% { box-shadow: 0 0 6px 2px rgba(52,211,153,0); }
+        }
+        @keyframes celebrate-pulse-target {
+            0%   { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+            35%  { box-shadow: 0 0 20px 10px rgba(255,255,255,0.45); }
+            100% { box-shadow: 0 0 6px 2px rgba(255,255,255,0); }
+        }
+        .placed-piece.celebrate-pulse[data-piece-type="Arpeggio"]  { animation: celebrate-pulse-arpeggio 0.5s ease-out; z-index: 10; }
+        .placed-piece.celebrate-pulse[data-piece-type="Neighbor"]  { animation: celebrate-pulse-neighbor 0.5s ease-out; z-index: 10; }
+        .placed-piece.celebrate-pulse[data-piece-type="Approach"]  { animation: celebrate-pulse-approach 0.5s ease-out; z-index: 10; }
+        .placed-piece.celebrate-pulse[data-piece-type="Enclosure"] { animation: celebrate-pulse-enclosure 0.5s ease-out; z-index: 10; }
+        .placed-piece.celebrate-pulse[data-piece-type="Target"]    { animation: celebrate-pulse-target 0.5s ease-out; z-index: 10; }
+
         /* ---- Sound Panel (vintage amp style) ---- */
         .sound-panel-overlay {
             position: fixed; inset: 0;
@@ -2555,6 +2643,62 @@
             border-color: var(--gold);
             box-shadow: 0 0 24px rgba(240,168,48,0.25);
         }
+        .level-node.perfected {
+            position: relative;
+            overflow: hidden;
+        }
+        .level-node.perfected::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(
+                105deg,
+                transparent 40%,
+                rgba(240,168,48,0.08) 45%,
+                rgba(240,168,48,0.14) 50%,
+                rgba(240,168,48,0.08) 55%,
+                transparent 60%
+            );
+            background-size: 250% 100%;
+            animation: perfected-shimmer 4s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes perfected-shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -50% 0; }
+        }
+
+        /* =============================================
+           CHAPTER BADGES — mastery & completion
+           ============================================= */
+        .chapter-mastered-badge {
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--gold);
+            background: rgba(240,168,48,0.1);
+            border: 1px solid rgba(240,168,48,0.2);
+            border-radius: 12px;
+            padding: 3px 10px;
+            animation: mastered-glow 2s ease-in-out infinite;
+        }
+        @keyframes mastered-glow {
+            0%, 100% { box-shadow: 0 0 8px rgba(240,168,48,0.1); }
+            50% { box-shadow: 0 0 16px rgba(240,168,48,0.3); }
+        }
+        .chapter-complete-badge {
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 3px 10px;
+        }
 
         /* =============================================
            SCREEN TRANSITIONS — directional
@@ -2699,6 +2843,74 @@
             cursor: pointer; padding: 4px;
         }
         .onboard-skip:hover { color: var(--text-secondary); }
+
+        /* =============================================
+           SUCCESS TIER CELEBRATIONS
+           ============================================= */
+
+        /* --- 3 Stars: Perfect tier --- */
+        .success-modal.perfect {
+            box-shadow: 0 0 60px rgba(240,168,48,0.25), 0 0 120px rgba(240,168,48,0.1), 0 24px 80px rgba(0,0,0,0.5);
+            border-color: var(--gold-dim);
+        }
+
+        .perfect-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--gold);
+            opacity: 0;
+            margin-bottom: 6px;
+            animation: perfect-flash 1.8s ease-out 0.7s both;
+        }
+        @keyframes perfect-flash {
+            0%   { opacity: 0; transform: scale(0.8); filter: brightness(2); }
+            20%  { opacity: 1; transform: scale(1.05); filter: brightness(1.6); }
+            40%  { opacity: 1; transform: scale(1); filter: brightness(1); }
+            100% { opacity: 0.85; transform: scale(1); filter: brightness(1); }
+        }
+
+        /* Confetti particle */
+        .confetti-particle {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            border-radius: 1px;
+            pointer-events: none;
+            z-index: 60;
+            opacity: 0;
+            animation: confetti-burst var(--confetti-dur, 1.6s) ease-out var(--confetti-delay, 0s) both;
+        }
+        @keyframes confetti-burst {
+            0%   { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(1); }
+            15%  { opacity: 1; }
+            100% { opacity: 0; transform: translate(var(--confetti-x, 0px), var(--confetti-y, 120px)) rotate(var(--confetti-rot, 360deg)) scale(0.3); }
+        }
+
+        /* --- 2 Stars: Great tier --- */
+        .success-modal.great {
+            box-shadow: 0 0 40px rgba(240,168,48,0.12), 0 24px 80px rgba(0,0,0,0.5);
+        }
+
+        /* Sparkle particle */
+        .sparkle-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--gold);
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0;
+            animation: sparkle-drift var(--sparkle-dur, 1s) ease-out var(--sparkle-delay, 0s) both;
+        }
+        @keyframes sparkle-drift {
+            0%   { opacity: 0; transform: translate(0, 0) scale(0); }
+            20%  { opacity: 1; transform: translate(var(--sparkle-x1, 4px), var(--sparkle-y1, -4px)) scale(1); }
+            100% { opacity: 0; transform: translate(var(--sparkle-x2, 8px), var(--sparkle-y2, -12px)) scale(0.2); }
+        }
 
     </style>
 </head>
@@ -2857,9 +3069,10 @@
          SUCCESS OVERLAY
          ============================================= -->
     <div class="success-overlay hidden" id="success-overlay">
-        <div class="success-modal">
+        <div class="success-modal" id="success-modal">
             <div class="success-title">Complete</div>
             <div class="success-subtitle" id="success-level-name"></div>
+            <div id="success-perfect-text"></div>
             <div class="success-stars" id="success-stars"></div>
             <div class="success-stats" id="success-stats"></div>
             <div class="success-actions">
@@ -3922,6 +4135,16 @@ function getTotalStars() {
     return LEVELS.reduce((sum, l) => sum + (getLevelProgress(l.id).stars || 0), 0);
 }
 
+function isChapterMastered(chapterId) {
+    const levels = LEVELS.filter(l => l.chapter === chapterId);
+    return levels.length > 0 && levels.every(l => getLevelProgress(l.id).stars === 3);
+}
+
+function isChapterComplete(chapterId) {
+    const levels = LEVELS.filter(l => l.chapter === chapterId);
+    return levels.length > 0 && levels.every(l => getLevelProgress(l.id).completed);
+}
+
 function isChapterUnlocked(chapterId) {
     if (chapterId === 1) return true;
     const prev = chapterId - 1;
@@ -3998,7 +4221,8 @@ function renderMap() {
     tabsEl.innerHTML = CHAPTERS.map(ch => {
         const unlocked = isChapterUnlocked(ch.id);
         const isActive = ch.id === activeChapterTab;
-        const cls = 'map-tab' + (isActive ? ' active' : '') + (unlocked ? '' : ' locked');
+        const mastered = unlocked && isChapterMastered(ch.id);
+        const cls = 'map-tab' + (isActive ? ' active' : '') + (unlocked ? '' : ' locked') + (mastered ? ' mastered' : '');
         return `<button class="${cls}" onclick="switchChapterTab(${ch.id})" data-chapter="${ch.id}">
             <span class="tab-icon">${renderChapterIcon(ch.icon, 14)}</span>
             ${ch.name}
@@ -4048,6 +4272,13 @@ function renderChapterContent(chapterId) {
     const maxStars = levels.length * 3;
     const colors = COLOR_MAP[ch.color] || COLOR_MAP.gold;
     const pct = maxStars > 0 ? Math.round((stars / maxStars) * 100) : 0;
+    const mastered = isChapterMastered(chapterId);
+    const complete = !mastered && isChapterComplete(chapterId);
+    const badgeHtml = mastered
+        ? '<span class="chapter-mastered-badge">★ Mastered</span>'
+        : complete
+            ? '<span class="chapter-complete-badge">✓ Complete</span>'
+            : '';
 
     content.innerHTML = `
         <div class="chapter-info">
@@ -4056,7 +4287,7 @@ function renderChapterContent(chapterId) {
                     ${renderChapterIcon(ch.icon, 24)}
                 </div>
                 <div style="flex:1;">
-                    <div class="chapter-info-name" style="color:${colors.css};">${ch.name}</div>
+                    <div class="chapter-info-name" style="color:${colors.css};">${ch.name} ${badgeHtml}</div>
                     <div class="chapter-info-stars">★ ${stars} / ${maxStars}</div>
                 </div>
             </div>
@@ -5236,7 +5467,10 @@ function finishDrag(clientX, clientY) {
                 clearCraftTable();
                 renderTray();
                 renderGrid();
+                { const _snapEl = document.querySelector(`.grid-column[data-col="${currentSnapCol}"] .placed-piece`);
+                  if (_snapEl) { _snapEl.classList.add('snap-in'); _snapEl.addEventListener('animationend', () => _snapEl.classList.remove('snap-in'), {once:true}); } }
                 applyHighlights();
+                flashConnectedNeighbors(currentSnapCol);
                 checkAnswer(currentSnapCol);
             }
         } else {
@@ -5315,7 +5549,10 @@ function finishDrag(clientX, clientY) {
 
             renderTray();
             renderGrid();
+            { const _snapEl = document.querySelector(`.grid-column[data-col="${currentSnapCol}"] .placed-piece`);
+              if (_snapEl) { _snapEl.classList.add('snap-in'); _snapEl.addEventListener('animationend', () => _snapEl.classList.remove('snap-in'), {once:true}); } }
             applyHighlights();
+            flashConnectedNeighbors(currentSnapCol);
             checkAnswer(currentSnapCol);
         } else if (draggedFromGrid) {
             // Can't place here, put piece back
@@ -5351,6 +5588,57 @@ function onTouchEnd(e) {
     document.removeEventListener('touchend', onTouchEnd);
     const touch = e.changedTouches?.[0];
     finishDrag(touch?.clientX, touch?.clientY);
+}
+
+// ==================================================================
+// CONNECTION FLASH — visual feedback when pieces connect
+// ==================================================================
+function flashConnectedNeighbors(col) {
+    const state = gridState[col];
+    if (!state) return;
+    const key = state.piece.name + '|' + state.piece.label;
+    const rule = PIECE_RULES[key];
+    if (!rule) return;
+
+    const placedPos = state.position;
+    const neighborsToFlash = [];
+
+    // Check left neighbor (col - 1): its exit should meet our entry
+    const left = gridState[col - 1];
+    if (left) {
+        const leftKey = left.piece.name + '|' + left.piece.label;
+        const leftRule = PIECE_RULES[leftKey];
+        if (leftRule) {
+            if (Math.abs((left.position + leftRule.exit) - (placedPos + rule.entry)) < 0.01) {
+                neighborsToFlash.push(col - 1);
+            }
+        }
+    }
+
+    // Check right neighbor (col + 1): our exit should meet its entry
+    const right = gridState[col + 1];
+    if (right) {
+        const rightKey = right.piece.name + '|' + right.piece.label;
+        const rightRule = PIECE_RULES[rightKey];
+        if (rightRule) {
+            if (Math.abs((placedPos + rule.exit) - (right.position + rightRule.entry)) < 0.01) {
+                neighborsToFlash.push(col + 1);
+            }
+        }
+    }
+
+    if (neighborsToFlash.length > 0) {
+        const allCols = [col, ...neighborsToFlash];
+        allCols.forEach(c => {
+            const el = document.querySelector(`.grid-column[data-col="${c}"] .placed-piece`);
+            if (el) {
+                el.classList.remove('connected-flash');
+                void el.offsetWidth; // force reflow to restart animation
+                el.classList.add('connected-flash');
+                el.addEventListener('animationend', () => el.classList.remove('connected-flash'), { once: true });
+            }
+        });
+    }
 }
 
 // ==================================================================
@@ -5429,6 +5717,117 @@ function checkAnswer(col) {
     }
 }
 
+function playCelebrationMelody(callback) {
+    const notes = fullMelodyNotes;
+    if (!notes || !notes.targetNote) { callback(); return; }
+
+    getAudioCtx(); // ensure context is alive
+    getMasterGain();
+
+    const eighth = getEighth();
+    const swingRatio = soundParams.swing;
+    const swingLong = eighth * 2 * swingRatio;
+    const swingShort = eighth * 2 * (1 - swingRatio);
+
+    const originTime = audioCtx.currentTime + 0.1;
+    let currentTime = originTime;
+    let globalNoteIdx = 0;
+    const celebrationTimeouts = [];
+
+    // Phase 1: Gold flash across all placed pieces left-to-right
+    // We schedule gold flashes for every column, slightly staggered
+    const goldFlashGap = 0.12; // seconds between each column's gold flash
+    for (let col = 0; col <= numCols; col++) {
+        const el = document.querySelector(`.grid-column[data-col="${col}"] .placed-piece`);
+        if (!el) continue;
+        const flashDelay = col * goldFlashGap * 1000;
+        const tid = setTimeout(() => {
+            el.classList.add('celebrate-gold');
+            setTimeout(() => el.classList.remove('celebrate-gold'), 500);
+        }, flashDelay);
+        celebrationTimeouts.push(tid);
+    }
+
+    // Phase 2: After gold flash sweep, play the melody with per-column pulse
+    const goldSweepDuration = (numCols + 1) * goldFlashGap;
+    const melodyStartTime = originTime + goldSweepDuration;
+    currentTime = melodyStartTime;
+
+    // Schedule the gold sweep to finish before melody starts
+    // (audio scheduling uses absolute audioCtx times, DOM uses setTimeout)
+    for (let col = 0; col < numCols; col++) {
+        const colNotes = notes.pieceNotes[col] || [];
+        if (colNotes.length === 0) continue;
+
+        // Schedule DOM pulse for this column's placed piece
+        const colAudioTime = currentTime;
+        const pulseDelayMs = (colAudioTime - audioCtx.currentTime) * 1000;
+        const pieceEl = document.querySelector(`.grid-column[data-col="${col}"] .placed-piece`);
+        if (pieceEl) {
+            const tid = setTimeout(() => {
+                // Re-trigger animation by removing and re-adding the class
+                pieceEl.classList.remove('celebrate-pulse');
+                void pieceEl.offsetWidth; // force reflow
+                pieceEl.classList.add('celebrate-pulse');
+                setTimeout(() => pieceEl.classList.remove('celebrate-pulse'), 500);
+            }, Math.max(0, pulseDelayMs));
+            celebrationTimeouts.push(tid);
+        }
+
+        // Schedule playhead highlight
+        const phDelayMs = (colAudioTime - audioCtx.currentTime) * 1000;
+        const phTid = setTimeout(() => {
+            document.querySelectorAll('.playhead-active').forEach(el => el.classList.remove('playhead-active'));
+            const colEl = document.querySelector(`.grid-column[data-col="${col}"]`);
+            if (colEl) colEl.querySelectorAll('.grid-cell').forEach(c => c.classList.add('playhead-active'));
+        }, Math.max(0, phDelayMs));
+        celebrationTimeouts.push(phTid);
+
+        colNotes.forEach(midi => {
+            const isOnBeat = (globalNoteIdx % 2 === 0);
+            const noteDur = isOnBeat ? swingLong : swingShort;
+            playNote(midiToFreq(midi), currentTime, noteDur * 0.9);
+            currentTime += noteDur;
+            globalNoteIdx++;
+        });
+    }
+
+    // Target note
+    const targetAudioTime = currentTime;
+    const targetDelayMs = (targetAudioTime - audioCtx.currentTime) * 1000;
+    const targetPieceEl = document.querySelector(`.grid-column[data-col="${numCols}"] .placed-piece`);
+    if (targetPieceEl) {
+        const tid = setTimeout(() => {
+            targetPieceEl.classList.remove('celebrate-pulse');
+            void targetPieceEl.offsetWidth;
+            targetPieceEl.classList.add('celebrate-pulse');
+            setTimeout(() => targetPieceEl.classList.remove('celebrate-pulse'), 500);
+        }, Math.max(0, targetDelayMs));
+        celebrationTimeouts.push(tid);
+    }
+    // Target playhead
+    const tphTid = setTimeout(() => {
+        document.querySelectorAll('.playhead-active').forEach(el => el.classList.remove('playhead-active'));
+        const colEl = document.querySelector(`.grid-column[data-col="${numCols}"]`);
+        if (colEl) colEl.querySelectorAll('.grid-cell').forEach(c => c.classList.add('playhead-active'));
+    }, Math.max(0, targetDelayMs));
+    celebrationTimeouts.push(tphTid);
+
+    playNote(midiToFreq(notes.targetNote), currentTime, eighth * 2);
+    currentTime += eighth * 2;
+
+    // After melody finishes + 0.5s buffer, clean up and call callback
+    const totalMs = (currentTime - audioCtx.currentTime) * 1000 + 500;
+    const finishTid = setTimeout(() => {
+        document.querySelectorAll('.playhead-active').forEach(el => el.classList.remove('playhead-active'));
+        document.querySelectorAll('.celebrate-gold, .celebrate-pulse').forEach(el => {
+            el.classList.remove('celebrate-gold', 'celebrate-pulse');
+        });
+        callback();
+    }, totalMs);
+    celebrationTimeouts.push(finishTid);
+}
+
 function completeLevel() {
     // Timer was already stopped in checkAnswer at the moment of solve; guard for safety
     if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
@@ -5443,7 +5842,11 @@ function completeLevel() {
     };
     saveProgress();
     sfx('complete');
-    showSuccessModal(stars, elapsed);
+
+    // Play celebration melody, then show the success modal
+    playCelebrationMelody(() => {
+        showSuccessModal(stars, elapsed);
+    });
 }
 
 function calculateStars(elapsed) {
@@ -5595,6 +5998,7 @@ function showOptionsHint(answer) {
                 const sel = answer.selectedIntervals || selectRandomIntervals(piece);
                 gridState[answer.col] = { piece, position: answer.position, selectedIntervals: sel };
                 renderGrid(); applyHighlights();
+                flashConnectedNeighbors(answer.col);
                 checkAnswer(answer.col);
             } else {
                 opt.style.animation = 'none'; opt.offsetHeight;
@@ -5634,6 +6038,43 @@ function updateListenCounter() {
 // ==================================================================
 // PLAYBACK
 // ==================================================================
+
+// Color map for note particles by piece type
+const noteParticleColors = {
+    'Arpeggio': '#f0a830',
+    'Neighbor': '#a78bfa',
+    'Approach': '#5b8def',
+    'Enclosure': '#34d399',
+    'Target':   '#5b8def'
+};
+
+function spawnNoteParticles(col) {
+    const colEl = document.querySelector(`.grid-column[data-col="${col}"]`);
+    if (!colEl) return;
+    const rect = colEl.getBoundingClientRect();
+
+    // Determine color from piece type
+    let color = '#f0a830'; // default gold
+    if (gridState[col] && gridState[col].piece && gridState[col].piece.name) {
+        color = noteParticleColors[gridState[col].piece.name] || color;
+    }
+
+    const symbols = ['\u266A', '\u266B']; // ♪ ♫
+    const count = 2 + Math.floor(Math.random() * 2); // 2 or 3 particles
+
+    for (let i = 0; i < count; i++) {
+        const particle = document.createElement('span');
+        particle.className = 'note-particle';
+        particle.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        particle.style.color = color;
+        particle.style.left = (rect.left + Math.random() * rect.width) + 'px';
+        particle.style.top = (rect.top + Math.random() * rect.height * 0.5) + 'px';
+        document.body.appendChild(particle);
+        // Auto-remove after animation completes
+        particle.addEventListener('animationend', () => particle.remove());
+    }
+}
+
 function playMelody() {
     removeTutorialTooltip(); // dismiss step-1 tooltip when user presses play
     getAudioCtx(); // ensure context is alive
@@ -5674,6 +6115,7 @@ function playMelody() {
             document.querySelectorAll('.playhead-active').forEach(el => el.classList.remove('playhead-active'));
             const colEl = document.querySelector(`.grid-column[data-col="${col}"]`);
             if (colEl) colEl.querySelectorAll('.grid-cell').forEach(c => c.classList.add('playhead-active'));
+            spawnNoteParticles(col);
         }, Math.max(0, delayMs));
         playbackTimeouts.push(id);
     }
@@ -5906,29 +6348,83 @@ function showTutorialStep2() {
 
 function showSuccessModal(stars, elapsed) {
     const overlay = document.getElementById('success-overlay');
+    const modal = document.getElementById('success-modal');
+    const perfectTextEl = document.getElementById('success-perfect-text');
     overlay.classList.remove('hidden');
+
+    // Clean up tier classes and previous particles
+    modal.classList.remove('perfect', 'great');
+    perfectTextEl.innerHTML = '';
+    document.querySelectorAll('.confetti-particle').forEach(function(el) { el.remove(); });
+    modal.querySelectorAll('.sparkle-particle').forEach(function(el) { el.remove(); });
+
+    // Apply tier class
+    if (stars === 3) modal.classList.add('perfect');
+    else if (stars === 2) modal.classList.add('great');
 
     document.getElementById('success-level-name').textContent = currentLevelData.name;
 
-    const starsContainer = document.getElementById('success-stars');
+    var starsContainer = document.getElementById('success-stars');
     starsContainer.innerHTML = '';
-    for (let i = 0; i < 3; i++) {
-        const span = document.createElement('span');
+    for (var i = 0; i < 3; i++) {
+        var span = document.createElement('span');
         span.className = 'success-star' + (i < stars ? ' earned' : '');
-        span.textContent = '★';
+        span.textContent = '\u2605';
         if (i < stars) {
             span.style.animationDelay = (i * 0.2) + 's';
-            setTimeout(() => sfx('star'), i * 200 + 100);
+            setTimeout(function(idx) { return function() { sfx('star'); }; }(i), i * 200 + 100);
         }
         starsContainer.appendChild(span);
     }
 
-    const m = Math.floor(elapsed / 60), s = elapsed % 60;
-    document.getElementById('success-stats').innerHTML = `
-        Time <span class="success-stat-value">${m}:${s.toString().padStart(2,'0')}</span>
-        &nbsp;·&nbsp; Hints <span class="success-stat-value">${hintsUsed}</span>
-        &nbsp;·&nbsp; Mistakes <span class="success-stat-value">${wrongPlacements}</span>
-    `;
+    // --- 3 Stars: Perfect celebration ---
+    if (stars === 3) {
+        var perfSpan = document.createElement('div');
+        perfSpan.className = 'perfect-text';
+        perfSpan.textContent = 'Perfect!';
+        perfectTextEl.appendChild(perfSpan);
+
+        var confettiColors = ['#f0a830', '#d97706', '#fbbf24', '#fffbeb', '#c4872a', '#f59e0b'];
+        var modalRect = modal.getBoundingClientRect();
+        var cx = modalRect.left + modalRect.width / 2;
+        var cy = modalRect.top + modalRect.height * 0.35;
+        for (var ci = 0; ci < 20; ci++) {
+            var dot = document.createElement('div');
+            dot.className = 'confetti-particle';
+            var xOff = (Math.random() - 0.5) * 260;
+            var yOff = (Math.random() - 0.7) * 220;
+            var rot = (Math.random() - 0.5) * 720;
+            var dur = 1.2 + Math.random() * 0.8;
+            var delay = Math.random() * 0.3 + 0.5;
+            dot.style.cssText = 'left:' + cx + 'px;top:' + cy + 'px;background:' + confettiColors[ci % confettiColors.length] + ';width:' + (4 + Math.random() * 4) + 'px;height:' + (4 + Math.random() * 4) + 'px;border-radius:' + (Math.random() > 0.5 ? '50%' : '1px') + ';--confetti-x:' + xOff + 'px;--confetti-y:' + yOff + 'px;--confetti-rot:' + rot + 'deg;--confetti-dur:' + dur + 's;--confetti-delay:' + delay + 's';
+            document.body.appendChild(dot);
+            setTimeout(function(el) { return function() { el.remove(); }; }(dot), (dur + delay) * 1000 + 100);
+        }
+        setTimeout(function() { sfx('complete'); }, 3 * 200 + 300);
+    }
+
+    // --- 2 Stars: Sparkle celebration ---
+    if (stars === 2) {
+        var starsRect = starsContainer.getBoundingClientRect();
+        var modalR = modal.getBoundingClientRect();
+        var relCx = (starsRect.left - modalR.left) + starsRect.width / 2;
+        var relCy = (starsRect.top - modalR.top) + starsRect.height / 2;
+        for (var si = 0; si < 8; si++) {
+            var spark = document.createElement('div');
+            spark.className = 'sparkle-particle';
+            var angle = (si / 8) * Math.PI * 2;
+            var r1 = 18 + Math.random() * 12;
+            var r2 = 30 + Math.random() * 20;
+            var sdur = 0.7 + Math.random() * 0.5;
+            var sdelay = 0.3 + Math.random() * 0.4;
+            spark.style.cssText = 'left:' + relCx + 'px;top:' + relCy + 'px;width:' + (3 + Math.random() * 2) + 'px;height:' + (3 + Math.random() * 2) + 'px;--sparkle-x1:' + (Math.cos(angle) * r1) + 'px;--sparkle-y1:' + (Math.sin(angle) * r1) + 'px;--sparkle-x2:' + (Math.cos(angle) * r2) + 'px;--sparkle-y2:' + (Math.sin(angle) * r2) + 'px;--sparkle-dur:' + sdur + 's;--sparkle-delay:' + sdelay + 's';
+            modal.appendChild(spark);
+            setTimeout(function(el) { return function() { el.remove(); }; }(spark), (sdur + sdelay) * 1000 + 100);
+        }
+    }
+
+    var m = Math.floor(elapsed / 60), s = elapsed % 60;
+    document.getElementById('success-stats').innerHTML = 'Time <span class="success-stat-value">' + m + ':' + s.toString().padStart(2,'0') + '</span>&nbsp;\u00b7&nbsp;Hints <span class="success-stat-value">' + hintsUsed + '</span>&nbsp;\u00b7&nbsp;Mistakes <span class="success-stat-value">' + wrongPlacements + '</span>';
 }
 
 function retryLevel() {

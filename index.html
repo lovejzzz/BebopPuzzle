@@ -515,6 +515,13 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.6; }
         }
+        .melody-grid.sing-back-pulse {
+            animation: grid-sing-pulse 1s ease-in-out infinite;
+        }
+        @keyframes grid-sing-pulse {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.08); }
+        }
         .topbar-stars {
             display: flex; gap: 4px; justify-content: center; margin-top: 2px;
         }
@@ -546,6 +553,28 @@
         }
         .hint-btn:hover { background: rgba(240,168,48,0.14); }
         .hint-btn.disabled { opacity: 0.3; pointer-events: none; }
+        .hint-btn.hint-pulse {
+            animation: hint-pulse-anim 1.5s ease 2;
+        }
+        @keyframes hint-pulse-anim {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(240,168,48,0); }
+            50% { box-shadow: 0 0 0 8px rgba(240,168,48,0.25); }
+        }
+        .guide-me-btn {
+            position: absolute; bottom: 12px; right: 12px;
+            padding: 10px 20px;
+            border-radius: 12px;
+            background: var(--gold);
+            color: var(--bg);
+            font-weight: 700;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            z-index: 50;
+            transition: all 0.2s;
+        }
+        .guide-me-btn:hover { filter: brightness(1.1); transform: scale(1.04); }
+        .guide-me-btn.hidden { display: none; }
 
         .timer-display {
             font-family: 'JetBrains Mono', monospace;
@@ -829,6 +858,7 @@
         .piece-tray::-webkit-scrollbar { display: none; }
 
         .tray-piece {
+            position: relative;
             flex-shrink: 0;
             display: flex; flex-direction: column;
             align-items: center; gap: 4px;
@@ -906,6 +936,23 @@
             font-family: 'Inter', sans-serif;
             margin-top: -2px;
         }
+
+        .tray-preview-btn {
+            position: absolute;
+            top: 3px; right: 3px;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+            border: none;
+            font-size: 10px;
+            line-height: 20px;
+            text-align: center;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+            padding: 0;
+        }
+        .tray-preview-btn:hover { opacity: 1; }
 
         /* Piece type color accents */
         .tray-piece[data-base-name="Arpeggio"]  { border-bottom: 3px solid rgba(240,168,48,0.6); }
@@ -1349,6 +1396,149 @@
         /* =============================================
            REWARD OVERLAY — New Piece Unlocked
            ============================================= */
+        /* ---- Ear Warm-Up ---- */
+        .warmup-overlay {
+            position: fixed; inset: 0;
+            background: rgba(7,9,15,0.88);
+            backdrop-filter: blur(12px);
+            z-index: 65;
+            display: flex; align-items: center; justify-content: center;
+            animation: fade-in 0.4s ease-out;
+        }
+        .warmup-overlay.hidden { display: none; }
+        .warmup-modal {
+            text-align: center;
+            max-width: 340px;
+            width: 90%;
+            animation: reward-entrance 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+        .warmup-title {
+            font-family: var(--font-display);
+            font-size: 22px; font-weight: 700;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+        .warmup-subtitle {
+            font-size: 14px; color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+        .warmup-play-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 12px;
+            background: rgba(240,168,48,0.1);
+            border: 1.5px solid rgba(240,168,48,0.25);
+            color: var(--gold);
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.2s;
+        }
+        .warmup-play-btn:hover { background: rgba(240,168,48,0.18); }
+        .warmup-choices {
+            display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .warmup-choice {
+            padding: 10px 18px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.06);
+            border: 1.5px solid rgba(255,255,255,0.12);
+            color: var(--text);
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .warmup-choice:hover { background: rgba(255,255,255,0.1); border-color: var(--gold); }
+        .warmup-choice.correct { background: rgba(52,211,153,0.15); border-color: #34d399; color: #34d399; }
+        .warmup-choice.wrong { background: rgba(248,113,113,0.15); border-color: #f87171; color: #f87171; }
+        .warmup-result {
+            font-size: 14px; color: var(--text-muted); margin-bottom: 12px;
+        }
+        .warmup-progress {
+            font-size: 12px; color: var(--text-muted); margin-bottom: 12px;
+        }
+
+        /* ---- Meet the Piece Interstitial ---- */
+        .piece-intro-overlay {
+            position: fixed; inset: 0;
+            background: rgba(7,9,15,0.88);
+            backdrop-filter: blur(12px);
+            z-index: 65;
+            display: flex; align-items: center; justify-content: center;
+            animation: fade-in 0.4s ease-out;
+        }
+        .piece-intro-overlay.hidden { display: none; }
+        .piece-intro-modal {
+            text-align: center;
+            max-width: 360px;
+            width: 90%;
+            animation: reward-entrance 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+        .piece-intro-title {
+            font-family: var(--font-display);
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 24px;
+        }
+        .piece-intro-variants {
+            display: flex; gap: 16px; justify-content: center; margin-bottom: 24px;
+        }
+        .piece-intro-variant {
+            flex: 1; max-width: 140px;
+            padding: 16px 12px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.05);
+            border: 1.5px solid rgba(255,255,255,0.1);
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .piece-intro-variant:hover { background: rgba(255,255,255,0.09); border-color: var(--gold); }
+        .piece-intro-variant.playing { border-color: var(--gold); box-shadow: 0 0 12px rgba(240,168,48,0.3); }
+        .piece-intro-var-icon { font-size: 24px; margin-bottom: 6px; }
+        .piece-intro-var-label { font-size: 13px; font-weight: 600; }
+        .piece-intro-quiz {
+            margin-bottom: 20px;
+        }
+        .piece-intro-quiz-prompt {
+            font-size: 15px; color: var(--text-muted); margin-bottom: 12px;
+        }
+        .piece-intro-quiz-choices {
+            display: flex; gap: 12px; justify-content: center;
+        }
+        .piece-intro-choice {
+            flex: 1; max-width: 140px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: rgba(240,168,48,0.08);
+            border: 1.5px solid rgba(240,168,48,0.2);
+            color: var(--gold);
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .piece-intro-choice:hover { background: rgba(240,168,48,0.15); }
+        .piece-intro-choice.correct { background: rgba(52,211,153,0.15); border-color: #34d399; color: #34d399; }
+        .piece-intro-choice.wrong { background: rgba(248,113,113,0.15); border-color: #f87171; color: #f87171; }
+        .piece-intro-result {
+            font-size: 14px; color: var(--text-muted); margin-bottom: 16px;
+        }
+        .piece-intro-skip {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 13px;
+            cursor: pointer;
+            padding: 8px 16px;
+            transition: color 0.2s;
+        }
+        .piece-intro-skip:hover { color: var(--text); }
+
         .reward-overlay {
             position: fixed; inset: 0;
             background: rgba(7,9,15,0.85);
@@ -1628,9 +1818,24 @@
         }
 
         /* ---- Floating tutorial tooltip ---- */
+        /* ---- Tutorial Spotlight ---- */
+        .tutorial-spotlight {
+            position: fixed; inset: 0;
+            background: rgba(7,9,15,0.6);
+            z-index: 45;
+            pointer-events: none;
+            animation: fade-in 0.4s ease-out;
+        }
+        .spotlight-target {
+            position: relative;
+            z-index: 46;
+            box-shadow: 0 0 0 4px var(--gold), 0 0 20px rgba(240,168,48,0.3);
+            border-radius: 12px;
+        }
+
         .tutorial-tooltip {
             position: fixed;
-            z-index: 50;
+            z-index: 55;
             background: rgba(91,141,239,0.15);
             border: 1px solid rgba(91,141,239,0.35);
             border-radius: 12px;
@@ -3018,7 +3223,7 @@
                 <div class="changelog-section-title">New Piece Unlocks</div>
                 <ul class="changelog-list">
                     <li>Reward screen auto-plays the new piece's sound</li>
-                    <li>Animated note dots trace the melodic contour</li>
+                    <li>Listen closely — each piece has its own melodic shape</li>
                     <li>One-word taglines replace text descriptions</li>
                 </ul>
             </div>
@@ -3191,6 +3396,49 @@
             <div class="reward-piece-tagline" id="reward-piece-tagline"></div>
             <button class="reward-replay-btn" id="reward-replay-btn" onclick="replayRewardPiece()">🔊 Tap to hear again</button>
             <button class="reward-continue-btn" onclick="dismissReward()">Continue</button>
+        </div>
+    </div>
+
+    <!-- =============================================
+         EAR WARM-UP — Returning Player Refresher
+         ============================================= -->
+    <div class="warmup-overlay hidden" id="warmup-overlay">
+        <div class="warmup-modal">
+            <div class="warmup-title">Welcome back!</div>
+            <div class="warmup-subtitle" id="warmup-subtitle">Quick warm-up — which piece is this?</div>
+            <div class="warmup-play-btn" id="warmup-play-btn" onclick="playWarmupSample()">🔊 Listen</div>
+            <div class="warmup-choices" id="warmup-choices"></div>
+            <div class="warmup-result hidden" id="warmup-result"></div>
+            <div class="warmup-progress" id="warmup-progress"></div>
+            <button class="piece-intro-skip" onclick="dismissWarmup()">Skip — I'm ready →</button>
+        </div>
+    </div>
+
+    <!-- =============================================
+         MEET THE PIECE — Ear Training Interstitial
+         ============================================= -->
+    <div class="piece-intro-overlay hidden" id="piece-intro-overlay">
+        <div class="piece-intro-modal">
+            <div class="piece-intro-title" id="piece-intro-title">Meet the Neighbor</div>
+            <div class="piece-intro-variants">
+                <button class="piece-intro-variant" id="piece-intro-var-a" onclick="playPieceIntroVariant('a')">
+                    <div class="piece-intro-var-icon">🔊</div>
+                    <div class="piece-intro-var-label" id="piece-intro-label-a"></div>
+                </button>
+                <button class="piece-intro-variant" id="piece-intro-var-b" onclick="playPieceIntroVariant('b')">
+                    <div class="piece-intro-var-icon">🔊</div>
+                    <div class="piece-intro-var-label" id="piece-intro-label-b"></div>
+                </button>
+            </div>
+            <div class="piece-intro-quiz hidden" id="piece-intro-quiz">
+                <div class="piece-intro-quiz-prompt" id="piece-intro-quiz-prompt">Which one was that?</div>
+                <div class="piece-intro-quiz-choices">
+                    <button class="piece-intro-choice" id="piece-intro-choice-a" onclick="checkPieceIntroAnswer('a')"></button>
+                    <button class="piece-intro-choice" id="piece-intro-choice-b" onclick="checkPieceIntroAnswer('b')"></button>
+                </div>
+            </div>
+            <div class="piece-intro-result hidden" id="piece-intro-result"></div>
+            <button class="piece-intro-skip" onclick="dismissPieceIntro()">Skip →</button>
         </div>
     </div>
 
@@ -4195,6 +4443,13 @@ let gameProgress = {};
 let listensRemaining = 0;
 let maxTraySize = 0;
 
+// Stuck detection state
+let stuckColWrong = {};      // per-column wrong placement count
+let stuckIdleTimer = null;   // fires after 45s of no action
+let stuckLastAction = 0;     // timestamp of last meaningful action
+let guideMeOffered = false;  // whether "Guide Me" has been shown this attempt
+let isGuidedMode = false;    // active guided walkthrough
+
 function initGridState() {
     gridState = {};
     for (let i = 0; i <= numCols; i++) gridState[i] = null;
@@ -4424,6 +4679,14 @@ function startLevel(levelId) {
     const template = LEVEL_TEMPLATES.find(t => t.id === levelId);
     if (!template) return;
 
+    // Show "Meet the Piece" ear training interstitial for first level of each chapter with a new piece
+    if (template.tutorial && template.newPc && !gameProgress['_intro_' + template.newPc]) {
+        gameProgress['_intro_' + template.newPc] = true;
+        saveProgress();
+        showPieceIntro(template.newPc, () => startLevel(levelId));
+        return;
+    }
+
     // Tutorial levels use hardcoded puzzles; others are generated fresh
     if (TUTORIAL_LEVELS[levelId]) {
         currentLevelData = JSON.parse(JSON.stringify(TUTORIAL_LEVELS[levelId]));
@@ -4474,6 +4737,34 @@ function startLevel(levelId) {
     currentHintCol = null;
     currentHintLevel = 0;
     levelStartTime = Date.now();
+    updateLastPlayedTimestamp();
+
+    // Reset stuck detection
+    stuckColWrong = {};
+    stuckLastAction = Date.now();
+    guideMeOffered = false;
+    isGuidedMode = false;
+    craftTutorialStep = 0;
+    craftTutorialType = null;
+    if (stuckIdleTimer) clearInterval(stuckIdleTimer);
+    stuckIdleTimer = setInterval(checkIdleStuck, 15000);
+    hideGuideMe();
+
+    // Invisible retry scaffolding — subtle difficulty reduction on repeated attempts
+    const retryCount = gameProgress['_retry_' + currentLevel] || 0;
+    if (retryCount >= 2) hintsRemaining = Math.max(hintsRemaining, (currentLevelData.hints || 3) + 1); // bonus hint
+    if (retryCount >= 3) currentBPM = Math.round(currentBPM * 0.85); // 15% slower
+    if (retryCount >= 4 && currentLevelData.removeCols.length >= 2) {
+        // Pre-fill one correct column (the first one)
+        const preCol = currentLevelData.removeCols[0];
+        const preAnswer = currentLevelData.solution.find(s => s.col === preCol);
+        if (preAnswer) {
+            const prePiece = findPiece(preAnswer.pieceName, preAnswer.pieceLabel);
+            if (prePiece) {
+                gridState[preCol] = { piece: prePiece, position: preAnswer.position, selectedIntervals: preAnswer.selectedIntervals || {} };
+            }
+        }
+    }
 
     // Jam Session: listen limit
     listensRemaining = currentLevelData.listens || 0;
@@ -4504,7 +4795,14 @@ function startLevel(levelId) {
         // Show persistent tempo slider
         showTempoHint();
 
-        // Schedule proactive craft tooltips
+        // Craft table onboarding: step-by-step tutorial on first encounter
+        if (craftMode === 'flip' && shouldShowCraftTutorial('flip')) {
+            setTimeout(() => startCraftTutorial('flip'), 800);
+        } else if (craftMode === 'full' && shouldShowCraftTutorial('dupe') && currentLevelData.removeCols.length >= 2) {
+            setTimeout(() => startCraftTutorial('dupe'), 800);
+        }
+
+        // Schedule proactive craft tooltips (fallback if tutorial already done)
         if (craftMode === 'flip') scheduleFlipProactiveHint();
         if (craftMode === 'full' && currentLevelData.removeCols.length >= 2) scheduleDupeProactiveHint();
 
@@ -4678,6 +4976,16 @@ function applyHighlights() {
             };
         }
         else if (gridState[c] && !isPuzzleCol(c)) colEl.classList.add('col-locked');
+        // Tap any filled column (pre-filled, solved, or target) to hear its isolated audio
+        if (gridState[c] && !emptyCols.has(c)) {
+            colEl.dataset.previewCol = c;
+            colEl.onclick = function(e) {
+                if (draggedPiece) return;
+                // Don't intercept clicks on draggable placed pieces
+                if (e.target.closest('.placed-piece') && isPuzzleCol(parseInt(this.dataset.previewCol))) return;
+                playColumnPreview(parseInt(this.dataset.previewCol));
+            };
+        }
     }
 }
 
@@ -4727,13 +5035,29 @@ function renderTray() {
         card.dataset.baseName = baseName;
 
         const flipStyle = isFlipped ? ' style="transform:scaleX(-1)"' : '';
+        // Show preview button only in early chapters
+        const showPreview = currentLevelData.chapter <= 2;
         card.innerHTML = `
             <div class="tray-piece-thumb">
                 <img src="${piece.thumbnail}" draggable="false"${flipStyle}>
             </div>
             <div class="tray-piece-label">${baseName}</div>
             <div class="tray-piece-variant">${label}</div>
+            ${showPreview ? '<button class="tray-preview-btn" title="Hear this piece">🔊</button>' : ''}
         `;
+
+        // Preview button: tap to hear piece sound
+        if (showPreview) {
+            const previewBtn = card.querySelector('.tray-preview-btn');
+            if (previewBtn) {
+                previewBtn.addEventListener('mousedown', e => { e.stopPropagation(); });
+                previewBtn.addEventListener('touchstart', e => { e.stopPropagation(); }, {passive: false});
+                previewBtn.addEventListener('click', e => {
+                    e.stopPropagation();
+                    playPiecePreview(baseName, label);
+                });
+            }
+        }
 
         // Drag from card
         card.addEventListener('mousedown', e => {
@@ -4775,6 +5099,91 @@ function showCraftTable() {
     craftOpen = true;
     // Old static onboarding overlay removed — craft table is taught contextually
     // via flip tooltip (3.4) and duplicate tooltip (3.7)
+}
+
+// ==================================================================
+// CRAFT TABLE STEP-BY-STEP ONBOARDING
+// ==================================================================
+let craftTutorialStep = 0;   // 0 = not active
+let craftTutorialType = null; // 'flip' or 'dupe'
+
+function shouldShowCraftTutorial(type) {
+    return !localStorage.getItem('bebopCraftTutorial_' + type);
+}
+
+function startCraftTutorial(type) {
+    if (!shouldShowCraftTutorial(type)) return;
+    craftTutorialType = type;
+    craftTutorialStep = 1;
+    showCraftTutorialStep();
+}
+
+function showCraftTutorialStep() {
+    removeTutorialTooltip();
+    if (craftTutorialType === 'flip') {
+        if (craftTutorialStep === 1) {
+            // Spotlight the craft drop zone
+            const dz = document.getElementById('craft-drop-zone');
+            if (dz) {
+                showSpotlight(dz);
+                showTooltipAt(dz, 'New! Drag your piece here to change its direction', 'arrow-up');
+            }
+        } else if (craftTutorialStep === 2) {
+            removeSpotlight();
+            const flipBtn = document.getElementById('craft-flip-btn');
+            if (flipBtn) {
+                showSpotlight(flipBtn);
+                showTooltipAt(flipBtn, 'Press Flip to reverse the direction ⇌', 'arrow-up');
+            }
+        } else if (craftTutorialStep === 3) {
+            removeSpotlight();
+            const output = document.getElementById('craft-output');
+            if (output) {
+                showSpotlight(output);
+                showTooltipAt(output, 'Tap to take your flipped piece!', 'arrow-down');
+            }
+        } else {
+            endCraftTutorial();
+        }
+    } else if (craftTutorialType === 'dupe') {
+        if (craftTutorialStep === 1) {
+            const dz = document.getElementById('craft-drop-zone');
+            if (dz) {
+                showSpotlight(dz);
+                showTooltipAt(dz, 'Need more pieces? Drag one here to duplicate it!', 'arrow-up');
+            }
+        } else if (craftTutorialStep === 2) {
+            removeSpotlight();
+            const dupeBtn = document.getElementById('craft-dupe-btn');
+            if (dupeBtn) {
+                showSpotlight(dupeBtn);
+                showTooltipAt(dupeBtn, 'Press Duplicate to make a copy!', 'arrow-up');
+            }
+        } else if (craftTutorialStep === 3) {
+            removeSpotlight();
+            const output = document.getElementById('craft-output');
+            if (output) {
+                showSpotlight(output);
+                showTooltipAt(output, 'Tap to take both copies!', 'arrow-down');
+            }
+        } else {
+            endCraftTutorial();
+        }
+    }
+}
+
+function advanceCraftTutorial() {
+    if (!craftTutorialStep) return;
+    craftTutorialStep++;
+    showCraftTutorialStep();
+}
+
+function endCraftTutorial() {
+    craftTutorialStep = 0;
+    if (craftTutorialType) localStorage.setItem('bebopCraftTutorial_' + craftTutorialType, '1');
+    craftTutorialType = null;
+    removeSpotlight();
+    removeTutorialTooltip();
 }
 
 // ==================================================================
@@ -4904,10 +5313,15 @@ function clearCraftOutput() {
 }
 
 function placePieceInCraft(baseName, flipState) {
-    // Dismiss craft tooltips
-    removeTutorialTooltip();
-    markFlipTooltipDone();
-    markDupeTooltipDone();
+    // Advance craft tutorial if active (step 1 → 2)
+    if (craftTutorialStep === 1) {
+        advanceCraftTutorial();
+    } else {
+        // Only dismiss old tooltips if NOT in craft tutorial (tutorial manages its own)
+        removeTutorialTooltip();
+        markFlipTooltipDone();
+        markDupeTooltipDone();
+    }
     // Only allow one piece at a time to prevent infinite duplication exploit
     if (craftStack.length >= 1) {
         // Return existing stack pieces to tray before accepting the new one
@@ -5040,6 +5454,8 @@ function showOutputPieces(pieces, mode) {
         output.style.cursor = 'grab';
         output.addEventListener('mousedown', craftOutputDragStart, { once: true });
         output.addEventListener('touchstart', craftOutputTouchStart, { passive: false, once: true });
+        // Advance craft tutorial to step 3 (spotlight output)
+        if (craftTutorialStep === 2) advanceCraftTutorial();
     }, 450);
 }
 
@@ -5082,6 +5498,8 @@ function craftOutputTouchStart(e) {
 function claimOutputPiece() {
     const output = document.getElementById('craft-output');
     if (!craftOutputPiece || !output.classList.contains('claimable')) return;
+    // End craft tutorial when player claims the output
+    if (craftTutorialStep) endCraftTutorial();
 
     // Collect ALL pieces in the output
     const allPieces = craftOutputPiece.pieces || [{ baseName: craftOutputPiece.baseName, flipH: craftOutputPiece.flipH }];
@@ -5171,6 +5589,11 @@ function claimOutputPiece() {
 
 function craftToggleFlip() {
     if (craftStack.length === 0) return;
+    // Advance craft tutorial if active (step 2 → 3 for flip)
+    if (craftTutorialStep === 2 && craftTutorialType === 'flip') {
+        removeSpotlight();
+        removeTutorialTooltip();
+    }
     sfx('flip');
 
     const dz = document.getElementById('craft-drop-zone');
@@ -5729,6 +6152,7 @@ function flashConnectedNeighbors(col) {
 // ANSWER CHECKING
 // ==================================================================
 function checkAnswer(col) {
+    removeSpotlight(); // clear tutorial spotlight on any placement
     if (composerMode) {
         // In composer mode: recompute melody, replenish tray, no validation
         composerRecomputeMelody();
@@ -5746,6 +6170,7 @@ function checkAnswer(col) {
     const posMatch = Math.abs(state.position - answer.position) < 0.01;
 
     if (nameMatch && labelMatch && posMatch) {
+        onPlayerAction();
         clearHintVisuals();
         const allSolved = currentLevelData.removeCols.every(c => isSolved(c));
 
@@ -5755,18 +6180,29 @@ function checkAnswer(col) {
             sfx('correct');
             setTimeout(() => completeLevel(), 600);
         } else {
-            // Non-final correct piece — show feedback
+            // Non-final correct piece — show feedback with ear-training reinforcement
             sfx('correct');
             const el = document.querySelector(`.grid-column[data-col="${col}"] .placed-piece`);
             if (el) el.classList.add('piece-correct');
             const remaining = currentLevelData.removeCols.filter(c => !isSolved(c)).length;
-            showToast(`Correct! ${remaining} more to go`, 'success');
+            const REINFORCE_TIPS = {
+                'Arpeggio': 'hear the jump?',
+                'Neighbor': 'hear how it stays close?',
+                'Approach': 'hear the chromatic walk?',
+                'Enclosure': 'hear it circle the note?',
+            };
+            const earTip = (currentLevelData.chapter <= 2) ? REINFORCE_TIPS[state.piece.name] : null;
+            const msg = earTip
+                ? `Correct! That's the ${state.piece.name} — ${earTip}`
+                : `Correct! ${remaining} more to go`;
+            showToast(msg, 'success');
             currentHintCol = null;
             currentHintLevel = 0;
             applyHighlights();
         }
     } else {
         wrongPlacements++;
+        onPlayerAction();
         sfx('wrong');
         const WRONG_MESSAGES = [
             'Not quite — try singing it first',
@@ -5799,6 +6235,8 @@ function checkAnswer(col) {
                 applyHighlights();
             }, 400);
         }
+        // Check stuck state after wrong placement
+        checkStuckAfterWrong(col);
     }
 }
 
@@ -5921,6 +6359,8 @@ function playCelebrationMelody(callback) {
 function completeLevel() {
     // Timer was already stopped in checkAnswer at the moment of solve; guard for safety
     if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    if (stuckIdleTimer) { clearInterval(stuckIdleTimer); stuckIdleTimer = null; }
+    hideGuideMe();
     const elapsed = Math.floor((Date.now() - levelStartTime) / 1000);
     const stars = calculateStars(elapsed);
 
@@ -5930,6 +6370,8 @@ function completeLevel() {
         stars: Math.max(prev.stars || 0, stars),
         bestTime: prev.bestTime ? Math.min(prev.bestTime, elapsed) : elapsed
     };
+    // Reset retry scaffolding on any completion so replays feel fresh
+    delete gameProgress['_retry_' + currentLevel];
     saveProgress();
     sfx('complete');
 
@@ -6067,6 +6509,19 @@ function showOptionsHint(answer) {
     const wrongPieces = shuffled.slice(0, 2);
     const options = [correctPiece, ...wrongPieces].sort(() => Math.random() - 0.5);
 
+    // Play this column's audio so the player can hear what belongs here
+    playColumnPreview(answer.col);
+
+    // Explain what to listen for
+    const HINT_EAR_TIPS = {
+        'Arpeggio': 'Hear the jump? That\'s the Arpeggio.',
+        'Neighbor': 'Hear how it stays close? That\'s the Neighbor.',
+        'Approach': 'Hear the chromatic walk? That\'s the Approach.',
+        'Enclosure': 'Hear it circle the note? That\'s the Enclosure.',
+    };
+    const earTip = HINT_EAR_TIPS[answer.pieceName];
+    if (earTip) setTimeout(() => showHintToast(earTip), 1200);
+
     const colRect = colEl.getBoundingClientRect();
     const popup = document.createElement('div');
     popup.className = 'hint-options-popup';
@@ -6126,6 +6581,175 @@ function updateListenCounter() {
 }
 
 // ==================================================================
+// STUCK DETECTION
+// ==================================================================
+function onPlayerAction() {
+    stuckLastAction = Date.now();
+}
+
+function checkStuckAfterWrong(col) {
+    stuckColWrong[col] = (stuckColWrong[col] || 0) + 1;
+
+    // ch1_01 directional bailout: explain ascending vs descending on first wrong
+    if (currentLevel === 'ch1_01' && wrongPlacements === 1) {
+        showToast('Listen for the direction — does it go UP ↑ or DOWN ↓?', 'info');
+        showDirectionLabels();
+    }
+
+    // 2 wrong on same column → nudge to tap column
+    if (stuckColWrong[col] === 2 && !isGuidedMode) {
+        showToast('Tap a filled column to hear just that part', 'info');
+    }
+
+    // 3 total wrong → pulse hint button
+    if (wrongPlacements >= 3 && hintsRemaining > 0 && !isGuidedMode) {
+        pulseHintButton();
+    }
+
+    // All hints used + 2 more wrong → offer Guide Me
+    if (hintsRemaining <= 0 && wrongPlacements >= (currentLevelData.hints || 3) + 2 && !guideMeOffered && !isGuidedMode) {
+        guideMeOffered = true;
+        showGuideMe();
+    }
+}
+
+function checkIdleStuck() {
+    if (!currentLevelData || isGuidedMode) return;
+    const idle = (Date.now() - stuckLastAction) / 1000;
+    if (idle >= 45) {
+        const unsolved = currentLevelData.removeCols.filter(c => !isSolved(c));
+        if (unsolved.length > 0) {
+            showToast('Play the melody again — focus on one column at a time', 'info');
+            stuckLastAction = Date.now(); // reset so we don't spam
+        }
+    }
+}
+
+function showDirectionLabels() {
+    // Temporarily annotate tray cards with ↑/↓ arrows for ch1_01
+    const cards = document.querySelectorAll('.tray-piece');
+    cards.forEach(card => {
+        const variant = card.querySelector('.tray-piece-variant');
+        if (!variant) return;
+        const text = variant.textContent.trim();
+        if (text === 'Ascending') variant.textContent = '↑ Ascending (goes up)';
+        else if (text === 'Descending') variant.textContent = '↓ Descending (goes down)';
+    });
+    // Remove after 5 seconds
+    setTimeout(() => {
+        const cards2 = document.querySelectorAll('.tray-piece');
+        cards2.forEach(card => {
+            const variant = card.querySelector('.tray-piece-variant');
+            if (!variant) return;
+            const text = variant.textContent.trim();
+            if (text.includes('Ascending')) variant.textContent = 'Ascending';
+            else if (text.includes('Descending')) variant.textContent = 'Descending';
+        });
+    }, 5000);
+}
+
+function pulseHintButton() {
+    const btn = document.getElementById('hint-btn');
+    if (!btn || hintsRemaining <= 0) return;
+    btn.classList.add('hint-pulse');
+    setTimeout(() => btn.classList.remove('hint-pulse'), 3000);
+}
+
+function showGuideMe() {
+    let btn = document.getElementById('guide-me-btn');
+    if (!btn) {
+        btn = document.createElement('button');
+        btn.id = 'guide-me-btn';
+        btn.className = 'guide-me-btn';
+        btn.textContent = 'Guide Me';
+        btn.onclick = startGuidedMode;
+        const topbar = document.querySelector('.puzzle-topbar') || document.querySelector('.puzzle-area');
+        if (topbar) topbar.appendChild(btn);
+    }
+    btn.classList.remove('hidden');
+    btn.style.animation = 'none'; btn.offsetWidth;
+    btn.style.animation = 'hint-pulse-anim 1.5s ease 2';
+}
+
+function hideGuideMe() {
+    const btn = document.getElementById('guide-me-btn');
+    if (btn) btn.classList.add('hidden');
+}
+
+function startGuidedMode() {
+    isGuidedMode = true;
+    hideGuideMe();
+    clearHintVisuals();
+
+    // Clear any player-placed pieces from puzzle columns
+    currentLevelData.removeCols.forEach(col => {
+        if (gridState[col]) {
+            const state = gridState[col];
+            const baseName = state.piece.name;
+            if (baseName) {
+                const map = FLIP_MAP[baseName];
+                const wasFlipped = map && map.flipH && state.piece.label === map.flipH;
+                trayAvailable.push(baseName);
+                trayFlipState.push(!!wasFlipped);
+            }
+            gridState[col] = null;
+        }
+    });
+    renderGrid();
+    renderTray();
+    applyHighlights();
+
+    guidedStep(0);
+}
+
+function guidedStep(stepIdx) {
+    const unsolved = currentLevelData.removeCols.filter(c => !isSolved(c));
+    if (unsolved.length === 0 || stepIdx >= currentLevelData.removeCols.length) {
+        // Guided walkthrough complete — restart with a fresh puzzle so the player
+        // must use their ears, not just replay what they watched from memory
+        isGuidedMode = false;
+        showToast('Now try a fresh one on your own!', 'success');
+        setTimeout(() => startLevel(currentLevel), 1200);
+        return;
+    }
+
+    const col = currentLevelData.removeCols[stepIdx];
+    const answer = currentLevelData.solution.find(s => s.col === col);
+    if (!answer) { guidedStep(stepIdx + 1); return; }
+
+    // Highlight the column
+    const colEl = document.querySelector(`.grid-column[data-col="${col}"]`);
+    if (colEl) colEl.classList.add('col-empty');
+
+    // Play just this column's audio
+    playColumnPreview(col);
+
+    // Explain the piece
+    const PIECE_EXPLAIN = {
+        'Arpeggio': 'Hear the jump? That\'s the Arpeggio.',
+        'Neighbor': 'Hear how it stays close? That\'s the Neighbor.',
+        'Approach': 'Hear the chromatic walk? That\'s the Approach.',
+        'Enclosure': 'Hear it circle the note? That\'s the Enclosure.'
+    };
+    const explain = PIECE_EXPLAIN[answer.pieceName] || '';
+    setTimeout(() => showToast(`${answer.pieceName} ${answer.pieceLabel} — ${explain}`, 'info'), 800);
+
+    // Auto-place after a delay so the player sees/hears it
+    setTimeout(() => {
+        const piece = findPiece(answer.pieceName, answer.pieceLabel);
+        if (!piece) { guidedStep(stepIdx + 1); return; }
+        const sel = answer.selectedIntervals || {};
+        gridState[col] = { piece, position: answer.position, selectedIntervals: sel };
+        sfx('place');
+        renderGrid();
+        applyHighlights();
+        setTimeout(() => flashConnectedNeighbors(col), 250);
+        // Next step
+        setTimeout(() => guidedStep(stepIdx + 1), 1500);
+    }, 2500);
+}
+
+// ==================================================================
 // PLAYBACK
 // ==================================================================
 
@@ -6167,6 +6791,7 @@ function spawnNoteParticles(col) {
 
 function playMelody() {
     removeTutorialTooltip(); // dismiss step-1 tooltip when user presses play
+    onPlayerAction();
     getAudioCtx(); // ensure context is alive
 
     const notes = fullMelodyNotes;
@@ -6299,9 +6924,14 @@ function showSingBackPrompt() {
         el.style.opacity = '';
     }, 400);
 
+    // Gentle grid pulse during "your turn" moment
+    const grid = document.getElementById('melody-grid');
+    if (grid) grid.classList.add('sing-back-pulse');
+
     // Restore after duration
     singBackTimeout = setTimeout(() => {
         el.style.opacity = '0';
+        if (grid) grid.classList.remove('sing-back-pulse');
         setTimeout(() => {
             el.innerHTML = originalHTML;
             el.classList.remove('sing-back');
@@ -6309,6 +6939,48 @@ function showSingBackPrompt() {
         }, 400);
         singBackTimeout = null;
     }, duration);
+}
+
+// ==================================================================
+// PIECE AUDIO PREVIEW (tray card speaker button)
+// ==================================================================
+function playPiecePreview(baseName, label) {
+    if (isPlaying) return;
+    getAudioCtx();
+    getMasterGain();
+
+    let notes = null;
+
+    // Use actual melody notes so the preview matches the puzzle's octave/register
+    if (fullMelodyNotes && currentLevelData) {
+        const solEntry = currentLevelData.solution.find(s =>
+            s.pieceName === baseName && s.pieceLabel === label);
+        if (solEntry && fullMelodyNotes.pieceNotes[solEntry.col]?.length > 0) {
+            notes = fullMelodyNotes.pieceNotes[solEntry.col];
+        }
+    }
+
+    // Fallback: compute from level context (or hardcoded if no level)
+    if (!notes) {
+        const chord = currentLevelData ? parseChord(currentLevelData.chords[0]) : parseChord('G7');
+        const targetNote = (fullMelodyNotes && fullMelodyNotes.targetNote) || 60;
+        const piece = findPiece(baseName, label);
+        if (!piece) return;
+        const sel = selectRandomIntervals(piece);
+        notes = calculatePieceNotes(piece, chord, targetNote, sel);
+    }
+    if (!notes || notes.length === 0) return;
+
+    const eighth = getEighth();
+    const sw = soundParams.swing;
+    const swL = eighth * 2 * sw;
+    const swS = eighth * 2 * (1 - sw);
+    let t = audioCtx.currentTime + 0.05;
+    notes.forEach((midi, i) => {
+        const dur = (i % 2 === 0) ? swL : swS;
+        playNote(midiToFreq(midi), t, dur * 0.9);
+        t += dur;
+    });
 }
 
 function showToast(msg, type) {
@@ -6380,6 +7052,10 @@ function showTutorialStep1() {
     tutorialListenDone = false;
     const playBtn = document.getElementById('play-btn');
     if (playBtn) {
+        // On ch1_01 (first ever level), add spotlight overlay
+        if (currentLevel === 'ch1_01' && !gameProgress['_tutorialSpotlightDone']) {
+            showSpotlight(playBtn);
+        }
         setTimeout(() => showTooltipAt(playBtn, '👆 Press ▶ to listen to the melody first!', ''), 400);
     }
 }
@@ -6388,14 +7064,66 @@ function onTutorialMelodyPlayed() {
     // Called after melody finishes — if this is a tutorial level, show step 2
     if (!currentLevelData || !currentLevelData.tutorial || tutorialListenDone) return;
     tutorialListenDone = true;
+
+    // On ch1_01, show extended sing-back before step 2
+    if (currentLevel === 'ch1_01' && !gameProgress['_tutorialSpotlightDone']) {
+        removeSpotlight();
+        removeTutorialTooltip();
+        // Extended sing-back moment
+        const el = document.getElementById('puzzle-level-name');
+        if (el) {
+            el.textContent = 'Can you hum what you just heard?';
+            el.style.color = 'var(--gold)';
+        }
+        setTimeout(() => {
+            if (el) { el.style.color = ''; }
+            gameProgress['_tutorialSpotlightDone'] = true;
+            saveProgress();
+            showTutorialStep2WithSpotlight();
+        }, 5000);
+        return;
+    }
     showTutorialStep2();
+}
+
+function showTutorialStep2WithSpotlight() {
+    removeTutorialTooltip();
+    const firstPiece = document.querySelector('#piece-tray .tray-piece');
+    const emptyCol = document.querySelector('.grid-column.col-empty');
+    if (firstPiece) {
+        // Spotlight both the tray piece and the empty column
+        showSpotlight(firstPiece, emptyCol);
+        const text = currentLevelData.tutorial || 'Drag the piece into the highlighted column.';
+        setTimeout(() => showTooltipAt(firstPiece, text, ''), 300);
+        // Remove spotlight after piece is placed (or after timeout)
+        setTimeout(() => removeSpotlight(), 12000);
+        setTimeout(() => removeTutorialTooltip(), 8500);
+    }
+}
+
+function showSpotlight(el1, el2) {
+    removeSpotlight();
+    const overlay = document.createElement('div');
+    overlay.id = 'tutorial-spotlight';
+    overlay.className = 'tutorial-spotlight';
+    // Click through to elements underneath
+    overlay.style.pointerEvents = 'none';
+    document.body.appendChild(overlay);
+
+    // Add spotlight-target class to elements
+    if (el1) el1.classList.add('spotlight-target');
+    if (el2) el2.classList.add('spotlight-target');
+}
+
+function removeSpotlight() {
+    const overlay = document.getElementById('tutorial-spotlight');
+    if (overlay) overlay.remove();
+    document.querySelectorAll('.spotlight-target').forEach(el => el.classList.remove('spotlight-target'));
 }
 
 // Play the solution notes for a specific column when user taps an empty column
 function playColumnPreview(col) {
     if (!fullMelodyNotes || isPlaying) return;
-    const notes = fullMelodyNotes.pieceNotes[col];
-    if (!notes || notes.length === 0) return;
 
     getAudioCtx();
     getMasterGain();
@@ -6412,11 +7140,23 @@ function playColumnPreview(col) {
     }
 
     let t = audioCtx.currentTime + 0.05;
-    notes.forEach((midi, i) => {
-        const dur = (i % 2 === 0) ? swL : swS;
-        playNote(midiToFreq(midi), t, dur * 0.9);
-        t += dur;
-    });
+
+    // Target column: play the target note
+    if (col === numCols && fullMelodyNotes.targetNote) {
+        playNote(midiToFreq(fullMelodyNotes.targetNote), t, eighth * 2 * 0.9);
+        t += eighth * 2;
+    } else {
+        const notes = fullMelodyNotes.pieceNotes[col];
+        if (!notes || notes.length === 0) {
+            if (colEl) colEl.querySelectorAll('.grid-cell').forEach(c => c.classList.remove('playhead-active'));
+            return;
+        }
+        notes.forEach((midi, i) => {
+            const dur = (i % 2 === 0) ? swL : swS;
+            playNote(midiToFreq(midi), t, dur * 0.9);
+            t += dur;
+        });
+    }
 
     // Remove highlight after notes finish
     const totalMs = (t - audioCtx.currentTime) * 1000 + 100;
@@ -6522,6 +7262,9 @@ function showSuccessModal(stars, elapsed) {
 function retryLevel() {
     document.getElementById('success-overlay').classList.add('hidden');
     stopPlayback();
+    // Track retry count for invisible scaffolding
+    const key = '_retry_' + currentLevel;
+    gameProgress[key] = (gameProgress[key] || 0) + 1;
     startLevel(currentLevel);
 }
 
@@ -6556,6 +7299,293 @@ function nextLevel() {
     } else {
         startLevel(chapterLevels[idx + 1].id);
     }
+}
+
+// ==================================================================
+// EAR WARM-UP — Returning Player Refresher
+// ==================================================================
+let warmupState = { pieces: [], current: 0, correctCount: 0, answer: null };
+
+function shouldShowWarmup() {
+    // Show if player has completed at least 1 level and hasn't played in 24+ hours
+    const totalCompleted = LEVELS.filter(l => getLevelProgress(l.id).completed).length;
+    if (totalCompleted < 1) return false;
+    const lastPlayed = gameProgress['_lastPlayedTimestamp'] || 0;
+    const hoursSince = (Date.now() - lastPlayed) / (1000 * 60 * 60);
+    return hoursSince >= 24;
+}
+
+function getLearnedPieces() {
+    // Figure out which piece types the player has encountered
+    const learned = ['Arpeggio'];
+    if (getLevelProgress('ch2_01').completed || getChapterStars(1) >= 10) learned.push('Neighbor');
+    if (getLevelProgress('ch3_01').completed || getChapterStars(2) >= 18) learned.push('Approach');
+    if (getLevelProgress('ch4_01').completed || getChapterStars(3) >= 20) learned.push('Enclosure');
+    return learned;
+}
+
+function showWarmup() {
+    const learned = getLearnedPieces();
+    if (learned.length < 2) return; // need at least 2 pieces to quiz
+
+    // Pick 3 random pieces to quiz
+    const picks = [];
+    for (let i = 0; i < 3; i++) {
+        picks.push(learned[Math.floor(Math.random() * learned.length)]);
+    }
+    warmupState = { pieces: picks, current: 0, correctCount: 0, answer: null };
+
+    document.getElementById('warmup-overlay').classList.remove('hidden');
+    showWarmupQuestion();
+}
+
+function showWarmupQuestion() {
+    const { pieces, current } = warmupState;
+    if (current >= pieces.length) {
+        finishWarmup();
+        return;
+    }
+
+    const pieceName = pieces[current];
+    const map = FLIP_MAP[pieceName];
+    if (!map) return;
+
+    // Pick a random variant
+    const labels = [map.defaultLabel];
+    if (map.flipH) labels.push(map.flipH);
+    const label = labels[Math.floor(Math.random() * labels.length)];
+    warmupState.answer = pieceName;
+
+    document.getElementById('warmup-subtitle').textContent = `Round ${current + 1} of ${pieces.length} — which piece is this?`;
+    document.getElementById('warmup-result').classList.add('hidden');
+    document.getElementById('warmup-progress').textContent = `${warmupState.correctCount}/${current} correct`;
+
+    // Build choice buttons from learned pieces
+    const learned = getLearnedPieces();
+    const choicesEl = document.getElementById('warmup-choices');
+    choicesEl.innerHTML = '';
+    learned.forEach(name => {
+        const btn = document.createElement('button');
+        btn.className = 'warmup-choice';
+        btn.textContent = name;
+        btn.onclick = () => checkWarmupAnswer(name, btn);
+        choicesEl.appendChild(btn);
+    });
+
+    // Generate and auto-play the notes
+    warmupState._currentNotes = generatePieceIntroNotes(pieceName, label);
+    setTimeout(() => playWarmupSample(), 400);
+}
+
+function playWarmupSample() {
+    const notes = warmupState._currentNotes;
+    if (!notes || notes.length === 0) return;
+    getAudioCtx();
+    getMasterGain();
+
+    const eighth = getEighth();
+    const sw = soundParams.swing;
+    const swL = eighth * 2 * sw;
+    const swS = eighth * 2 * (1 - sw);
+    let t = audioCtx.currentTime + 0.05;
+    notes.forEach((midi, i) => {
+        const dur = (i % 2 === 0) ? swL : swS;
+        playNote(midiToFreq(midi), t, dur * 0.9);
+        t += dur;
+    });
+}
+
+function checkWarmupAnswer(choice, btnEl) {
+    const resultEl = document.getElementById('warmup-result');
+    if (choice === warmupState.answer) {
+        btnEl.classList.add('correct');
+        warmupState.correctCount++;
+        resultEl.textContent = 'Correct!';
+        sfx('correct');
+    } else {
+        btnEl.classList.add('wrong');
+        resultEl.textContent = `That was ${warmupState.answer}`;
+        sfx('wrong');
+        // Highlight the correct one
+        document.querySelectorAll('.warmup-choice').forEach(b => {
+            if (b.textContent === warmupState.answer) b.classList.add('correct');
+        });
+    }
+    resultEl.classList.remove('hidden');
+    document.getElementById('warmup-progress').textContent = `${warmupState.correctCount}/${warmupState.current + 1} correct`;
+
+    // Disable all buttons
+    document.querySelectorAll('.warmup-choice').forEach(b => b.onclick = null);
+
+    // Next question after delay
+    warmupState.current++;
+    setTimeout(() => showWarmupQuestion(), 1500);
+}
+
+function finishWarmup() {
+    const resultEl = document.getElementById('warmup-result');
+    const { correctCount, pieces } = warmupState;
+    if (correctCount === pieces.length) {
+        document.getElementById('warmup-subtitle').textContent = 'Your ears are sharp!';
+    } else {
+        document.getElementById('warmup-subtitle').textContent = `${correctCount} out of ${pieces.length} — not bad!`;
+    }
+    document.getElementById('warmup-choices').innerHTML = '';
+    resultEl.classList.add('hidden');
+    setTimeout(() => dismissWarmup(), 1500);
+}
+
+function dismissWarmup() {
+    document.getElementById('warmup-overlay').classList.add('hidden');
+}
+
+function updateLastPlayedTimestamp() {
+    gameProgress['_lastPlayedTimestamp'] = Date.now();
+    saveProgress();
+}
+
+// ==================================================================
+// MEET THE PIECE — Ear Training Interstitial
+// ==================================================================
+const PIECE_INTRO_HINTS = {
+    'Neighbor': { a: 'From Above — hear how it dips down and returns?', b: 'From Below — hear how it reaches up and comes back?' },
+    'Approach': { a: 'Ascending — hear the chromatic walk upward?', b: 'Descending — hear it stepping down into the note?' },
+    'Enclosure': { a: 'From Above — it starts above, dips below, then lands.', b: 'From Below — it starts below, rises above, then lands.' },
+};
+
+let pieceIntroState = { pieceName: null, labelA: null, labelB: null, quizAnswer: null, callback: null };
+
+const PIECE_CONTRAST = {
+    'Neighbor': 'The Arpeggio jumps through the chord. The Neighbor stays close — just a step away.',
+    'Approach': 'The Neighbor wiggles around one note. The Approach walks steadily toward it.',
+    'Enclosure': 'The Approach comes from one direction. The Enclosure circles from both sides.',
+};
+
+function showPieceIntro(pieceName, callback) {
+    const map = FLIP_MAP[pieceName];
+    if (!map) { callback(); return; }
+
+    const labelA = map.defaultLabel;
+    const labelB = map.flipH || labelA;
+    pieceIntroState = { pieceName, labelA, labelB, quizAnswer: null, callback };
+
+    const contrast = PIECE_CONTRAST[pieceName] || '';
+    document.getElementById('piece-intro-title').textContent = 'Meet the ' + pieceName;
+    // Show contrast with previous piece if available
+    const resultEl = document.getElementById('piece-intro-result');
+    if (contrast) {
+        resultEl.textContent = contrast;
+        resultEl.classList.remove('hidden');
+    } else {
+        resultEl.classList.add('hidden');
+    }
+    document.getElementById('piece-intro-label-a').textContent = labelA;
+    document.getElementById('piece-intro-label-b').textContent = labelB;
+    document.getElementById('piece-intro-quiz').classList.add('hidden');
+    document.getElementById('piece-intro-result').classList.add('hidden');
+    document.getElementById('piece-intro-choice-a').textContent = labelA;
+    document.getElementById('piece-intro-choice-b').textContent = labelB;
+    document.getElementById('piece-intro-choice-a').className = 'piece-intro-choice';
+    document.getElementById('piece-intro-choice-b').className = 'piece-intro-choice';
+    document.getElementById('piece-intro-var-a').classList.remove('playing');
+    document.getElementById('piece-intro-var-b').classList.remove('playing');
+
+    document.getElementById('piece-intro-overlay').classList.remove('hidden');
+
+    // Auto-play variant A after a beat
+    setTimeout(() => playPieceIntroVariant('a'), 600);
+    // Then variant B
+    setTimeout(() => playPieceIntroVariant('b'), 2400);
+    // Then quiz
+    setTimeout(() => startPieceIntroQuiz(), 4200);
+}
+
+function generatePieceIntroNotes(pieceName, label) {
+    const chord = parseChord('G7');
+    const targetNote = 60; // middle C
+    const piece = findPiece(pieceName, label);
+    if (!piece) return [];
+    const sel = selectRandomIntervals(piece);
+    return calculatePieceNotes(piece, chord, targetNote, sel);
+}
+
+function playPieceIntroVariant(which) {
+    getAudioCtx();
+    getMasterGain();
+    const { pieceName, labelA, labelB } = pieceIntroState;
+    const label = which === 'a' ? labelA : labelB;
+    const notes = generatePieceIntroNotes(pieceName, label);
+    if (notes.length === 0) return;
+
+    // Visual feedback
+    document.getElementById('piece-intro-var-a').classList.remove('playing');
+    document.getElementById('piece-intro-var-b').classList.remove('playing');
+    document.getElementById('piece-intro-var-' + which).classList.add('playing');
+
+    const eighth = getEighth();
+    const sw = soundParams.swing;
+    const swL = eighth * 2 * sw;
+    const swS = eighth * 2 * (1 - sw);
+    let t = audioCtx.currentTime + 0.05;
+    notes.forEach((midi, i) => {
+        const dur = (i % 2 === 0) ? swL : swS;
+        playNote(midiToFreq(midi), t, dur * 0.9);
+        t += dur;
+    });
+    // Also play target note after piece notes
+    playNote(midiToFreq(60), t, eighth * 2 * 0.9);
+
+    const totalMs = (t + eighth * 2 - audioCtx.currentTime) * 1000 + 100;
+    setTimeout(() => {
+        document.getElementById('piece-intro-var-' + which).classList.remove('playing');
+    }, totalMs);
+}
+
+function startPieceIntroQuiz() {
+    const { labelA, labelB } = pieceIntroState;
+    // Pick a random variant for the quiz
+    pieceIntroState.quizAnswer = Math.random() < 0.5 ? 'a' : 'b';
+    const quizLabel = pieceIntroState.quizAnswer === 'a' ? labelA : labelB;
+
+    document.getElementById('piece-intro-quiz').classList.remove('hidden');
+    document.getElementById('piece-intro-quiz-prompt').textContent = 'Which one was that?';
+
+    // Play the quiz variant
+    playPieceIntroVariant(pieceIntroState.quizAnswer);
+}
+
+function checkPieceIntroAnswer(choice) {
+    const { quizAnswer, pieceName } = pieceIntroState;
+    const resultEl = document.getElementById('piece-intro-result');
+    const choiceAEl = document.getElementById('piece-intro-choice-a');
+    const choiceBEl = document.getElementById('piece-intro-choice-b');
+
+    if (choice === quizAnswer) {
+        (choice === 'a' ? choiceAEl : choiceBEl).classList.add('correct');
+        resultEl.textContent = 'You\'ve got the ear for it!';
+        resultEl.classList.remove('hidden');
+        sfx('correct');
+        setTimeout(() => dismissPieceIntro(), 1500);
+    } else {
+        (choice === 'a' ? choiceAEl : choiceBEl).classList.add('wrong');
+        resultEl.textContent = 'Not quite — listen again!';
+        resultEl.classList.remove('hidden');
+        sfx('wrong');
+        // Replay both variants, then quiz again
+        setTimeout(() => {
+            choiceAEl.className = 'piece-intro-choice';
+            choiceBEl.className = 'piece-intro-choice';
+            resultEl.classList.add('hidden');
+            playPieceIntroVariant('a');
+            setTimeout(() => playPieceIntroVariant('b'), 1800);
+            setTimeout(() => startPieceIntroQuiz(), 3600);
+        }, 1500);
+    }
+}
+
+function dismissPieceIntro() {
+    document.getElementById('piece-intro-overlay').classList.add('hidden');
+    if (pieceIntroState.callback) pieceIntroState.callback();
 }
 
 // ==================================================================
@@ -7838,6 +8868,11 @@ async function init() {
     initCraftOutput();
     showScreen('landing');
     updateComposerButton();
+
+    // Show ear warm-up for returning players (24+ hours away)
+    if (shouldShowWarmup()) {
+        setTimeout(() => showWarmup(), 600);
+    }
 
     // Start loading Rhodes samples in background (non-blocking)
     loadRhodesSamples();

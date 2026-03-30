@@ -4636,6 +4636,9 @@ function goToMap() {
     if (craftProactiveTimeout) { clearTimeout(craftProactiveTimeout); craftProactiveTimeout = null; }
     if (dupeProactiveTimeout) { clearTimeout(dupeProactiveTimeout); dupeProactiveTimeout = null; }
     if (singBackTimeout) { clearTimeout(singBackTimeout); singBackTimeout = null; }
+    if (stuckIdleTimer) { clearInterval(stuckIdleTimer); stuckIdleTimer = null; }
+    dismissSideNudge();
+    removeSpotlight();
     const levelNameEl = document.getElementById('puzzle-level-name');
     if (levelNameEl) levelNameEl.classList.remove('sing-back');
     // Remember which chapter tab to show

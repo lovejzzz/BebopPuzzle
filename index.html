@@ -1166,6 +1166,37 @@
             box-shadow: 0 0 30px var(--blue-glow);
         }
 
+        /* Side nudge — gentle singing reminder */
+        .side-nudge {
+            position: fixed;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%) translateX(20px);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.7);
+            background: rgba(30,25,40,0.85);
+            border: 1px solid rgba(167,139,250,0.15);
+            backdrop-filter: blur(8px);
+            z-index: 60;
+            opacity: 0;
+            pointer-events: none;
+            animation: nudgeFadeIn 0.5s ease forwards;
+            max-width: 180px;
+            text-align: center;
+            line-height: 1.4;
+        }
+        @keyframes nudgeFadeIn {
+            0%   { opacity: 0; transform: translateY(-50%) translateX(20px); }
+            100% { opacity: 1; transform: translateY(-50%) translateX(0); }
+        }
+        @keyframes nudgeFadeOut {
+            0%   { opacity: 1; transform: translateY(-50%) translateX(0); }
+            100% { opacity: 0; transform: translateY(-50%) translateX(20px); }
+        }
+
         /* =============================================
            SUCCESS OVERLAY
            ============================================= */
@@ -1947,24 +1978,24 @@
         .craft-inline-body {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 14px;
         }
         .craft-inline-mid {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
         }
         .craft-inline-btns {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
         }
         .craft-inline-output-wrap {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 3px;
+            gap: 0;
         }
         .craft-tray-divider {
             display: none;
@@ -1978,7 +2009,7 @@
         }
 
         .craft-table-title {
-            font-size: 9px; font-weight: 800;
+            font-size: 11px; font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.12em;
             color: var(--gold);
@@ -1988,8 +2019,8 @@
 
         /* Drop zone — where you drag pieces to */
         .craft-drop-zone {
-            width: 76px; height: 76px;
-            border-radius: 12px;
+            width: 96px; height: 96px;
+            border-radius: 14px;
             border: 2px dashed rgba(167,139,250,0.25);
             background: rgba(167,139,250,0.03);
             display: flex; align-items: center; justify-content: center;
@@ -2012,7 +2043,7 @@
                 inset 0 0 12px rgba(0,0,0,0.3);
         }
         .craft-drop-hint {
-            font-size: 9px; font-weight: 700;
+            font-size: 11px; font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.08em;
             color: rgba(167,139,250,0.3);
@@ -2031,7 +2062,7 @@
 
         /* Piece name under the drop zone */
         .craft-piece-label {
-            font-size: 10px; font-weight: 700;
+            font-size: 12px; font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.06em;
             color: var(--text-secondary);
@@ -2040,7 +2071,7 @@
             min-height: 14px;
         }
         .craft-variant-label {
-            font-size: 9px; font-weight: 600;
+            font-size: 11px; font-weight: 600;
             color: var(--purple);
             text-align: center;
             z-index: 1;
@@ -2097,13 +2128,13 @@
 
         /* Compact inline buttons */
         .craft-btn.craft-btn-sm {
-            max-width: 80px;
-            padding: 5px 10px;
-            font-size: 9px;
+            max-width: 110px;
+            padding: 8px 14px;
+            font-size: 12px;
             letter-spacing: 0.05em;
         }
         .craft-btn.craft-btn-sm .craft-btn-icon {
-            font-size: 11px;
+            font-size: 14px;
         }
 
         /* Flip icon spin animation */
@@ -2118,7 +2149,7 @@
 
         /* Output slot — the duplicated piece appears here */
         .craft-output-label {
-            font-size: 9px; font-weight: 700;
+            font-size: 11px; font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             color: rgba(52,211,153,0.35);
@@ -2132,14 +2163,14 @@
             display: none; /* hidden in horizontal layout */
         }
         .craft-output {
-            width: 76px; height: 76px;
-            border-radius: 12px;
+            width: 96px; height: 96px;
+            border-radius: 14px;
             border: 2px dashed rgba(52,211,153,0.15);
             background: rgba(52,211,153,0.02);
             display: flex; align-items: center; justify-content: center;
             z-index: 1;
             cursor: default;
-            min-height: 76px;
+            min-height: 96px;
             position: relative;
             overflow: hidden;
         }
@@ -2186,7 +2217,7 @@
             100% { transform: translate(-50%, -50%) translate(-6px, 4px) rotate(-4deg) scale(1); opacity: 1; }
         }
         .craft-output-empty-hint {
-            font-size: 8px; font-weight: 700;
+            font-size: 11px; font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.06em;
             color: rgba(52,211,153,0.2);
@@ -2255,18 +2286,20 @@
 
         /* Claim label under the output */
         .craft-claim-hint {
-            font-size: 9px; font-weight: 800;
+            font-size: 11px; font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             color: rgba(52,211,153,0.6);
             z-index: 1;
             text-align: center;
             opacity: 0;
+            height: 0; overflow: visible;
             transition: opacity 0.3s ease;
             pointer-events: none;
         }
         .craft-claim-hint.visible {
             opacity: 1;
+            margin-top: 3px;
             animation: craft-claim-pulse 1.8s ease-in-out infinite;
         }
         @keyframes craft-claim-pulse {
@@ -4650,6 +4683,7 @@ function startLevel(levelId) {
     document.getElementById('puzzle-stars').style.display = '';
     stopPlayback(); // ensure any ongoing playback is halted before loading new level
     clearHintVisuals();
+    dismissSideNudge();
     if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
     const template = LEVEL_TEMPLATES.find(t => t.id === levelId);
     if (!template) return;
@@ -6147,6 +6181,7 @@ function checkAnswer(col) {
     if (nameMatch && labelMatch && posMatch) {
         onPlayerAction();
         clearHintVisuals();
+        dismissSideNudge();
         const allSolved = currentLevelData.removeCols.every(c => isSolved(c));
 
         if (allSolved) {
@@ -6588,13 +6623,54 @@ function checkStuckAfterWrong(col) {
     }
 }
 
+const singingNudges = [
+    'Try singing the melody — your voice knows the answer',
+    'Hum it out loud, feel where each note lands',
+    'Sing along with the playback — trust your ear',
+    'Let your voice trace the melody line',
+    'Sing the missing part — what does your ear expect?',
+    'Whistle it — the shape of the line will click',
+    'Sing each piece before you place it',
+    'Your voice is the best ear training tool',
+    'Hum the target note, then sing toward it',
+    'Close your eyes, sing it, then look for the match',
+    'Scat-sing the line — doo ba dee bop',
+    'Sing the rhythm too — it helps you hear the shape',
+    'Hum from the last placed piece forward',
+    "Can you sing the gap? That's your answer",
+    'Let your inner voice audiate the line',
+    'Sing it slow — speed comes later',
+    'Try la-la-la through the whole phrase',
+    'Match your voice to the playback, note by note',
+    'Bop du bah — sing like a horn player',
+    'Sing the interval — is it a step or a leap?',
+    'Your ear already knows — let your voice confirm it',
+    'Hum the connection between two pieces',
+    'Sing up, sing down — which way does it go?',
+    'Voice it out — even quietly helps',
+    'Tap your foot and sing — feel the pulse',
+    'Bebop is a vocal tradition — sing first, solve second',
+    'Doo-wee-doo-bah — find the melody in your voice',
+    'Sing the line back from memory',
+    'If you can sing it, you can solve it',
+    'Let the melody live in your throat, not just your ears',
+    'Hum the whole phrase, then zoom into the gap',
+    'Vocalize the contour — up, down, or staying close?',
+    'Bird sang everything before he played it — try that',
+    'Snap your fingers and scat through it',
+];
+let lastNudgeIdx = -1;
+
 function checkIdleStuck() {
     if (!currentLevelData || isGuidedMode) return;
     const idle = (Date.now() - stuckLastAction) / 1000;
     if (idle >= 45) {
         const unsolved = currentLevelData.removeCols.filter(c => !isSolved(c));
         if (unsolved.length > 0) {
-            showToast('Play the melody again — focus on one column at a time', 'info');
+            let idx;
+            do { idx = Math.floor(Math.random() * singingNudges.length); } while (idx === lastNudgeIdx && singingNudges.length > 1);
+            lastNudgeIdx = idx;
+            showSideNudge(singingNudges[idx]);
             stuckLastAction = Date.now(); // reset so we don't spam
         }
     }
@@ -6957,6 +7033,22 @@ function showToast(msg, type) {
     setTimeout(() => { if (toast.parentNode) toast.remove(); }, 2200);
 }
 
+function showSideNudge(msg) {
+    const existing = document.querySelector('.side-nudge');
+    if (existing) existing.remove();
+    const nudge = document.createElement('div');
+    nudge.className = 'side-nudge';
+    nudge.textContent = msg;
+    document.body.appendChild(nudge);
+}
+
+function dismissSideNudge() {
+    const nudge = document.querySelector('.side-nudge');
+    if (!nudge) return;
+    nudge.style.animation = 'nudgeFadeOut 0.5s ease forwards';
+    setTimeout(() => { if (nudge.parentNode) nudge.remove(); }, 600);
+}
+
 function showTutorial(text) {
     const bar = document.getElementById('tutorial-bar');
     document.getElementById('tutorial-text').textContent = text;
@@ -6974,15 +7066,24 @@ function positionTooltip(tip, targetEl, arrowDir) {
     const rect = targetEl.getBoundingClientRect();
     const tipRect = tip.getBoundingClientRect();
 
-    if (arrowDir === 'arrow-up') {
-        tip.style.left = (rect.left + rect.width / 2 - tipRect.width / 2) + 'px';
-        tip.style.top = (rect.bottom + 10) + 'px';
-    } else {
-        tip.style.left = (rect.left + rect.width / 2 - tipRect.width / 2) + 'px';
-        tip.style.top = (rect.top - tipRect.height - 10) + 'px';
+    // Always try above the target first
+    let top = rect.top - tipRect.height - 10;
+    let actualArrow = '';
+
+    // If it would go off the top, place below instead
+    if (top < 8) {
+        top = rect.bottom + 10;
+        actualArrow = 'arrow-up';
     }
 
-    // Clamp to viewport
+    tip.style.left = (rect.left + rect.width / 2 - tipRect.width / 2) + 'px';
+    tip.style.top = top + 'px';
+
+    // Update arrow class
+    tip.classList.remove('arrow-up');
+    if (actualArrow) tip.classList.add('arrow-up');
+
+    // Clamp horizontally
     const finalRect = tip.getBoundingClientRect();
     if (finalRect.left < 8) tip.style.left = '8px';
     if (finalRect.right > window.innerWidth - 8) tip.style.left = (window.innerWidth - 8 - tipRect.width) + 'px';
@@ -7038,10 +7139,14 @@ function showTutorialStep1() {
             showSpotlight(playBtn);
         }
         const listenLimit = currentLevelData?.listens;
-        const msg = listenLimit
-            ? `👆 Press ▶ — you have ${listenLimit} listens. Make each one count!`
-            : '👆 Press ▶ to listen to the melody first!';
-        setTimeout(() => showTooltipAt(playBtn, msg, ''), 400);
+        if (listenLimit) {
+            // Listen-limit levels (ch6) always show the count
+            const msg = `👆 Press ▶ — you have ${listenLimit} listens. Make each one count!`;
+            setTimeout(() => showTooltipAt(playBtn, msg, ''), 400);
+        } else if (currentLevel === 'ch1_01' || currentLevel === 'ch1_02') {
+            // Only show generic "press play" tooltip on the first two levels
+            setTimeout(() => showTooltipAt(playBtn, '👆 Press ▶ to listen to the melody first!', ''), 400);
+        }
     }
 }
 

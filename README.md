@@ -6,6 +6,15 @@ A jazz music theory game that teaches bebop vocabulary through tactile puzzle-so
 
 ---
 
+## What's New in v1.2
+
+- **Redesigned "Meet the Piece" intro** — 2-part flow: explore each variant's sound and look, then test your ear with a 2-round quiz featuring a mystery "?" piece
+- **Headphone icon** on tray pieces for quick audio preview
+- **Tooltips** now stay anchored on browser resize
+- **Bug fixes** — reward screen descriptions, listen-limit tutorial timing, piece intro visibility
+
+---
+
 ## How to Play
 
 Each puzzle gives you a chord progression and a target note. Your job is to fill in the missing columns by dragging pieces from the tray into the grid so every piece connects to the next.

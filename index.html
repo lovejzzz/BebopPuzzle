@@ -794,6 +794,7 @@
             color: #1a0800;
             font-size: 28px;
             display: flex; align-items: center; justify-content: center;
+            padding-left: 3px;
             cursor: pointer;
             transition: all 0.2s ease;
             flex-shrink: 0;
@@ -850,7 +851,7 @@
             gap: 12px;
             overflow-x: auto;
             flex: 1;
-            padding: 4px 2px;
+            padding: 32px 2px 4px;
             scrollbar-width: none;
             min-height: 92px;
             align-items: center;
@@ -939,18 +940,19 @@
 
         .tray-preview-btn {
             position: absolute;
-            top: 3px; right: 3px;
-            width: 20px; height: 20px;
+            top: -28px; left: 50%; transform: translateX(-50%);
+            width: 32px; height: 32px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.08);
+            background: none;
             border: none;
-            font-size: 10px;
-            line-height: 20px;
+            font-size: 24px;
+            line-height: 32px;
             text-align: center;
             cursor: pointer;
-            opacity: 0.6;
+            opacity: 0.7;
             transition: opacity 0.2s;
             padding: 0;
+            z-index: 2;
         }
         .tray-preview-btn:hover { opacity: 1; }
 
@@ -1485,7 +1487,7 @@
             margin-bottom: 24px;
         }
         .piece-intro-variants {
-            display: flex; gap: 16px; justify-content: center; margin-bottom: 24px;
+            display: flex; gap: 40px; justify-content: center; margin-bottom: 24px;
         }
         .piece-intro-variant {
             flex: 1; max-width: 140px;
@@ -1497,10 +1499,45 @@
             cursor: pointer;
             transition: all 0.2s;
         }
+        #piece-intro-part1 .piece-intro-variant {
+            background: none; border: none; border-radius: 0; padding: 8px;
+        }
+        #piece-intro-part1 .piece-intro-variant:hover { transform: scale(1.05); }
+        #piece-intro-part1 .piece-intro-variant.playing .piece-intro-var-icon img {
+            box-shadow: 0 0 18px rgba(240,168,48,0.5), 0 0 6px rgba(240,168,48,0.3);
+        }
         .piece-intro-variant:hover { background: rgba(255,255,255,0.09); border-color: var(--gold); }
         .piece-intro-variant.playing { border-color: var(--gold); box-shadow: 0 0 12px rgba(240,168,48,0.3); }
         .piece-intro-var-icon { font-size: 24px; margin-bottom: 6px; }
+        .piece-intro-var-icon img { width: 80px; height: 80px; border-radius: 8px; object-fit: contain; }
         .piece-intro-var-label { font-size: 13px; font-weight: 600; }
+        #piece-intro-part2.hidden { display: none; }
+        #piece-intro-part3.hidden { display: none; }
+        .piece-intro-congrats-icon { font-size: 48px; margin-bottom: 12px; }
+        .piece-intro-congrats-msg { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 24px; }
+        .piece-intro-congrats-actions { display: flex; gap: 12px; justify-content: center; margin-bottom: 16px; }
+        .piece-intro-congrats-btn { min-width: 110px; }
+        .piece-intro-ready-btn { background: rgba(52,211,153,0.12); border-color: #34d399; color: #34d399; }
+        .piece-intro-ready-btn:hover { background: rgba(52,211,153,0.22); }
+        .piece-intro-mystery { display: flex; justify-content: center; margin-bottom: 20px; }
+        .piece-intro-mystery-card {
+            max-width: none; flex: none; padding: 12px;
+            border-radius: 8px; border: none;
+            background: linear-gradient(135deg,
+                rgba(245,240,230,0.92) 0%,
+                rgba(235,228,216,0.95) 50%,
+                rgba(225,218,205,0.92) 100%);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.35), 0 1px 2px rgba(0,0,0,0.2),
+                inset 0 0 0 1px rgba(200,190,170,0.4);
+        }
+        .piece-intro-mystery-card .piece-intro-var-icon {
+            width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;
+            font-size: 36px; font-weight: bold; color: rgba(120,100,70,0.6);
+        }
+        .piece-intro-mystery-card .piece-intro-var-label { color: rgba(120,100,70,0.7); }
+        .piece-intro-mystery-card:hover { background: linear-gradient(135deg, rgba(245,240,230,1) 0%, rgba(235,228,216,1) 50%, rgba(225,218,205,1) 100%); }
+        .piece-intro-mystery-card.playing { box-shadow: 0 0 18px rgba(240,168,48,0.5), 0 2px 6px rgba(0,0,0,0.35); }
+        .piece-intro-quiz-round { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
         .piece-intro-quiz {
             margin-bottom: 20px;
         }
@@ -1527,6 +1564,7 @@
         .piece-intro-choice.wrong { background: rgba(248,113,113,0.15); border-color: #f87171; color: #f87171; }
         .piece-intro-result {
             font-size: 14px; color: var(--text-muted); margin-bottom: 16px;
+            min-height: 1.4em;
         }
         .piece-intro-skip {
             background: none;
@@ -1835,7 +1873,7 @@
 
         .tutorial-tooltip {
             position: fixed;
-            z-index: 55;
+            z-index: 70;
             background: rgba(91,141,239,0.15);
             border: 1px solid rgba(91,141,239,0.35);
             border-radius: 12px;
@@ -2418,55 +2456,6 @@
             animation: craft-sparkle 0.6s ease forwards;
         }
 
-        /* Craft table onboarding hint */
-        .craft-onboard {
-            position: absolute;
-            inset: 0;
-            background: rgba(7,9,15,0.92);
-            z-index: 20;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 16px 12px;
-            border-radius: 16px;
-            text-align: center;
-            animation: craftOnboardFade 0.4s ease;
-            cursor: pointer;
-        }
-        @keyframes craftOnboardFade {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .craft-onboard-icon {
-            font-size: 26px;
-            animation: craftOnboardBounce 1.5s ease-in-out infinite;
-        }
-        @keyframes craftOnboardBounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
-        }
-        .craft-onboard-title {
-            font-size: 12px;
-            font-weight: 800;
-            color: var(--gold);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-        }
-        .craft-onboard-desc {
-            font-size: 10px;
-            color: var(--text-secondary);
-            line-height: 1.5;
-        }
-        .craft-onboard-desc strong { color: var(--text-primary); }
-        .craft-onboard-tap {
-            font-size: 9px;
-            color: var(--text-muted);
-            margin-top: 4px;
-            animation: craft-claim-pulse 1.8s ease-in-out infinite;
-        }
-
         /* Ghost card in tray for consumed pieces */
         .tray-piece.used {
             cursor: default;
@@ -3007,69 +2996,6 @@
         }
 
         /* =============================================
-           ONBOARDING OVERLAY
-           ============================================= */
-        .onboard-overlay {
-            position: fixed; inset: 0; z-index: 200;
-            background: rgba(7,9,15,0.85);
-            backdrop-filter: blur(4px);
-            display: flex; align-items: center; justify-content: center;
-            animation: fade-in 0.3s ease-out;
-        }
-        .onboard-overlay.hidden { display: none; }
-        .onboard-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-medium);
-            border-radius: 20px;
-            padding: 32px;
-            max-width: 420px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 24px 80px rgba(0,0,0,0.5);
-        }
-        .onboard-step-indicator {
-            display: flex; gap: 6px; justify-content: center;
-            margin-bottom: 20px;
-        }
-        .onboard-dot {
-            width: 8px; height: 8px; border-radius: 50%;
-            background: var(--bg-elevated); transition: all 0.3s;
-        }
-        .onboard-dot.active { background: var(--gold); box-shadow: 0 0 8px var(--gold-glow); }
-        .onboard-dot.done { background: var(--green); }
-        .onboard-icon {
-            font-size: 48px; margin-bottom: 16px;
-            line-height: 1;
-        }
-        .onboard-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 22px; font-weight: 900;
-            color: var(--gold); margin-bottom: 8px;
-        }
-        .onboard-desc {
-            font-size: 13px; color: var(--text-secondary);
-            line-height: 1.6; margin-bottom: 24px;
-        }
-        .onboard-desc strong { color: var(--text-primary); }
-        .onboard-btn {
-            display: inline-block; padding: 12px 36px;
-            background: linear-gradient(135deg, var(--gold) 0%, #d97706 100%);
-            color: #1a0800; font-weight: 800; font-size: 13px;
-            text-transform: uppercase; letter-spacing: 0.1em;
-            border: none; border-radius: 12px;
-            cursor: pointer; transition: all 0.2s;
-            box-shadow: 0 4px 16px var(--gold-glow);
-        }
-        .onboard-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 24px var(--gold-glow); }
-        .onboard-skip {
-            display: block; margin: 12px auto 0;
-            background: none; border: none;
-            color: var(--text-muted); font-size: 11px;
-            cursor: pointer; padding: 4px;
-        }
-        .onboard-skip:hover { color: var(--text-secondary); }
-
-        /* =============================================
            SUCCESS TIER CELEBRATIONS
            ============================================= */
 
@@ -3182,7 +3108,7 @@
                 <button class="settings-btn settings-btn-danger" onclick="confirmResetProgress()">Reset All Progress</button>
             </div>
             <div class="settings-footer">
-                Bebop Puzzle <span class="settings-version" onclick="showChangelog()">v1.1</span><br>Made By Tian Xing
+                Bebop Puzzle <span class="settings-version" onclick="showChangelog()">v1.2</span><br>Made By Tian Xing
             </div>
         </div>
     </div>
@@ -3195,6 +3121,37 @@
             <div class="changelog-header">
                 <div class="changelog-title">What's New</div>
                 <button class="changelog-close" onclick="closeChangelog()">✕</button>
+            </div>
+
+            <div class="changelog-version-tag">v1.2</div>
+
+            <div class="changelog-section">
+                <div class="changelog-section-title">Meet the Piece — Redesigned</div>
+                <ul class="changelog-list">
+                    <li>2-part intro: explore piece variants first, then ear training quiz</li>
+                    <li>Actual piece thumbnails replace generic icons</li>
+                    <li>2-round quiz covers both variants with a mystery "?" piece</li>
+                    <li>Congrats screen with "Ready" or "More Quiz" options</li>
+                </ul>
+            </div>
+
+            <div class="changelog-section">
+                <div class="changelog-section-title">UI Polish</div>
+                <ul class="changelog-list">
+                    <li>Headphone icon above tray pieces for audio preview</li>
+                    <li>Tooltips stay anchored on browser resize</li>
+                    <li>Centered play/pause icon in melody button</li>
+                    <li>Removed note particle animations during playback</li>
+                </ul>
+            </div>
+
+            <div class="changelog-section">
+                <div class="changelog-section-title">Bug Fixes</div>
+                <ul class="changelog-list">
+                    <li>Reward screen description and Arpeggio tagline now display correctly</li>
+                    <li>Ch.6 listen-limit tutorial appears before first play</li>
+                    <li>Piece intro quiz elements properly hidden when inactive</li>
+                </ul>
             </div>
 
             <div class="changelog-version-tag">v1.1</div>
@@ -3260,16 +3217,6 @@
     <!-- =============================================
          ONBOARDING OVERLAY
          ============================================= -->
-    <div class="onboard-overlay hidden" id="onboard-overlay">
-        <div class="onboard-card">
-            <div class="onboard-step-indicator" id="onboard-dots"></div>
-            <div class="onboard-icon" id="onboard-icon"></div>
-            <div class="onboard-title" id="onboard-title"></div>
-            <div class="onboard-desc" id="onboard-desc"></div>
-            <button class="onboard-btn" id="onboard-next" onclick="nextOnboardStep()">Next</button>
-            <button class="onboard-skip" onclick="skipOnboarding()">Skip intro</button>
-        </div>
-    </div>
 
     <!-- =============================================
          SCREEN: CHAPTER MAP
@@ -3394,6 +3341,7 @@
             </div>
             <div class="reward-piece-name" id="reward-piece-name"></div>
             <div class="reward-piece-tagline" id="reward-piece-tagline"></div>
+            <div class="reward-piece-desc" id="reward-piece-desc"></div>
             <button class="reward-replay-btn" id="reward-replay-btn" onclick="replayRewardPiece()">🔊 Tap to hear again</button>
             <button class="reward-continue-btn" onclick="dismissReward()">Continue</button>
         </div>
@@ -3420,25 +3368,52 @@
     <div class="piece-intro-overlay hidden" id="piece-intro-overlay">
         <div class="piece-intro-modal">
             <div class="piece-intro-title" id="piece-intro-title">Meet the Neighbor</div>
-            <div class="piece-intro-variants">
-                <button class="piece-intro-variant" id="piece-intro-var-a" onclick="playPieceIntroVariant('a')">
-                    <div class="piece-intro-var-icon">🔊</div>
-                    <div class="piece-intro-var-label" id="piece-intro-label-a"></div>
-                </button>
-                <button class="piece-intro-variant" id="piece-intro-var-b" onclick="playPieceIntroVariant('b')">
-                    <div class="piece-intro-var-icon">🔊</div>
-                    <div class="piece-intro-var-label" id="piece-intro-label-b"></div>
-                </button>
+
+            <!-- Part 1: Reveal -->
+            <div id="piece-intro-part1">
+                <div class="piece-intro-variants">
+                    <button class="piece-intro-variant" id="piece-intro-var-a" onclick="playPieceIntroVariant('a')">
+                        <div class="piece-intro-var-icon" id="piece-intro-icon-a"></div>
+                        <div class="piece-intro-var-label" id="piece-intro-label-a"></div>
+                    </button>
+                    <button class="piece-intro-variant" id="piece-intro-var-b" onclick="playPieceIntroVariant('b')">
+                        <div class="piece-intro-var-icon" id="piece-intro-icon-b"></div>
+                        <div class="piece-intro-var-label" id="piece-intro-label-b"></div>
+                    </button>
+                </div>
+                <div class="piece-intro-result" id="piece-intro-contrast"></div>
             </div>
-            <div class="piece-intro-quiz hidden" id="piece-intro-quiz">
-                <div class="piece-intro-quiz-prompt" id="piece-intro-quiz-prompt">Which one was that?</div>
-                <div class="piece-intro-quiz-choices">
-                    <button class="piece-intro-choice" id="piece-intro-choice-a" onclick="checkPieceIntroAnswer('a')"></button>
-                    <button class="piece-intro-choice" id="piece-intro-choice-b" onclick="checkPieceIntroAnswer('b')"></button>
+
+            <!-- Part 2: Quiz -->
+            <div id="piece-intro-part2" class="hidden">
+                <div class="piece-intro-quiz-round" id="piece-intro-round"></div>
+                <div class="piece-intro-mystery">
+                    <button class="piece-intro-variant piece-intro-mystery-card" id="piece-intro-mystery-btn" onclick="replayIntroQuiz()">
+                        <div class="piece-intro-var-icon">?</div>
+                        <div class="piece-intro-var-label">Tap to listen</div>
+                    </button>
+                </div>
+                <div class="piece-intro-quiz" id="piece-intro-quiz">
+                    <div class="piece-intro-quiz-prompt" id="piece-intro-quiz-prompt">Which one is this?</div>
+                    <div class="piece-intro-quiz-choices">
+                        <button class="piece-intro-choice" id="piece-intro-choice-a" onclick="checkPieceIntroAnswer('a')"></button>
+                        <button class="piece-intro-choice" id="piece-intro-choice-b" onclick="checkPieceIntroAnswer('b')"></button>
+                    </div>
+                </div>
+                <div class="piece-intro-result" id="piece-intro-result"></div>
+            </div>
+
+            <!-- Part 3: Congrats -->
+            <div id="piece-intro-part3" class="hidden">
+                <div class="piece-intro-congrats-icon">🎉</div>
+                <div class="piece-intro-congrats-msg">You've got the ear for it!</div>
+                <div class="piece-intro-congrats-actions">
+                    <button class="piece-intro-choice piece-intro-congrats-btn" onclick="pieceIntroMoreQuiz()">More Quiz</button>
+                    <button class="piece-intro-choice piece-intro-congrats-btn piece-intro-ready-btn" onclick="dismissPieceIntro()">Ready</button>
                 </div>
             </div>
-            <div class="piece-intro-result hidden" id="piece-intro-result"></div>
-            <button class="piece-intro-skip" onclick="dismissPieceIntro()">Skip →</button>
+
+            <button class="piece-intro-skip" id="piece-intro-next-btn" onclick="pieceIntroNext()">Next →</button>
         </div>
     </div>
 
@@ -3901,8 +3876,8 @@ function togglePlay() { if (isPlaying) { stopPlayback(); return; } playMelody();
 const LEVEL_TEMPLATES = [
     // Chapter 1: Arpeggios — progressive mechanics introduction
     // Levels 1-2: craft hidden, Levels 3-5: flip only, Levels 6-8: full craft
-    {id:"ch1_01", ch:1, name:"First Chorus",    len:2, rem:1, pool:["Arpeggio"], newPc:null, hints:3, time:60,  craft:'hidden', tutorial:"Listen to the melody, then drag the piece into the highlighted column."},
-    {id:"ch1_02", ch:1, name:"Turnaround",      len:3, rem:1, pool:["Arpeggio"], newPc:null, hints:3, time:90,  craft:'hidden', tutorial:"Listen again — where does this piece fit?"},
+    {id:"ch1_01", ch:1, name:"First Chorus",    len:2, rem:1, pool:["Arpeggio"], newPc:"Arpeggio", hints:3, time:60,  craft:'hidden', tutorial:"Listen to the melody, then drag the piece into the highlighted column."},
+    {id:"ch1_02", ch:1, name:"Turnaround",      len:3, rem:1, pool:["Arpeggio"], newPc:null, hints:3, time:90,  craft:'hidden', tutorial:"Tap any filled column to hear just that part of the melody."},
     {id:"ch1_03", ch:1, name:"Going Down",      len:2, rem:1, pool:["Arpeggio"], newPc:null, hints:3, time:60,  craft:'flip',   tutorial:"This piece needs to go the other way!"},
     {id:"ch1_04", ch:1, name:"High Wire",       len:3, rem:1, pool:["Arpeggio"], newPc:null, hints:3, time:90,  craft:'flip'},
     {id:"ch1_05", ch:1, name:"Walking Bass",    len:4, rem:1, pool:["Arpeggio"], newPc:null, hints:3, time:100, craft:'flip'},
@@ -3979,7 +3954,7 @@ const LEVEL_TEMPLATES = [
     {id:"ch5_15", ch:5, name:"Bebop Legend",      len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:180},
 
     // Chapter 6: Jam Session — extra pieces + limited listens (listens: 12 down to 1)
-    {id:"ch6_01", ch:6, name:"Sound Check",       len:3, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, time:120, listens:12, extraPieces:2},
+    {id:"ch6_01", ch:6, name:"Sound Check",       len:3, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, time:120, listens:12, extraPieces:2, tutorial:"Jam Session rules: you have a limited number of listens. Make each one count!"},
     {id:"ch6_02", ch:6, name:"Opening Act",       len:3, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, time:120, listens:11, extraPieces:2},
     {id:"ch6_03", ch:6, name:"Head In",           len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, time:120, listens:10, extraPieces:2},
     {id:"ch6_04", ch:6, name:"First Solo",        len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:150, listens:9,  extraPieces:3},
@@ -5043,7 +5018,7 @@ function renderTray() {
             </div>
             <div class="tray-piece-label">${baseName}</div>
             <div class="tray-piece-variant">${label}</div>
-            ${showPreview ? '<button class="tray-preview-btn" title="Hear this piece">🔊</button>' : ''}
+            ${showPreview ? '<button class="tray-preview-btn" title="Hear this piece">🎧</button>' : ''}
         `;
 
         // Preview button: tap to hear piece sound
@@ -6635,17 +6610,7 @@ function showDirectionLabels() {
         if (text === 'Ascending') variant.textContent = '↑ Ascending (goes up)';
         else if (text === 'Descending') variant.textContent = '↓ Descending (goes down)';
     });
-    // Remove after 5 seconds
-    setTimeout(() => {
-        const cards2 = document.querySelectorAll('.tray-piece');
-        cards2.forEach(card => {
-            const variant = card.querySelector('.tray-piece-variant');
-            if (!variant) return;
-            const text = variant.textContent.trim();
-            if (text.includes('Ascending')) variant.textContent = 'Ascending';
-            else if (text.includes('Descending')) variant.textContent = 'Descending';
-        });
-    }, 5000);
+    // Labels persist until level completes — cleared by renderTray on next level
 }
 
 function pulseHintButton() {
@@ -6830,7 +6795,6 @@ function playMelody() {
             document.querySelectorAll('.playhead-active').forEach(el => el.classList.remove('playhead-active'));
             const colEl = document.querySelector(`.grid-column[data-col="${col}"]`);
             if (colEl) colEl.querySelectorAll('.grid-cell').forEach(c => c.classList.add('playhead-active'));
-            spawnNoteParticles(col);
         }, Math.max(0, delayMs));
         playbackTimeouts.push(id);
     }
@@ -7002,13 +6966,42 @@ function showTutorial(text) {
 
 // ---- Floating tutorial tooltip system ----
 let activeTutorialTooltip = null;
+let activeTooltipTarget = null;
+let activeTooltipArrow = null;
 let tutorialListenDone = false;
+
+function positionTooltip(tip, targetEl, arrowDir) {
+    const rect = targetEl.getBoundingClientRect();
+    const tipRect = tip.getBoundingClientRect();
+
+    if (arrowDir === 'arrow-up') {
+        tip.style.left = (rect.left + rect.width / 2 - tipRect.width / 2) + 'px';
+        tip.style.top = (rect.bottom + 10) + 'px';
+    } else {
+        tip.style.left = (rect.left + rect.width / 2 - tipRect.width / 2) + 'px';
+        tip.style.top = (rect.top - tipRect.height - 10) + 'px';
+    }
+
+    // Clamp to viewport
+    const finalRect = tip.getBoundingClientRect();
+    if (finalRect.left < 8) tip.style.left = '8px';
+    if (finalRect.right > window.innerWidth - 8) tip.style.left = (window.innerWidth - 8 - tipRect.width) + 'px';
+}
+
+function onTooltipResize() {
+    if (activeTutorialTooltip && activeTooltipTarget) {
+        positionTooltip(activeTutorialTooltip, activeTooltipTarget, activeTooltipArrow);
+    }
+}
+window.addEventListener('resize', onTooltipResize);
 
 function removeTutorialTooltip() {
     if (activeTutorialTooltip && activeTutorialTooltip.parentNode) {
         activeTutorialTooltip.remove();
     }
     activeTutorialTooltip = null;
+    activeTooltipTarget = null;
+    activeTooltipArrow = null;
 }
 
 function showTooltipAt(targetEl, text, arrowDir) {
@@ -7021,25 +7014,13 @@ function showTooltipAt(targetEl, text, arrowDir) {
     tip.style.animation = 'none';
     document.body.appendChild(tip);
     activeTutorialTooltip = tip;
+    activeTooltipTarget = targetEl;
+    activeTooltipArrow = arrowDir;
 
     // Double-rAF to ensure layout is fully computed before positioning
     requestAnimationFrame(() => { requestAnimationFrame(() => {
         if (!activeTutorialTooltip || activeTutorialTooltip !== tip) return;
-        const rect = targetEl.getBoundingClientRect();
-        const tipRect = tip.getBoundingClientRect();
-
-        if (arrowDir === 'arrow-up') {
-            tip.style.left = (rect.left + rect.width / 2 - tipRect.width / 2) + 'px';
-            tip.style.top = (rect.bottom + 10) + 'px';
-        } else {
-            tip.style.left = (rect.left + rect.width / 2 - tipRect.width / 2) + 'px';
-            tip.style.top = (rect.top - tipRect.height - 10) + 'px';
-        }
-
-        // Clamp to viewport
-        const finalRect = tip.getBoundingClientRect();
-        if (finalRect.left < 8) tip.style.left = '8px';
-        if (finalRect.right > window.innerWidth - 8) tip.style.left = (window.innerWidth - 8 - tipRect.width) + 'px';
+        positionTooltip(tip, targetEl, arrowDir);
 
         // Now reveal with animation
         tip.style.visibility = '';
@@ -7056,7 +7037,11 @@ function showTutorialStep1() {
         if (currentLevel === 'ch1_01' && !gameProgress['_tutorialSpotlightDone']) {
             showSpotlight(playBtn);
         }
-        setTimeout(() => showTooltipAt(playBtn, '👆 Press ▶ to listen to the melody first!', ''), 400);
+        const listenLimit = currentLevelData?.listens;
+        const msg = listenLimit
+            ? `👆 Press ▶ — you have ${listenLimit} listens. Make each one count!`
+            : '👆 Press ▶ to listen to the melody first!';
+        setTimeout(() => showTooltipAt(playBtn, msg, ''), 400);
     }
 }
 
@@ -7072,7 +7057,7 @@ function onTutorialMelodyPlayed() {
         // Extended sing-back moment
         const el = document.getElementById('puzzle-level-name');
         if (el) {
-            el.textContent = 'Can you hum what you just heard?';
+            el.textContent = 'Try replaying it in your head \u2014 what shape did the melody make?';
             el.style.color = 'var(--gold)';
         }
         setTimeout(() => {
@@ -7136,7 +7121,6 @@ function playColumnPreview(col) {
     const colEl = document.querySelector(`.grid-column[data-col="${col}"]`);
     if (colEl) {
         colEl.querySelectorAll('.grid-cell').forEach(c => c.classList.add('playhead-active'));
-        spawnNoteParticles(col);
     }
 
     let t = audioCtx.currentTime + 0.05;
@@ -7257,6 +7241,22 @@ function showSuccessModal(stars, elapsed) {
 
     var m = Math.floor(elapsed / 60), s = elapsed % 60;
     document.getElementById('success-stats').innerHTML = 'Time <span class="success-stat-value">' + m + ':' + s.toString().padStart(2,'0') + '</span>&nbsp;\u00b7&nbsp;Hints <span class="success-stat-value">' + hintsUsed + '</span>&nbsp;\u00b7&nbsp;Mistakes <span class="success-stat-value">' + wrongPlacements + '</span>';
+
+    // Show star criteria hint when player didn't get 3 stars
+    var infoEl = document.getElementById('success-star-info');
+    if (!infoEl) {
+        infoEl = document.createElement('div');
+        infoEl.id = 'success-star-info';
+        infoEl.style.cssText = 'font-size:0.72em;color:#998;margin-top:6px;';
+        document.getElementById('success-stats').after(infoEl);
+    }
+    var threshold = currentLevelData.timeThreshold || currentLevelData.time || 999;
+    var tm = Math.floor(threshold / 60), ts = threshold % 60;
+    if (stars < 3) {
+        infoEl.textContent = '\u2605\u2605\u2605 = no hints, no mistakes, under ' + tm + ':' + ts.toString().padStart(2,'0');
+    } else {
+        infoEl.textContent = '';
+    }
 }
 
 function retryLevel() {
@@ -7448,14 +7448,16 @@ function updateLastPlayedTimestamp() {
 // MEET THE PIECE — Ear Training Interstitial
 // ==================================================================
 const PIECE_INTRO_HINTS = {
+    'Arpeggio': { a: 'Ascending — hear how it jumps up through the chord?', b: 'Descending — hear how it leaps down?' },
     'Neighbor': { a: 'From Above — hear how it dips down and returns?', b: 'From Below — hear how it reaches up and comes back?' },
     'Approach': { a: 'Ascending — hear the chromatic walk upward?', b: 'Descending — hear it stepping down into the note?' },
     'Enclosure': { a: 'From Above — it starts above, dips below, then lands.', b: 'From Below — it starts below, rises above, then lands.' },
 };
 
-let pieceIntroState = { pieceName: null, labelA: null, labelB: null, quizAnswer: null, callback: null };
+let pieceIntroState = { pieceName: null, labelA: null, labelB: null, quizAnswer: null, quizRound: 1, quizOrder: [], callback: null };
 
 const PIECE_CONTRAST = {
+    'Arpeggio': 'The Arpeggio leaps through the notes of the chord — hear the jump?',
     'Neighbor': 'The Arpeggio jumps through the chord. The Neighbor stays close — just a step away.',
     'Approach': 'The Neighbor wiggles around one note. The Approach walks steadily toward it.',
     'Enclosure': 'The Approach comes from one direction. The Enclosure circles from both sides.',
@@ -7467,37 +7469,42 @@ function showPieceIntro(pieceName, callback) {
 
     const labelA = map.defaultLabel;
     const labelB = map.flipH || labelA;
-    pieceIntroState = { pieceName, labelA, labelB, quizAnswer: null, callback };
+    const quizOrder = Math.random() < 0.5 ? ['a', 'b'] : ['b', 'a'];
+    pieceIntroState = { pieceName, labelA, labelB, quizAnswer: null, quizRound: 1, quizOrder, callback };
 
-    const contrast = PIECE_CONTRAST[pieceName] || '';
     document.getElementById('piece-intro-title').textContent = 'Meet the ' + pieceName;
-    // Show contrast with previous piece if available
-    const resultEl = document.getElementById('piece-intro-result');
-    if (contrast) {
-        resultEl.textContent = contrast;
-        resultEl.classList.remove('hidden');
-    } else {
-        resultEl.classList.add('hidden');
-    }
+
+    // Set piece thumbnails
+    const pieceA = findPiece(pieceName, labelA);
+    const pieceB = findPiece(pieceName, labelB);
+    const iconA = document.getElementById('piece-intro-icon-a');
+    const iconB = document.getElementById('piece-intro-icon-b');
+    iconA.innerHTML = pieceA && pieceA.thumbnail ? '<img src="' + pieceA.thumbnail + '" alt="' + labelA + '">' : '🎧';
+    iconB.innerHTML = pieceB && pieceB.thumbnail ? '<img src="' + pieceB.thumbnail + '" alt="' + labelB + '">' : '🎧';
+
     document.getElementById('piece-intro-label-a').textContent = labelA;
     document.getElementById('piece-intro-label-b').textContent = labelB;
-    document.getElementById('piece-intro-quiz').classList.add('hidden');
-    document.getElementById('piece-intro-result').classList.add('hidden');
-    document.getElementById('piece-intro-choice-a').textContent = labelA;
-    document.getElementById('piece-intro-choice-b').textContent = labelB;
-    document.getElementById('piece-intro-choice-a').className = 'piece-intro-choice';
-    document.getElementById('piece-intro-choice-b').className = 'piece-intro-choice';
+
+    // Show contrast text
+    const contrast = PIECE_CONTRAST[pieceName] || '';
+    const contrastEl = document.getElementById('piece-intro-contrast');
+    contrastEl.textContent = contrast;
+
+    // Show Part 1, hide Part 2
+    document.getElementById('piece-intro-part1').style.display = '';
+    document.getElementById('piece-intro-part2').classList.add('hidden');
+    document.getElementById('piece-intro-next-btn').textContent = 'Next →';
+
     document.getElementById('piece-intro-var-a').classList.remove('playing');
     document.getElementById('piece-intro-var-b').classList.remove('playing');
 
     document.getElementById('piece-intro-overlay').classList.remove('hidden');
 
-    // Auto-play variant A after a beat
-    setTimeout(() => playPieceIntroVariant('a'), 600);
-    // Then variant B
-    setTimeout(() => playPieceIntroVariant('b'), 2400);
-    // Then quiz
-    setTimeout(() => startPieceIntroQuiz(), 4200);
+    // Tooltip hint for Part 1
+    setTimeout(() => {
+        const varA = document.getElementById('piece-intro-var-a');
+        showTooltipAt(varA, '👆 Tap to hear each piece', 'arrow-up');
+    }, 400);
 }
 
 function generatePieceIntroNotes(pieceName, label) {
@@ -7510,6 +7517,7 @@ function generatePieceIntroNotes(pieceName, label) {
 }
 
 function playPieceIntroVariant(which) {
+    removeTutorialTooltip();
     getAudioCtx();
     getMasterGain();
     const { pieceName, labelA, labelB } = pieceIntroState;
@@ -7541,50 +7549,104 @@ function playPieceIntroVariant(which) {
     }, totalMs);
 }
 
+function pieceIntroNext() {
+    removeTutorialTooltip();
+    const part1 = document.getElementById('piece-intro-part1');
+    const part2 = document.getElementById('piece-intro-part2');
+    if (part1.style.display !== 'none') {
+        // Advance from Part 1 to Part 2
+        part1.style.display = 'none';
+        part2.classList.remove('hidden');
+        document.getElementById('piece-intro-title').textContent = 'Which one is this?';
+        pieceIntroState.quizRound = 1;
+        startPieceIntroQuiz();
+    } else {
+        // On Part 2 — skip/finish quiz
+        dismissPieceIntro();
+    }
+}
+
 function startPieceIntroQuiz() {
-    const { labelA, labelB } = pieceIntroState;
-    // Pick a random variant for the quiz
-    pieceIntroState.quizAnswer = Math.random() < 0.5 ? 'a' : 'b';
-    const quizLabel = pieceIntroState.quizAnswer === 'a' ? labelA : labelB;
+    const { labelA, labelB, quizOrder, quizRound } = pieceIntroState;
+    const which = quizOrder[quizRound - 1];
+    pieceIntroState.quizAnswer = which;
 
-    document.getElementById('piece-intro-quiz').classList.remove('hidden');
-    document.getElementById('piece-intro-quiz-prompt').textContent = 'Which one was that?';
+    document.getElementById('piece-intro-round').textContent = 'Round ' + quizRound + ' of 2';
+    document.getElementById('piece-intro-quiz-prompt').textContent = 'Which one is this?';
+    document.getElementById('piece-intro-choice-a').textContent = labelA;
+    document.getElementById('piece-intro-choice-b').textContent = labelB;
+    document.getElementById('piece-intro-choice-a').className = 'piece-intro-choice';
+    document.getElementById('piece-intro-choice-b').className = 'piece-intro-choice';
+    document.getElementById('piece-intro-result').textContent = '';
 
-    // Play the quiz variant
-    playPieceIntroVariant(pieceIntroState.quizAnswer);
+    // Add playing glow to mystery card and play the quiz variant
+    const mysteryBtn = document.getElementById('piece-intro-mystery-btn');
+    mysteryBtn.classList.add('playing');
+    playPieceIntroVariant(which);
+    // Remove glow after playback
+    setTimeout(() => mysteryBtn.classList.remove('playing'), 2000);
+}
+
+function replayIntroQuiz() {
+    const { quizAnswer } = pieceIntroState;
+    if (!quizAnswer) return;
+    const mysteryBtn = document.getElementById('piece-intro-mystery-btn');
+    mysteryBtn.classList.add('playing');
+    playPieceIntroVariant(quizAnswer);
+    setTimeout(() => mysteryBtn.classList.remove('playing'), 2000);
 }
 
 function checkPieceIntroAnswer(choice) {
-    const { quizAnswer, pieceName } = pieceIntroState;
+    const { quizAnswer } = pieceIntroState;
     const resultEl = document.getElementById('piece-intro-result');
     const choiceAEl = document.getElementById('piece-intro-choice-a');
     const choiceBEl = document.getElementById('piece-intro-choice-b');
 
     if (choice === quizAnswer) {
         (choice === 'a' ? choiceAEl : choiceBEl).classList.add('correct');
-        resultEl.textContent = 'You\'ve got the ear for it!';
-        resultEl.classList.remove('hidden');
         sfx('correct');
-        setTimeout(() => dismissPieceIntro(), 1500);
+        if (pieceIntroState.quizRound >= 2) {
+            resultEl.textContent = '✓ Correct!';
+            setTimeout(() => showPieceIntroCongrats(), 1000);
+        } else {
+            resultEl.textContent = '✓ Correct!';
+            pieceIntroState.quizRound = 2;
+            setTimeout(() => startPieceIntroQuiz(), 1500);
+        }
     } else {
         (choice === 'a' ? choiceAEl : choiceBEl).classList.add('wrong');
         resultEl.textContent = 'Not quite — listen again!';
-        resultEl.classList.remove('hidden');
         sfx('wrong');
-        // Replay both variants, then quiz again
         setTimeout(() => {
             choiceAEl.className = 'piece-intro-choice';
             choiceBEl.className = 'piece-intro-choice';
-            resultEl.classList.add('hidden');
-            playPieceIntroVariant('a');
-            setTimeout(() => playPieceIntroVariant('b'), 1800);
-            setTimeout(() => startPieceIntroQuiz(), 3600);
+            resultEl.textContent = '';
+            replayIntroQuiz();
         }, 1500);
     }
 }
 
+function showPieceIntroCongrats() {
+    document.getElementById('piece-intro-part2').classList.add('hidden');
+    document.getElementById('piece-intro-part3').classList.remove('hidden');
+    document.getElementById('piece-intro-title').textContent = '';
+    document.getElementById('piece-intro-next-btn').style.display = 'none';
+}
+
+function pieceIntroMoreQuiz() {
+    document.getElementById('piece-intro-part3').classList.add('hidden');
+    document.getElementById('piece-intro-part2').classList.remove('hidden');
+    document.getElementById('piece-intro-title').textContent = 'Which one is this?';
+    document.getElementById('piece-intro-next-btn').style.display = '';
+    const quizOrder = Math.random() < 0.5 ? ['a', 'b'] : ['b', 'a'];
+    pieceIntroState.quizRound = 1;
+    pieceIntroState.quizOrder = quizOrder;
+    startPieceIntroQuiz();
+}
+
 function dismissPieceIntro() {
     document.getElementById('piece-intro-overlay').classList.add('hidden');
+    document.getElementById('piece-intro-next-btn').style.display = '';
     if (pieceIntroState.callback) pieceIntroState.callback();
 }
 
@@ -7592,12 +7654,14 @@ function dismissPieceIntro() {
 // REWARD — New Piece Unlocked
 // ==================================================================
 const PIECE_DESCRIPTIONS = {
+    'Arpeggio': 'Leaps through the notes of the chord. The foundation of bebop vocabulary — every great line starts here.',
     'Neighbor': 'Decorates the target note by stepping to an adjacent tone and returning. Perfect for adding smooth melodic motion.',
     'Approach': 'Steps chromatically into the target note from above or below. A classic bebop device for creating tension and resolution.',
     'Enclosure': 'Surrounds the target note from both sides before landing on it. The ultimate bebop secret weapon for hip lines.',
 };
 
 const PIECE_TAGLINES = {
+    'Arpeggio':  'Leaping',
     'Neighbor':  'Smooth',
     'Approach':  'Chromatic',
     'Enclosure': 'Surrounding',
@@ -7605,6 +7669,7 @@ const PIECE_TAGLINES = {
 
 // Dot positions (x%, y%) tracing each piece type's melodic contour
 const PIECE_DOT_CONTOURS = {
+    'Arpeggio':  [{x:10,y:85},{x:35,y:55},{x:60,y:30},{x:85,y:10}],
     'Neighbor':  [{x:10,y:50},{x:35,y:25},{x:60,y:50},{x:85,y:75}],
     'Approach':  [{x:10,y:85},{x:35,y:65},{x:60,y:45},{x:85,y:25}],
     'Enclosure': [{x:10,y:15},{x:35,y:35},{x:60,y:85},{x:85,y:65}],
@@ -7689,9 +7754,12 @@ function showRewardScreen(pieceName) {
     // Tagline instead of paragraph
     const taglineEl = document.getElementById('reward-piece-tagline');
     if (taglineEl) taglineEl.textContent = PIECE_TAGLINES[pieceName] || '';
-    // Hide old desc if it exists
+    // Show piece description
     const descEl = document.getElementById('reward-piece-desc');
-    if (descEl) descEl.style.display = 'none';
+    if (descEl) {
+        descEl.textContent = PIECE_DESCRIPTIONS[pieceName] || '';
+        descEl.style.display = '';
+    }
 
     overlay.classList.remove('hidden');
     spawnRewardParticles(frame);
@@ -8503,89 +8571,9 @@ showScreen = function(name) {
 // ==================================================================
 // ONBOARDING — Step-by-step intro for first-time players
 // ==================================================================
-const ONBOARD_STEPS = [
-    {
-        icon: '🎵',
-        title: 'Welcome to Bebop Puzzle',
-        desc: 'Learn jazz vocabulary by solving melodic puzzles. Each piece represents a <strong>4-note musical pattern</strong> used in bebop improvisation.'
-    },
-    {
-        icon: '🧩',
-        title: 'Connect the Pieces',
-        desc: 'Drag pieces from the <strong>tray</strong> onto the grid. Each piece has <strong>entry and exit points</strong> that must align with neighboring pieces.'
-    },
-    {
-        icon: '🎤',
-        title: 'Sing It Back',
-        desc: 'After hearing the melody, <strong>sing or hum it back</strong> before placing pieces. Your ear is your best tool — if you can sing it, you can solve it!'
-    },
-    {
-        icon: '⭐',
-        title: 'Earn Stars',
-        desc: 'Solve quickly with <strong>no hints or mistakes</strong> for 3 stars. Stars unlock new chapters with <strong>new piece types</strong> to master.'
-    },
-    {
-        icon: '🎷',
-        title: 'Ready to Play!',
-        desc: 'Start with <strong>Arpeggios</strong> and work your way up through all 6 chapters. Press <strong>▶</strong> anytime to hear the melody!'
-    }
-];
-
-let onboardStep = 0;
-
-function shouldShowOnboarding() {
-    return !localStorage.getItem('bebopOnboardDone') && getTotalStars() === 0;
-}
-
-function startOnboarding() {
-    onboardStep = 0;
-    renderOnboardStep();
-    document.getElementById('onboard-overlay').classList.remove('hidden');
-}
-
-function renderOnboardStep() {
-    const step = ONBOARD_STEPS[onboardStep];
-    document.getElementById('onboard-icon').textContent = step.icon;
-    document.getElementById('onboard-title').textContent = step.title;
-    document.getElementById('onboard-desc').innerHTML = step.desc;
-
-    // Dots
-    const dots = document.getElementById('onboard-dots');
-    dots.innerHTML = '';
-    ONBOARD_STEPS.forEach((_, i) => {
-        const d = document.createElement('div');
-        d.className = 'onboard-dot' + (i === onboardStep ? ' active' : i < onboardStep ? ' done' : '');
-        dots.appendChild(d);
-    });
-
-    // Button text
-    const btn = document.getElementById('onboard-next');
-    btn.textContent = onboardStep === ONBOARD_STEPS.length - 1 ? "Let's Go!" : 'Next';
-}
-
-function nextOnboardStep() {
-    sfx('click');
-    onboardStep++;
-    if (onboardStep >= ONBOARD_STEPS.length) {
-        skipOnboarding();
-        return;
-    }
-    renderOnboardStep();
-}
-
-function skipOnboarding() {
-    localStorage.setItem('bebopOnboardDone', '1');
-    document.getElementById('onboard-overlay').classList.add('hidden');
-    showScreen('map');
-}
-
 function onPlayPressed() {
     sfx('click');
-    if (shouldShowOnboarding()) {
-        startOnboarding();
-    } else {
-        showScreen('map');
-    }
+    showScreen('map');
 }
 
 // ==================================================================

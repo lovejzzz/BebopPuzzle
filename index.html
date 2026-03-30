@@ -851,7 +851,7 @@
             gap: 12px;
             overflow-x: auto;
             flex: 1;
-            padding: 32px 2px 4px;
+            padding: 8px 2px 4px;
             scrollbar-width: none;
             min-height: 92px;
             align-items: center;
@@ -938,23 +938,18 @@
             margin-top: -2px;
         }
 
-        .tray-preview-btn {
-            position: absolute;
-            top: -28px; left: 50%; transform: translateX(-50%);
-            width: 32px; height: 32px;
-            border-radius: 50%;
-            background: none;
-            border: none;
-            font-size: 24px;
-            line-height: 32px;
-            text-align: center;
-            cursor: pointer;
-            opacity: 0.7;
-            transition: opacity 0.2s;
-            padding: 0;
-            z-index: 2;
+        .tray-piece.tray-playing {
+            animation: trayPieceGlow 2s ease forwards;
         }
-        .tray-preview-btn:hover { opacity: 1; }
+        .tray-piece.tray-playing .tray-piece-thumb img {
+            box-shadow: 0 0 14px rgba(240,168,48,0.5), 0 0 4px rgba(240,168,48,0.3);
+        }
+        @keyframes trayPieceGlow {
+            0%   { transform: scale(1); }
+            15%  { transform: scale(1.08); }
+            85%  { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
 
         /* Piece type color accents */
         .tray-piece[data-base-name="Arpeggio"]  { border-bottom: 3px solid rgba(240,168,48,0.6); }
@@ -1085,7 +1080,6 @@
             width: 160px;
             text-align: center;
             box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            animation: pop-in 0.25s ease-out;
         }
         .tempo-hint.hidden { display: none; }
         .tempo-hint-title {
@@ -1534,6 +1528,9 @@
             background: none; border: none; border-radius: 0; padding: 8px;
         }
         #piece-intro-part1 .piece-intro-variant:hover { transform: scale(1.05); }
+        #piece-intro-part1 .piece-intro-variant.playing {
+            border-color: transparent; box-shadow: none;
+        }
         #piece-intro-part1 .piece-intro-variant.playing .piece-intro-var-icon img {
             box-shadow: 0 0 18px rgba(240,168,48,0.5), 0 0 6px rgba(240,168,48,0.3);
         }
@@ -1568,6 +1565,32 @@
         .piece-intro-mystery-card .piece-intro-var-label { color: rgba(120,100,70,0.7); }
         .piece-intro-mystery-card:hover { background: linear-gradient(135deg, rgba(245,240,230,1) 0%, rgba(235,228,216,1) 50%, rgba(225,218,205,1) 100%); }
         .piece-intro-mystery-card.playing { box-shadow: 0 0 18px rgba(240,168,48,0.5), 0 2px 6px rgba(0,0,0,0.35); }
+        .piece-intro-mystery { perspective: 600px; }
+        .piece-intro-mystery-card { transition: transform 0.5s ease; transform-style: preserve-3d; }
+        .piece-intro-mystery-card.flipping { animation: cardFlip 0.5s ease forwards; }
+        @keyframes cardFlip {
+            0%   { transform: rotateY(0deg); }
+            100% { transform: rotateY(180deg); }
+        }
+        .piece-intro-mystery-card.revealed { transform: rotateY(0deg); animation: none; }
+        .piece-intro-mystery-card.revealed .piece-intro-var-icon img {
+            width: 80px; height: 80px; border-radius: 8px; object-fit: contain;
+        }
+        .piece-intro-mystery-card.thrown {
+            animation: cardThrow 0.5s ease forwards;
+            pointer-events: none;
+        }
+        @keyframes cardThrow {
+            0%   { opacity: 1; transform: translateX(0) translateY(0) rotate(0deg) scale(1); }
+            100% { opacity: 0; transform: translateX(120px) translateY(-60px) rotate(25deg) scale(0.7); }
+        }
+        .piece-intro-mystery-card.entering {
+            animation: cardEnter 0.4s ease-out forwards;
+        }
+        @keyframes cardEnter {
+            0%   { opacity: 0; transform: translateY(30px) scale(0.8); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
         .piece-intro-quiz-round { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
         .piece-intro-quiz {
             margin-bottom: 20px;
@@ -2531,6 +2554,12 @@
             100% { transform: scale(1); opacity: 1; }
         }
         .piece-correct { animation: bounce-correct 0.45s ease-out; }
+        .piece-correct img {
+            outline: 5px solid rgba(52,211,153,0.9);
+            outline-offset: -5px;
+            border-radius: 6px;
+            box-shadow: 0 0 18px rgba(52,211,153,0.4);
+        }
 
         /* ---- Celebration melody auto-play on solve ---- */
         @keyframes celebrate-gold-flash {
@@ -5044,29 +5073,29 @@ function renderTray() {
         card.dataset.baseName = baseName;
 
         const flipStyle = isFlipped ? ' style="transform:scaleX(-1)"' : '';
-        // Show preview button only in early chapters
-        const showPreview = currentLevelData.chapter <= 2;
         card.innerHTML = `
             <div class="tray-piece-thumb">
                 <img src="${piece.thumbnail}" draggable="false"${flipStyle}>
             </div>
             <div class="tray-piece-label">${baseName}</div>
             <div class="tray-piece-variant">${label}</div>
-            ${showPreview ? '<button class="tray-preview-btn" title="Hear this piece">🎧</button>' : ''}
         `;
 
-        // Preview button: tap to hear piece sound
-        if (showPreview) {
-            const previewBtn = card.querySelector('.tray-preview-btn');
-            if (previewBtn) {
-                previewBtn.addEventListener('mousedown', e => { e.stopPropagation(); });
-                previewBtn.addEventListener('touchstart', e => { e.stopPropagation(); }, {passive: false});
-                previewBtn.addEventListener('click', e => {
-                    e.stopPropagation();
-                    playPiecePreview(baseName, label);
-                });
-            }
-        }
+        // Hover-to-preview: hold hover for 1s to hear the piece
+        let hoverTimer = null;
+        card.addEventListener('mouseenter', () => {
+            hoverTimer = setTimeout(() => {
+                card.classList.add('tray-playing');
+                playPiecePreview(baseName, label);
+                setTimeout(() => card.classList.remove('tray-playing'), 2000);
+            }, 1000);
+        });
+        card.addEventListener('mouseleave', () => {
+            if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
+        });
+        card.addEventListener('mousedown', () => {
+            if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
+        });
 
         // Drag from card
         card.addEventListener('mousedown', e => {
@@ -6190,22 +6219,10 @@ function checkAnswer(col) {
             sfx('correct');
             setTimeout(() => completeLevel(), 600);
         } else {
-            // Non-final correct piece — show feedback with ear-training reinforcement
+            // Non-final correct piece — green outline + sound
             sfx('correct');
             const el = document.querySelector(`.grid-column[data-col="${col}"] .placed-piece`);
             if (el) el.classList.add('piece-correct');
-            const remaining = currentLevelData.removeCols.filter(c => !isSolved(c)).length;
-            const REINFORCE_TIPS = {
-                'Arpeggio': 'hear the jump?',
-                'Neighbor': 'hear how it stays close?',
-                'Approach': 'hear the chromatic walk?',
-                'Enclosure': 'hear it circle the note?',
-            };
-            const earTip = (currentLevelData.chapter <= 2) ? REINFORCE_TIPS[state.piece.name] : null;
-            const msg = earTip
-                ? `Correct! That's the ${state.piece.name} — ${earTip}`
-                : `Correct! ${remaining} more to go`;
-            showToast(msg, 'success');
             currentHintCol = null;
             currentHintLevel = 0;
             applyHighlights();
@@ -6425,6 +6442,15 @@ function useHint() {
     const unsolved = currentLevelData.removeCols.filter(c => !isSolved(c));
     if (unsolved.length === 0) return;
 
+    // Craft table hint: if an unsolved column needs a piece that isn't in the tray
+    // (requires flip or dupe), give the user the exact piece they need
+    if (craftOpen && tryCraftHint(unsolved)) {
+        hintsUsed++;
+        hintsRemaining--;
+        updateHintButton();
+        return;
+    }
+
     if (currentHintCol === null || isSolved(currentHintCol)) {
         currentHintCol = unsolved[Math.floor(Math.random() * unsolved.length)];
         currentHintLevel = 1; // reset column-level hint
@@ -6445,6 +6471,47 @@ function useHint() {
         showPositionHint(answer);
         showOptionsHint(answer);
     }
+}
+
+function tryCraftHint(unsolved) {
+    // Count how many of each piece+label the unsolved columns need
+    const needed = {};
+    for (const col of unsolved) {
+        const answer = currentLevelData.solution.find(s => s.col === col);
+        if (!answer) continue;
+        const key = answer.pieceName + '|' + answer.pieceLabel;
+        needed[key] = (needed[key] || 0) + 1;
+    }
+
+    // Count how many of each piece+label are in the tray
+    const available = {};
+    trayAvailable.forEach((name, i) => {
+        const label = getFlippedLabel(name, !!trayFlipState[i]);
+        const key = name + '|' + label;
+        available[key] = (available[key] || 0) + 1;
+    });
+
+    // Find a piece that's short and add it to the tray
+    for (const col of unsolved) {
+        const answer = currentLevelData.solution.find(s => s.col === col);
+        if (!answer) continue;
+        const key = answer.pieceName + '|' + answer.pieceLabel;
+        const have = available[key] || 0;
+        const need = needed[key] || 0;
+        if (have >= need) continue;
+
+        const map = FLIP_MAP[answer.pieceName];
+        if (!map) continue;
+        const needsFlip = answer.pieceLabel !== map.defaultLabel;
+
+        trayAvailable.push(answer.pieceName);
+        trayFlipState.push(needsFlip);
+        available[key] = have + 1; // update count
+        renderTray();
+        showSideNudge(`Here's the ${answer.pieceName} you need`);
+        return true;
+    }
+    return false;
 }
 
 function clearHintVisuals() {
@@ -7702,33 +7769,78 @@ function replayIntroQuiz() {
 }
 
 function checkPieceIntroAnswer(choice) {
-    const { quizAnswer } = pieceIntroState;
+    const { quizAnswer, pieceName, labelA, labelB } = pieceIntroState;
     const resultEl = document.getElementById('piece-intro-result');
     const choiceAEl = document.getElementById('piece-intro-choice-a');
     const choiceBEl = document.getElementById('piece-intro-choice-b');
+    const mysteryBtn = document.getElementById('piece-intro-mystery-btn');
+
+    // Determine the correct label and find the piece thumbnail
+    const correctLabel = quizAnswer === 'a' ? labelA : labelB;
+    const correctPiece = findPiece(pieceName, correctLabel);
+
+    // Flip the mystery card to reveal the answer
+    mysteryBtn.classList.add('flipping');
+    setTimeout(() => {
+        const iconEl = mysteryBtn.querySelector('.piece-intro-var-icon');
+        const labelEl = mysteryBtn.querySelector('.piece-intro-var-label');
+        iconEl.innerHTML = correctPiece && correctPiece.thumbnail
+            ? '<img src="' + correctPiece.thumbnail + '" draggable="false">'
+            : correctLabel;
+        labelEl.textContent = correctLabel;
+        mysteryBtn.classList.remove('flipping');
+        mysteryBtn.classList.add('revealed');
+    }, 250);
 
     if (choice === quizAnswer) {
         (choice === 'a' ? choiceAEl : choiceBEl).classList.add('correct');
         sfx('correct');
+        resultEl.textContent = '✓ Correct!';
         if (pieceIntroState.quizRound >= 2) {
-            resultEl.textContent = '✓ Correct!';
-            setTimeout(() => showPieceIntroCongrats(), 1000);
+            setTimeout(() => showPieceIntroCongrats(), 1500);
         } else {
-            resultEl.textContent = '✓ Correct!';
             pieceIntroState.quizRound = 2;
-            setTimeout(() => startPieceIntroQuiz(), 1500);
+            setTimeout(() => {
+                mysteryBtn.classList.remove('revealed');
+                mysteryBtn.classList.add('thrown');
+            }, 1200);
+            setTimeout(() => {
+                resetMysteryCard();
+                mysteryBtn.classList.add('entering');
+            }, 1700);
+            setTimeout(() => {
+                mysteryBtn.classList.remove('entering');
+                startPieceIntroQuiz();
+            }, 2100);
         }
     } else {
         (choice === 'a' ? choiceAEl : choiceBEl).classList.add('wrong');
-        resultEl.textContent = 'Not quite — listen again!';
+        resultEl.textContent = 'Not quite — it was ' + correctLabel;
         sfx('wrong');
+        // Throw card away after reveal, then bring in new one
         setTimeout(() => {
-            choiceAEl.className = 'piece-intro-choice';
-            choiceBEl.className = 'piece-intro-choice';
-            resultEl.textContent = '';
-            replayIntroQuiz();
+            mysteryBtn.classList.remove('revealed');
+            mysteryBtn.classList.add('thrown');
         }, 1500);
+        setTimeout(() => {
+            resetMysteryCard();
+            mysteryBtn.classList.add('entering');
+        }, 2000);
+        setTimeout(() => {
+            mysteryBtn.classList.remove('entering');
+            pieceIntroState.quizOrder = Math.random() < 0.5 ? ['a', 'b'] : ['b', 'a'];
+            startPieceIntroQuiz();
+        }, 2400);
     }
+}
+
+function resetMysteryCard() {
+    const mysteryBtn = document.getElementById('piece-intro-mystery-btn');
+    const iconEl = mysteryBtn.querySelector('.piece-intro-var-icon');
+    const labelEl = mysteryBtn.querySelector('.piece-intro-var-label');
+    mysteryBtn.classList.remove('revealed', 'flipping', 'thrown');
+    iconEl.innerHTML = '?';
+    labelEl.textContent = 'Tap to listen';
 }
 
 function showPieceIntroCongrats() {

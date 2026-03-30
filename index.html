@@ -37,6 +37,9 @@
             --text-primary: #e6edf3;
             --text-secondary: #8b949e;
             --text-muted: #484f58;
+            --bg: #07090f;
+            --text: #e6edf3;
+            --font-display: 'Playfair Display', serif;
         }
 
         body {
@@ -2531,6 +2534,14 @@
         }
 
         @keyframes fade-in { 0% { opacity: 0; } 100% { opacity: 1; } }
+        @keyframes overlay-fade-out {
+            from { opacity: 1; }
+            to   { opacity: 0; transform: scale(0.97); }
+        }
+        .overlay-dismissing {
+            animation: overlay-fade-out 0.25s ease-in forwards;
+            pointer-events: none;
+        }
 
         @keyframes shake {
             0%,100% { transform: translateX(0); }
@@ -2868,6 +2879,16 @@
         }
 
         /* ---- Responsive ---- */
+        @media (max-width: 768px) and (min-width: 481px) {
+            .puzzle-topbar { padding: 12px 16px; }
+            .puzzle-area { padding: 12px; }
+            .puzzle-bottombar { padding: 12px 16px 20px; }
+            .tray-piece-thumb { width: 60px; height: 60px; }
+            .tray-piece-thumb img { width: 60px; height: 60px; }
+            .success-modal, .warmup-modal, .piece-intro-modal, .reward-modal {
+                max-width: 320px;
+            }
+        }
         @media (max-width: 480px) {
             .puzzle-topbar { padding: 10px 12px; }
             .puzzle-area { padding: 10px; }
@@ -3757,6 +3778,7 @@ let currentBPM = 90;
 function getEighth() { return 60 / currentBPM / 2; }
 let isPlaying = false;
 let playbackTimeouts = [];
+let celebrationTimeouts = [];
 
 // Sound design parameters (0–1 range, persisted)
 let soundParams = { tone: 0.9, drive: 0.0, reverb: 0.03, tremRate: 0.2, tremDepth: 0.1, swing: 0.64 };
@@ -4546,12 +4568,25 @@ function showScreen(name) {
     if (name === 'landing') updateComposerButton();
 }
 
+function dismissOverlay(id, callback) {
+    const el = document.getElementById(id);
+    if (!el || el.classList.contains('hidden')) { if (callback) callback(); return; }
+    el.classList.add('overlay-dismissing');
+    setTimeout(() => {
+        el.classList.remove('overlay-dismissing');
+        el.classList.add('hidden');
+        if (callback) callback();
+    }, 250);
+}
+
 function goToMap() {
     if (composerMode) {
         exitComposerMode();
         return;
     }
     stopPlayback();
+    celebrationTimeouts.forEach(t => clearTimeout(t));
+    celebrationTimeouts = [];
     hideCraftTable();
     trayFlipState = [];
     trayAvailable = [];
@@ -4709,6 +4744,8 @@ function startLevel(levelId) {
     document.getElementById('timer-display').style.display = '';
     document.getElementById('puzzle-stars').style.display = '';
     stopPlayback(); // ensure any ongoing playback is halted before loading new level
+    celebrationTimeouts.forEach(t => clearTimeout(t));
+    celebrationTimeouts = [];
     clearHintVisuals();
     dismissSideNudge();
     if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
@@ -6285,7 +6322,8 @@ function playCelebrationMelody(callback) {
     const originTime = audioCtx.currentTime + 0.1;
     let currentTime = originTime;
     let globalNoteIdx = 0;
-    const celebrationTimeouts = [];
+    celebrationTimeouts.forEach(t => clearTimeout(t));
+    celebrationTimeouts = [];
 
     // Phase 1: Gold flash across all placed pieces left-to-right
     // We schedule gold flashes for every column, slightly staggered
@@ -6784,6 +6822,7 @@ function hideGuideMe() {
 
 function startGuidedMode() {
     isGuidedMode = true;
+    if (stuckIdleTimer) { clearInterval(stuckIdleTimer); stuckIdleTimer = null; }
     hideGuideMe();
     clearHintVisuals();
 
@@ -7430,45 +7469,46 @@ function showSuccessModal(stars, elapsed) {
 }
 
 function retryLevel() {
-    document.getElementById('success-overlay').classList.add('hidden');
-    stopPlayback();
-    // Track retry count for invisible scaffolding
-    const key = '_retry_' + currentLevel;
-    gameProgress[key] = (gameProgress[key] || 0) + 1;
-    startLevel(currentLevel);
+    dismissOverlay('success-overlay', () => {
+        stopPlayback();
+        // Track retry count for invisible scaffolding
+        const key = '_retry_' + currentLevel;
+        gameProgress[key] = (gameProgress[key] || 0) + 1;
+        startLevel(currentLevel);
+    });
 }
 
 function nextLevel() {
-    document.getElementById('success-overlay').classList.add('hidden');
-    const chapterLevels = LEVELS.filter(l => l.chapter === currentLevelData.chapter);
-    const idx = chapterLevels.findIndex(l => l.id === currentLevel);
+    dismissOverlay('success-overlay', () => {
+        const chapterLevels = LEVELS.filter(l => l.chapter === currentLevelData.chapter);
+        const idx = chapterLevels.findIndex(l => l.id === currentLevel);
 
-    // Check if this was the last level in the chapter
-    if (idx === chapterLevels.length - 1) {
-        const currentChapter = currentLevelData.chapter;
-        const nextCh = CHAPTERS.find(c => c.id === currentChapter + 1);
+        // Check if this was the last level in the chapter
+        if (idx === chapterLevels.length - 1) {
+            const currentChapter = currentLevelData.chapter;
+            const nextCh = CHAPTERS.find(c => c.id === currentChapter + 1);
 
-        // Show reward screen for next chapter's new piece (once only)
-        if (nextCh && nextCh.reward && !gameProgress['_reward_' + nextCh.reward]) {
-            showRewardScreen(nextCh.reward);
-            return;
+            // Show reward screen for next chapter's new piece (once only)
+            if (nextCh && nextCh.reward && !gameProgress['_reward_' + nextCh.reward]) {
+                showRewardScreen(nextCh.reward);
+                return;
+            }
+
+            // No next chapter → game complete
+            if (!nextCh) {
+                showGameComplete();
+                return;
+            }
+
+            // Navigate to next chapter tab if the chapter just became unlocked.
+            if (getChapterStars(currentChapter) >= nextCh.unlockStars) {
+                activeChapterTab = nextCh.id;
+            }
+            goToMap();
+        } else {
+            startLevel(chapterLevels[idx + 1].id);
         }
-
-        // No next chapter → game complete
-        if (!nextCh) {
-            showGameComplete();
-            return;
-        }
-
-        // Navigate to next chapter tab if the chapter just became unlocked.
-        // unlockStars threshold checks the *current* chapter's stars, not total stars.
-        if (getChapterStars(currentChapter) >= nextCh.unlockStars) {
-            activeChapterTab = nextCh.id;
-        }
-        goToMap();
-    } else {
-        startLevel(chapterLevels[idx + 1].id);
-    }
+    });
 }
 
 // ==================================================================
@@ -7488,9 +7528,9 @@ function shouldShowWarmup() {
 function getLearnedPieces() {
     // Figure out which piece types the player has encountered
     const learned = ['Arpeggio'];
-    if (getLevelProgress('ch2_01').completed || getChapterStars(1) >= 10) learned.push('Neighbor');
-    if (getLevelProgress('ch3_01').completed || getChapterStars(2) >= 18) learned.push('Approach');
-    if (getLevelProgress('ch4_01').completed || getChapterStars(3) >= 20) learned.push('Enclosure');
+    if (getLevelProgress('ch2_01').completed) learned.push('Neighbor');
+    if (getLevelProgress('ch3_01').completed) learned.push('Approach');
+    if (getLevelProgress('ch4_01').completed) learned.push('Enclosure');
     return learned;
 }
 
@@ -7529,7 +7569,7 @@ function showWarmupQuestion() {
 
     document.getElementById('warmup-subtitle').textContent = `Round ${current + 1} of ${pieces.length} — which piece is this?`;
     document.getElementById('warmup-result').innerHTML = '&nbsp;';
-    document.getElementById('warmup-progress').textContent = `${warmupState.correctCount}/${current} correct`;
+    document.getElementById('warmup-progress').textContent = current > 0 ? `${warmupState.correctCount}/${current} correct` : '';
 
     // Reset mystery card
     const mysteryBtn = document.getElementById('warmup-mystery-btn');
@@ -7555,8 +7595,8 @@ function showWarmupQuestion() {
         btn.dataset.label = v.label;
         const piece = findPiece(v.name, v.label);
         btn.innerHTML = piece && piece.thumbnail
-            ? `<img src="${piece.thumbnail}" draggable="false"><span>${v.label}</span>`
-            : v.name + ' · ' + v.label;
+            ? `<img src="${piece.thumbnail}" draggable="false"><span>${v.name}</span>`
+            : v.name;
         btn.onclick = () => checkWarmupAnswer(v.name, v.label, btn);
         choicesEl.appendChild(btn);
     });
@@ -8108,12 +8148,13 @@ function spawnRewardParticles(container) {
 }
 
 function dismissReward() {
-    document.getElementById('reward-overlay').classList.add('hidden');
-    if (rewardNextChapter) {
-        activeChapterTab = rewardNextChapter;
-        rewardNextChapter = null;
-    }
-    goToMap();
+    dismissOverlay('reward-overlay', () => {
+        if (rewardNextChapter) {
+            activeChapterTab = rewardNextChapter;
+            rewardNextChapter = null;
+        }
+        goToMap();
+    });
 }
 
 // ==================================================================
@@ -8166,9 +8207,10 @@ function gameCompleteReplay() {
 }
 
 function gameCompleteMap() {
-    document.getElementById('game-complete-overlay').classList.add('hidden');
-    activeChapterTab = 5;
-    goToMap();
+    dismissOverlay('game-complete-overlay', () => {
+        activeChapterTab = 6;
+        goToMap();
+    });
 }
 
 function gameCompleteComposer() {
@@ -8243,6 +8285,24 @@ document.addEventListener('keydown', e => {
         if (e.code === 'KeyC' && craftOpen && craftOutputPiece) {
             e.preventDefault(); claimOutputPiece();
         }
+    }
+});
+
+// Escape key — dismiss topmost overlay
+document.addEventListener('keydown', e => {
+    if (e.code !== 'Escape') return;
+    const overlays = [
+        { id: 'sound-panel-overlay', dismiss: closeSoundPanel },
+        { id: 'changelog-overlay',   dismiss: closeChangelog },
+        { id: 'reward-overlay',      dismiss: dismissReward },
+        { id: 'game-complete-overlay', dismiss: gameCompleteMap },
+        { id: 'warmup-overlay',      dismiss: dismissWarmupAndGo },
+        { id: 'piece-intro-overlay', dismiss: dismissPieceIntro },
+        { id: 'success-overlay',     dismiss: () => goToMap() },
+    ];
+    for (const { id, dismiss } of overlays) {
+        const el = document.getElementById(id);
+        if (el && !el.classList.contains('hidden')) { dismiss(); return; }
     }
 });
 

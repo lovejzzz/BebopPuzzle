@@ -1449,40 +1449,30 @@
             font-size: 14px; color: var(--text-muted);
             margin-bottom: 20px;
         }
-        .warmup-play-btn {
-            display: inline-block;
-            padding: 12px 24px;
-            border-radius: 12px;
-            background: rgba(240,168,48,0.1);
-            border: 1.5px solid rgba(240,168,48,0.25);
-            color: var(--gold);
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            margin-bottom: 20px;
-            transition: all 0.2s;
-        }
-        .warmup-play-btn:hover { background: rgba(240,168,48,0.18); }
+        .warmup-modal .piece-intro-mystery { margin-bottom: 20px; }
         .warmup-choices {
             display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
             margin-bottom: 16px;
         }
         .warmup-choice {
-            padding: 10px 18px;
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            padding: 10px 14px;
             border-radius: 10px;
             background: rgba(255,255,255,0.06);
             border: 1.5px solid rgba(255,255,255,0.12);
             color: var(--text);
             font-weight: 600;
-            font-size: 13px;
+            font-size: 11px;
             cursor: pointer;
             transition: all 0.2s;
         }
+        .warmup-choice img { width: 56px; height: 56px; border-radius: 6px; object-fit: contain; }
         .warmup-choice:hover { background: rgba(255,255,255,0.1); border-color: var(--gold); }
         .warmup-choice.correct { background: rgba(52,211,153,0.15); border-color: #34d399; color: #34d399; }
         .warmup-choice.wrong { background: rgba(248,113,113,0.15); border-color: #f87171; color: #f87171; }
         .warmup-result {
             font-size: 14px; color: var(--text-muted); margin-bottom: 12px;
+            min-height: 1.4em;
         }
         .warmup-progress {
             font-size: 12px; color: var(--text-muted); margin-bottom: 12px;
@@ -3416,9 +3406,14 @@
         <div class="warmup-modal">
             <div class="warmup-title">Welcome back!</div>
             <div class="warmup-subtitle" id="warmup-subtitle">Quick warm-up — which piece is this?</div>
-            <div class="warmup-play-btn" id="warmup-play-btn" onclick="playWarmupSample()">🔊 Listen</div>
+            <div class="piece-intro-mystery">
+                <button class="piece-intro-variant piece-intro-mystery-card" id="warmup-mystery-btn" onclick="playWarmupSample()">
+                    <div class="piece-intro-var-icon">?</div>
+                    <div class="piece-intro-var-label">Tap to listen</div>
+                </button>
+            </div>
             <div class="warmup-choices" id="warmup-choices"></div>
-            <div class="warmup-result hidden" id="warmup-result"></div>
+            <div class="warmup-result" id="warmup-result">&nbsp;</div>
             <div class="warmup-progress" id="warmup-progress"></div>
             <button class="piece-intro-skip" onclick="dismissWarmup()">Skip — I'm ready →</button>
         </div>
@@ -7527,10 +7522,17 @@ function showWarmupQuestion() {
     if (map.flipH) labels.push(map.flipH);
     const label = labels[Math.floor(Math.random() * labels.length)];
     warmupState.answer = pieceName;
+    warmupState.answerLabel = label;
 
     document.getElementById('warmup-subtitle').textContent = `Round ${current + 1} of ${pieces.length} — which piece is this?`;
-    document.getElementById('warmup-result').classList.add('hidden');
+    document.getElementById('warmup-result').innerHTML = '&nbsp;';
     document.getElementById('warmup-progress').textContent = `${warmupState.correctCount}/${current} correct`;
+
+    // Reset mystery card
+    const mysteryBtn = document.getElementById('warmup-mystery-btn');
+    mysteryBtn.classList.remove('revealed', 'flipping', 'thrown');
+    mysteryBtn.querySelector('.piece-intro-var-icon').innerHTML = '?';
+    mysteryBtn.querySelector('.piece-intro-var-label').textContent = 'Tap to listen';
 
     // Build choice buttons from learned pieces
     const learned = getLearnedPieces();
@@ -7539,7 +7541,12 @@ function showWarmupQuestion() {
     learned.forEach(name => {
         const btn = document.createElement('button');
         btn.className = 'warmup-choice';
-        btn.textContent = name;
+        btn.dataset.name = name;
+        const map = FLIP_MAP[name];
+        const piece = map ? findPiece(name, map.defaultLabel) : null;
+        btn.innerHTML = piece && piece.thumbnail
+            ? `<img src="${piece.thumbnail}" draggable="false"><span>${name}</span>`
+            : name;
         btn.onclick = () => checkWarmupAnswer(name, btn);
         choicesEl.appendChild(btn);
     });
@@ -7552,6 +7559,9 @@ function showWarmupQuestion() {
 function playWarmupSample() {
     const notes = warmupState._currentNotes;
     if (!notes || notes.length === 0) return;
+    const mysteryBtn = document.getElementById('warmup-mystery-btn');
+    mysteryBtn.classList.add('playing');
+    setTimeout(() => mysteryBtn.classList.remove('playing'), 2000);
     getAudioCtx();
     getMasterGain();
 
@@ -7569,21 +7579,37 @@ function playWarmupSample() {
 
 function checkWarmupAnswer(choice, btnEl) {
     const resultEl = document.getElementById('warmup-result');
-    if (choice === warmupState.answer) {
+    const mysteryBtn = document.getElementById('warmup-mystery-btn');
+    const answerName = warmupState.answer;
+    const answerLabel = warmupState.answerLabel;
+    const answerPiece = findPiece(answerName, answerLabel);
+
+    // Flip mystery card to reveal answer
+    mysteryBtn.classList.add('flipping');
+    setTimeout(() => {
+        const iconEl = mysteryBtn.querySelector('.piece-intro-var-icon');
+        const labelEl = mysteryBtn.querySelector('.piece-intro-var-label');
+        iconEl.innerHTML = answerPiece && answerPiece.thumbnail
+            ? '<img src="' + answerPiece.thumbnail + '" draggable="false">'
+            : answerName;
+        labelEl.textContent = answerName + ' · ' + answerLabel;
+        mysteryBtn.classList.remove('flipping');
+        mysteryBtn.classList.add('revealed');
+    }, 250);
+
+    if (choice === answerName) {
         btnEl.classList.add('correct');
         warmupState.correctCount++;
         resultEl.textContent = 'Correct!';
         sfx('correct');
     } else {
         btnEl.classList.add('wrong');
-        resultEl.textContent = `That was ${warmupState.answer}`;
+        resultEl.textContent = `That was ${answerName}`;
         sfx('wrong');
-        // Highlight the correct one
         document.querySelectorAll('.warmup-choice').forEach(b => {
-            if (b.textContent === warmupState.answer) b.classList.add('correct');
+            if (b.dataset.name === answerName) b.classList.add('correct');
         });
     }
-    resultEl.classList.remove('hidden');
     document.getElementById('warmup-progress').textContent = `${warmupState.correctCount}/${warmupState.current + 1} correct`;
 
     // Disable all buttons
@@ -7591,7 +7617,7 @@ function checkWarmupAnswer(choice, btnEl) {
 
     // Next question after delay
     warmupState.current++;
-    setTimeout(() => showWarmupQuestion(), 1500);
+    setTimeout(() => showWarmupQuestion(), 2000);
 }
 
 function finishWarmup() {

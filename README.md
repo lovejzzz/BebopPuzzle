@@ -6,12 +6,17 @@ A jazz music theory game that teaches bebop vocabulary through tactile puzzle-so
 
 ---
 
-## What's New in v1.2
+## What's New in v1.25
 
-- **Redesigned "Meet the Piece" intro** — 2-part flow: explore each variant's sound and look, then test your ear with a 2-round quiz featuring a mystery "?" piece
-- **Headphone icon** on tray pieces for quick audio preview
-- **Tooltips** now stay anchored on browser resize
-- **Bug fixes** — reward screen descriptions, listen-limit tutorial timing, piece intro visibility
+- **Redesigned warmup quiz** — real piece thumbnails, mystery "?" card with flip reveal, variant-level choices, "More quiz" or "I'm ready" at the end
+- **Singing encouragement** — idle nudge with 35 unique messages encouraging players to sing the melody
+- **Correct placement feedback** — green outline + sound on correctly placed pieces
+- **Craft table hint** — gives the missing piece directly to your tray when you need it
+- **Hover-to-play** — hold over a tray piece for 1s to hear its audio preview
+- **Escape key** dismisses any open overlay
+- **Smooth overlay transitions** — fade-out animations when closing modals
+- **Tutorial spotlight fix** — target elements now properly highlighted above the dim overlay
+- **Bug fixes** — celebration timeout leak, game complete navigation, warmup piece filtering, CSS variables, tablet breakpoint
 
 ---
 

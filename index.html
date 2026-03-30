@@ -3187,7 +3187,7 @@
                 <button class="settings-btn settings-btn-danger" onclick="confirmResetProgress()">Reset All Progress</button>
             </div>
             <div class="settings-footer">
-                Bebop Puzzle <span class="settings-version" onclick="showChangelog()">v1.2</span><br>Made By Tian Xing
+                Bebop Puzzle <span class="settings-version" onclick="showChangelog()">v1.25</span><br>Made By Tian Xing
             </div>
         </div>
     </div>
@@ -3200,6 +3200,42 @@
             <div class="changelog-header">
                 <div class="changelog-title">What's New</div>
                 <button class="changelog-close" onclick="closeChangelog()">✕</button>
+            </div>
+
+            <div class="changelog-version-tag">v1.25</div>
+
+            <div class="changelog-section">
+                <div class="changelog-section-title">Warmup Quiz Redesign</div>
+                <ul class="changelog-list">
+                    <li>Welcome back quiz uses real piece thumbnails and mystery "?" card</li>
+                    <li>Each variant shown as a separate choice for direction recognition</li>
+                    <li>"More quiz" or "I'm ready" options after finishing — no auto-progress</li>
+                    <li>Warmup triggers on Play button instead of page load</li>
+                </ul>
+            </div>
+
+            <div class="changelog-section">
+                <div class="changelog-section-title">UX Improvements</div>
+                <ul class="changelog-list">
+                    <li>Escape key dismisses any open overlay</li>
+                    <li>Smooth fade-out transitions when closing overlays</li>
+                    <li>Singing encouragement nudge on idle (35 unique messages)</li>
+                    <li>Green outline on correctly placed pieces</li>
+                    <li>Craft table hint gives missing piece directly to tray</li>
+                    <li>Hover-to-play on tray pieces (hold 1s) replaces headphone icon</li>
+                    <li>Tutorial spotlight properly highlights target elements</li>
+                </ul>
+            </div>
+
+            <div class="changelog-section">
+                <div class="changelog-section-title">Bug Fixes</div>
+                <ul class="changelog-list">
+                    <li>Celebration timeouts cleared when navigating away</li>
+                    <li>Game complete "Back to Map" now goes to correct chapter</li>
+                    <li>Warmup only quizzes pieces from completed intro levels</li>
+                    <li>Missing CSS variables defined (--bg, --text, --font-display)</li>
+                    <li>Tablet responsive breakpoint at 768px</li>
+                </ul>
             </div>
 
             <div class="changelog-version-tag">v1.2</div>

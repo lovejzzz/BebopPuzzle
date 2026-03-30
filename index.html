@@ -1566,6 +1566,9 @@
         .piece-intro-mystery-card.revealed .piece-intro-var-icon img {
             width: 80px; height: 80px; border-radius: 8px; object-fit: contain;
         }
+        .piece-intro-mystery-card.revealed .piece-intro-var-label {
+            font-size: 11px; white-space: nowrap;
+        }
         .piece-intro-mystery-card.thrown {
             animation: cardThrow 0.5s ease forwards;
             pointer-events: none;
@@ -3415,7 +3418,7 @@
             <div class="warmup-choices" id="warmup-choices"></div>
             <div class="warmup-result" id="warmup-result">&nbsp;</div>
             <div class="warmup-progress" id="warmup-progress"></div>
-            <button class="piece-intro-skip" onclick="dismissWarmup()">Skip — I'm ready →</button>
+            <button class="piece-intro-skip" onclick="dismissWarmupAndGo()">Skip — I'm ready →</button>
         </div>
     </div>
 
@@ -7534,20 +7537,27 @@ function showWarmupQuestion() {
     mysteryBtn.querySelector('.piece-intro-var-icon').innerHTML = '?';
     mysteryBtn.querySelector('.piece-intro-var-label').textContent = 'Tap to listen';
 
-    // Build choice buttons from learned pieces
+    // Build choice buttons — each variant is a separate option
     const learned = getLearnedPieces();
     const choicesEl = document.getElementById('warmup-choices');
     choicesEl.innerHTML = '';
+    const variants = [];
     learned.forEach(name => {
+        const m = FLIP_MAP[name];
+        if (!m) return;
+        variants.push({ name, label: m.defaultLabel });
+        if (m.flipH) variants.push({ name, label: m.flipH });
+    });
+    variants.forEach(v => {
         const btn = document.createElement('button');
         btn.className = 'warmup-choice';
-        btn.dataset.name = name;
-        const map = FLIP_MAP[name];
-        const piece = map ? findPiece(name, map.defaultLabel) : null;
+        btn.dataset.name = v.name;
+        btn.dataset.label = v.label;
+        const piece = findPiece(v.name, v.label);
         btn.innerHTML = piece && piece.thumbnail
-            ? `<img src="${piece.thumbnail}" draggable="false"><span>${name}</span>`
-            : name;
-        btn.onclick = () => checkWarmupAnswer(name, btn);
+            ? `<img src="${piece.thumbnail}" draggable="false"><span>${v.label}</span>`
+            : v.name + ' · ' + v.label;
+        btn.onclick = () => checkWarmupAnswer(v.name, v.label, btn);
         choicesEl.appendChild(btn);
     });
 
@@ -7577,7 +7587,7 @@ function playWarmupSample() {
     });
 }
 
-function checkWarmupAnswer(choice, btnEl) {
+function checkWarmupAnswer(choiceName, choiceLabel, btnEl) {
     const resultEl = document.getElementById('warmup-result');
     const mysteryBtn = document.getElementById('warmup-mystery-btn');
     const answerName = warmupState.answer;
@@ -7597,17 +7607,18 @@ function checkWarmupAnswer(choice, btnEl) {
         mysteryBtn.classList.add('revealed');
     }, 250);
 
-    if (choice === answerName) {
+    const isCorrect = choiceName === answerName && choiceLabel === answerLabel;
+    if (isCorrect) {
         btnEl.classList.add('correct');
         warmupState.correctCount++;
         resultEl.textContent = 'Correct!';
         sfx('correct');
     } else {
         btnEl.classList.add('wrong');
-        resultEl.textContent = `That was ${answerName}`;
+        resultEl.textContent = `That was ${answerLabel}`;
         sfx('wrong');
         document.querySelectorAll('.warmup-choice').forEach(b => {
-            if (b.dataset.name === answerName) b.classList.add('correct');
+            if (b.dataset.name === answerName && b.dataset.label === answerLabel) b.classList.add('correct');
         });
     }
     document.getElementById('warmup-progress').textContent = `${warmupState.correctCount}/${warmupState.current + 1} correct`;
@@ -7621,20 +7632,77 @@ function checkWarmupAnswer(choice, btnEl) {
 }
 
 function finishWarmup() {
-    const resultEl = document.getElementById('warmup-result');
     const { correctCount, pieces } = warmupState;
     if (correctCount === pieces.length) {
         document.getElementById('warmup-subtitle').textContent = 'Your ears are sharp!';
     } else {
         document.getElementById('warmup-subtitle').textContent = `${correctCount} out of ${pieces.length} — not bad!`;
     }
-    document.getElementById('warmup-choices').innerHTML = '';
-    resultEl.classList.add('hidden');
-    setTimeout(() => dismissWarmup(), 1500);
+    document.getElementById('warmup-result').innerHTML = '&nbsp;';
+    document.getElementById('warmup-progress').textContent = '';
+
+    // Hide mystery card
+    const mysteryContainer = document.querySelector('.warmup-modal .piece-intro-mystery');
+    if (mysteryContainer) mysteryContainer.style.display = 'none';
+
+    // Show "More quiz" and "I'm ready" buttons
+    const choicesEl = document.getElementById('warmup-choices');
+    choicesEl.innerHTML = '';
+
+    const moreBtn = document.createElement('button');
+    moreBtn.className = 'warmup-choice';
+    moreBtn.innerHTML = '<span>🔄 More quiz</span>';
+    moreBtn.style.padding = '12px 20px';
+    moreBtn.style.fontSize = '13px';
+    moreBtn.onclick = () => {
+        if (mysteryContainer) mysteryContainer.style.display = '';
+        showWarmup();
+    };
+    choicesEl.appendChild(moreBtn);
+
+    const readyBtn = document.createElement('button');
+    readyBtn.className = 'warmup-choice';
+    readyBtn.innerHTML = '<span>✅ I\'m ready</span>';
+    readyBtn.style.padding = '12px 20px';
+    readyBtn.style.fontSize = '13px';
+    readyBtn.style.borderColor = 'rgba(52,211,153,0.4)';
+    readyBtn.onclick = () => {
+        dismissWarmup();
+        // Navigate to most advanced unlocked chapter
+        for (let i = CHAPTERS.length - 1; i >= 0; i--) {
+            if (isChapterUnlocked(CHAPTERS[i].id)) {
+                activeChapterTab = CHAPTERS[i].id;
+                renderMap();
+                break;
+            }
+        }
+    };
+    choicesEl.appendChild(readyBtn);
+
+    // Hide skip button
+    const skipBtn = document.querySelector('.warmup-modal .piece-intro-skip');
+    if (skipBtn) skipBtn.style.display = 'none';
 }
 
 function dismissWarmup() {
     document.getElementById('warmup-overlay').classList.add('hidden');
+    // Restore hidden elements for next time
+    const mysteryContainer = document.querySelector('.warmup-modal .piece-intro-mystery');
+    if (mysteryContainer) mysteryContainer.style.display = '';
+    const skipBtn = document.querySelector('.warmup-modal .piece-intro-skip');
+    if (skipBtn) skipBtn.style.display = '';
+}
+
+function dismissWarmupAndGo() {
+    dismissWarmup();
+    // Navigate to most advanced unlocked chapter
+    for (let i = CHAPTERS.length - 1; i >= 0; i--) {
+        if (isChapterUnlocked(CHAPTERS[i].id)) {
+            activeChapterTab = CHAPTERS[i].id;
+            renderMap();
+            break;
+        }
+    }
 }
 
 function updateLastPlayedTimestamp() {

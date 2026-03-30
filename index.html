@@ -8960,6 +8960,9 @@ showScreen = function(name) {
 function onPlayPressed() {
     sfx('click');
     showScreen('map');
+    if (shouldShowWarmup()) {
+        setTimeout(() => showWarmup(), 400);
+    }
 }
 
 // ==================================================================
@@ -9243,10 +9246,7 @@ async function init() {
     showScreen('landing');
     updateComposerButton();
 
-    // Show ear warm-up for returning players (24+ hours away)
-    if (shouldShowWarmup()) {
-        setTimeout(() => showWarmup(), 600);
-    }
+    // Warmup now triggers when player presses Play (see onPlayPressed)
 
     // Start loading Rhodes samples in background (non-blocking)
     loadRhodesSamples();

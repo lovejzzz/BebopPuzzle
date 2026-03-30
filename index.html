@@ -1920,6 +1920,9 @@
             box-shadow: 0 0 0 4px var(--gold), 0 0 20px rgba(240,168,48,0.3);
             border-radius: 12px;
         }
+        .spotlight-lift {
+            z-index: 46;
+        }
 
         .tutorial-tooltip {
             position: fixed;
@@ -7304,15 +7307,27 @@ function showSpotlight(el1, el2) {
     overlay.style.pointerEvents = 'none';
     document.body.appendChild(overlay);
 
-    // Add spotlight-target class to elements
-    if (el1) el1.classList.add('spotlight-target');
-    if (el2) el2.classList.add('spotlight-target');
+    // Add spotlight-target class to elements and lift parent stacking contexts
+    [el1, el2].forEach(el => {
+        if (!el) return;
+        el.classList.add('spotlight-target');
+        // Walk up to lift any parent that creates a stacking context (has z-index set)
+        let parent = el.parentElement;
+        while (parent && parent !== document.body) {
+            const z = getComputedStyle(parent).zIndex;
+            if (z !== 'auto' && parseInt(z) < 46) {
+                parent.classList.add('spotlight-lift');
+            }
+            parent = parent.parentElement;
+        }
+    });
 }
 
 function removeSpotlight() {
     const overlay = document.getElementById('tutorial-spotlight');
     if (overlay) overlay.remove();
     document.querySelectorAll('.spotlight-target').forEach(el => el.classList.remove('spotlight-target'));
+    document.querySelectorAll('.spotlight-lift').forEach(el => el.classList.remove('spotlight-lift'));
 }
 
 // Play the solution notes for a specific column when user taps an empty column

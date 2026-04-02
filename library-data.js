@@ -191,7 +191,7 @@ const DEFAULT_LIBRARY_DATA = {
     {
       "id": 1770068563603,
       "name": "Neighbor",
-      "label": "From Above",
+      "label": "Down-Up",
       "entryY": 0.5,
       "exitY": 0.5,
       "allowInversions": false,
@@ -272,7 +272,7 @@ const DEFAULT_LIBRARY_DATA = {
     {
       "id": 1770068153450,
       "name": "Neighbor",
-      "label": "From Below",
+      "label": "Up-Down",
       "entryY": 0.5,
       "exitY": 0.5,
       "allowInversions": false,
@@ -353,7 +353,7 @@ const DEFAULT_LIBRARY_DATA = {
     {
       "id": 1770068026763,
       "name": "Enclosure",
-      "label": "From Below",
+      "label": "Up-Down",
       "entryY": 1,
       "exitY": 0.5,
       "allowInversions": false,
@@ -406,7 +406,7 @@ const DEFAULT_LIBRARY_DATA = {
     {
       "id": 1770068006809,
       "name": "Enclosure",
-      "label": "From Above",
+      "label": "Down-Up",
       "entryY": 0,
       "exitY": 0.5,
       "allowInversions": false,

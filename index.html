@@ -415,18 +415,26 @@
         }
 
         .level-node.playable {
-            background: var(--bg-elevated);
-            border-color: var(--border-medium);
+            background: linear-gradient(135deg, rgba(240,168,48,0.08), rgba(240,168,48,0.02));
+            border-color: var(--gold-dim);
             animation: levelPulse 2.5s ease-in-out infinite;
+            position: relative;
+        }
+        .level-node.playable .level-next-badge {
+            position: absolute; top: -6px; right: -6px;
+            background: var(--gold); color: #1a0800;
+            font-size: 9px; font-weight: 800;
+            padding: 2px 6px; border-radius: 6px;
+            box-shadow: 0 2px 8px var(--gold-glow);
         }
         @keyframes levelPulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(240,168,48,0); }
-            50% { box-shadow: 0 0 12px 2px rgba(240,168,48,0.12); }
+            0%, 100% { box-shadow: 0 0 4px 1px rgba(240,168,48,0.1); }
+            50% { box-shadow: 0 0 18px 4px rgba(240,168,48,0.25); }
         }
         .level-node.playable:hover {
-            border-color: var(--gold-dim);
+            border-color: var(--gold);
             transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 16px rgba(240,168,48,0.2);
             animation: none;
         }
 
@@ -538,6 +546,23 @@
             text-shadow: 0 0 8px var(--gold-glow);
         }
 
+        .star-info-btn {
+            font-size: 11px; color: var(--text-muted); cursor: pointer;
+            opacity: 0.5; transition: opacity 0.2s;
+            position: absolute; right: -16px; top: 0;
+        }
+        .star-info-btn:hover { opacity: 1; }
+        .topbar-center { position: relative; }
+        .star-info-popup {
+            position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+            background: rgba(20,10,5,0.95); border: 1px solid rgba(240,168,48,0.3);
+            border-radius: 8px; padding: 10px 14px; font-size: 11px;
+            color: var(--text-dim); white-space: nowrap; z-index: 100;
+            backdrop-filter: blur(10px); margin-top: 6px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        }
+        .star-info-popup.hidden { display: none; }
+
         .topbar-right {
             display: flex; align-items: center; gap: 10px;
         }
@@ -617,6 +642,11 @@
         }
         .chord-label.target-chord {
             color: var(--blue);
+        }
+        .chord-label.playhead-active {
+            color: var(--gold) !important;
+            text-shadow: 0 0 8px var(--gold-glow);
+            transition: color 0.08s ease, text-shadow 0.08s ease;
         }
 
         /* Grid */
@@ -815,6 +845,19 @@
                 inset 0 1px 2px rgba(255,255,255,0.3);
         }
         .play-btn:active { transform: scale(0.95); }
+        .play-btn.skippable {
+            font-size: 22px;
+            background: radial-gradient(circle at 35% 35%, #5b8def 0%, #4a6fc7 40%, #3a5299 100%);
+            border-color: rgba(91,141,239,0.4);
+            box-shadow: 0 3px 12px rgba(0,0,0,0.4), 0 0 16px rgba(91,141,239,0.25), inset 0 1px 2px rgba(255,255,255,0.2);
+        }
+        .play-btn.attract {
+            animation: playBtnAttract 1.5s ease-in-out infinite;
+        }
+        @keyframes playBtnAttract {
+            0%, 100% { box-shadow: 0 3px 12px rgba(0,0,0,0.4), 0 0 20px rgba(212,175,55,0.2), inset 0 1px 2px rgba(255,255,255,0.3); }
+            50% { box-shadow: 0 3px 12px rgba(0,0,0,0.4), 0 0 36px rgba(212,175,55,0.5), inset 0 1px 2px rgba(255,255,255,0.3); }
+        }
 
         .listen-counter {
             position: absolute;
@@ -905,6 +948,11 @@
         }
         .tray-piece:active { cursor: grabbing; }
         .tray-piece.dragging { opacity: 0.3; transform: scale(0.88) rotate(2deg); }
+        .tray-piece.collapsing {
+            opacity: 0; transform: scale(0.5); width: 0; padding: 0; margin: 0; gap: 0;
+            overflow: hidden;
+            transition: all 0.2s ease-out;
+        }
 
         /* Piece thumbnail wrapper */
         .tray-piece-thumb {
@@ -942,16 +990,27 @@
         }
 
         .tray-piece.tray-playing {
-            animation: trayPieceGlow 2s ease forwards;
+            transform: scale(1.06);
+        }
+        .tray-piece.tray-playing .tray-piece-thumb {
+            overflow: hidden;
+        }
+        .tray-piece.tray-playing .tray-piece-thumb::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(240,168,48,0.25);
+            border-radius: inherit;
+            animation: trayFillSweep var(--preview-dur, 1.5s) linear forwards;
+            pointer-events: none;
+            z-index: 2;
         }
         .tray-piece.tray-playing .tray-piece-thumb img {
             box-shadow: 0 0 14px rgba(240,168,48,0.5), 0 0 4px rgba(240,168,48,0.3);
         }
-        @keyframes trayPieceGlow {
-            0%   { transform: scale(1); }
-            15%  { transform: scale(1.08); }
-            85%  { transform: scale(1.08); }
-            100% { transform: scale(1); }
+        @keyframes trayFillSweep {
+            0%   { clip-path: inset(0 100% 0 0); }
+            100% { clip-path: inset(0 0 0 0); }
         }
 
         /* Piece type color accents */
@@ -1617,15 +1676,19 @@
             min-height: 1.4em;
         }
         .piece-intro-skip {
-            background: none;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%);
             border: none;
-            color: var(--text-muted);
-            font-size: 13px;
+            color: #1a0800;
+            font-size: 15px;
+            font-weight: 700;
             cursor: pointer;
-            padding: 8px 16px;
-            transition: color 0.2s;
+            padding: 12px 28px;
+            border-radius: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 16px var(--gold-glow);
+            animation: levelPulse 2.5s ease-in-out infinite;
         }
-        .piece-intro-skip:hover { color: var(--text); }
+        .piece-intro-skip:hover { transform: translateY(-1px); box-shadow: 0 6px 24px var(--gold-glow); }
 
         .reward-overlay {
             position: fixed; inset: 0;
@@ -2894,12 +2957,21 @@
         }
         @media (max-width: 480px) {
             .puzzle-topbar { padding: 10px 12px; }
-            .puzzle-area { padding: 10px; }
+            .puzzle-area { padding: 8px; overflow-x: auto; }
             .puzzle-bottombar { padding: 10px 12px 16px; }
             .chord-row, .melody-grid { gap: 8px; }
             .grid-cell + .grid-cell { margin-top: 8px; }
-            .tray-piece-thumb { width: 50px; height: 50px; }
+            .tray-piece-thumb { width: 50px; height: 50px; min-width: 44px; min-height: 44px; }
             .tray-piece-thumb img { width: 50px; height: 50px; }
+            .piece-tray { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+            .craft-table { max-height: 200px; overflow-y: auto; }
+            .play-btn { width: 56px; height: 56px; font-size: 22px; }
+            .hint-btn { min-width: 44px; min-height: 44px; }
+            .craft-btn { min-width: 44px; min-height: 44px; }
+            .star-info-btn { display: none; }
+            .success-modal, .warmup-modal, .piece-intro-modal, .reward-modal {
+                max-width: 300px;
+            }
         }
 
         /* =============================================
@@ -3187,7 +3259,7 @@
                 <button class="settings-btn settings-btn-danger" onclick="confirmResetProgress()">Reset All Progress</button>
             </div>
             <div class="settings-footer">
-                Bebop Puzzle <span class="settings-version" onclick="showChangelog()">v1.25</span><br>Made By Tian Xing
+                Bebop Puzzle <span class="settings-version" onclick="showChangelog()">v1.35</span><br>Made By Tian Xing
             </div>
         </div>
     </div>
@@ -3200,6 +3272,68 @@
             <div class="changelog-header">
                 <div class="changelog-title">What's New</div>
                 <button class="changelog-close" onclick="closeChangelog()">✕</button>
+            </div>
+
+            <div class="changelog-version-tag">v1.35</div>
+
+            <div class="changelog-section">
+                <div class="changelog-section-title">Audio</div>
+                <ul class="changelog-list">
+                    <li>Fixed echo/overlap when celebration melody played over unfinished playback</li>
+                    <li>Reward samples now resolve to the target note (sounds complete)</li>
+                    <li>Non-final correct placements play that column's notes as confirmation</li>
+                    <li>Tray piece hover preview shows a gold fill animation synced to audio</li>
+                </ul>
+            </div>
+
+            <div class="changelog-section">
+                <div class="changelog-section-title">Gameplay Flow</div>
+                <ul class="changelog-list">
+                    <li>Melody auto-plays when entering a level (except the very first tutorial)</li>
+                    <li>Play button turns into a skip button during celebration</li>
+                    <li>Click anywhere to skip the celebration and jump to results</li>
+                    <li>Chapter map navigates to the correct chapter after reward screens</li>
+                </ul>
+            </div>
+
+            <div class="changelog-section">
+                <div class="changelog-section-title">Craft Table</div>
+                <ul class="changelog-list">
+                    <li>Drag pieces back out of the craft drop zone to return them to your hand</li>
+                    <li>Craft output pieces stay draggable after a cancelled drag</li>
+                    <li>Fixed piece duplication bug when dragging out of craft zone</li>
+                    <li>Tray collapse animation when a piece is consumed (no more layout jump)</li>
+                </ul>
+            </div>
+
+            <div class="changelog-section">
+                <div class="changelog-section-title">Labels &amp; UI</div>
+                <ul class="changelog-list">
+                    <li>Renamed "From Above"/"From Below" to "Down-Up"/"Up-Down" for clarity</li>
+                    <li>"NEXT" badge on the first uncompleted level in the chapter map</li>
+                    <li>Stronger gold pulse on playable levels</li>
+                    <li>Chord labels highlight gold during melody playback</li>
+                    <li>Play button pulses on level entry to attract attention</li>
+                    <li>Enlarged "Next" button in piece intro screens</li>
+                    <li>Star rating info button (tap to see how stars are earned)</li>
+                    <li>One-time hint about between-grid snap positions</li>
+                </ul>
+            </div>
+
+            <div class="changelog-section">
+                <div class="changelog-section-title">Tooltips &amp; Tutorials</div>
+                <ul class="changelog-list">
+                    <li>Tooltips persist until the user performs the action (no more auto-dismiss)</li>
+                    <li>Flip hint triggers faster on tutorial levels (8s instead of 15s)</li>
+                    <li>Ch1 Level 4 now always requires a flip to solve</li>
+                </ul>
+            </div>
+
+            <div class="changelog-section">
+                <div class="changelog-section-title">Responsive</div>
+                <ul class="changelog-list">
+                    <li>Improved small-screen layout: scrollable tray, min touch targets, craft overflow</li>
+                </ul>
             </div>
 
             <div class="changelog-version-tag">v1.25</div>
@@ -3355,6 +3489,13 @@
             <div class="topbar-center">
                 <div class="topbar-level-name" id="puzzle-level-name"></div>
                 <div class="topbar-stars" id="puzzle-stars"></div>
+                <div class="star-info-btn" id="star-info-btn" onclick="toggleStarInfo()" title="Star rating info">ⓘ</div>
+                <div class="star-info-popup hidden" id="star-info-popup">
+                    <div style="font-weight:700;margin-bottom:4px;">Star Rating</div>
+                    <div>★★★ No hints, no mistakes, within time</div>
+                    <div>★★☆ At most 1 hint or mistake</div>
+                    <div>★☆☆ Level completed</div>
+                </div>
             </div>
             <div class="topbar-right">
                 <button class="hint-btn" id="hint-btn" onclick="useHint()">
@@ -3403,7 +3544,7 @@
                                 <div class="craft-variant-label" id="craft-variant-label"></div>
                             </div>
                             <div class="craft-inline-output-wrap">
-                                <div class="craft-output" id="craft-output" onclick="claimOutputPiece()">
+                                <div class="craft-output" id="craft-output">
                                     <div class="craft-output-empty-hint">···</div>
                                 </div>
                                 <div class="craft-claim-hint" id="craft-claim-hint">tap</div>
@@ -3452,6 +3593,7 @@
                     <div class="reward-note-dot" data-note="1"></div>
                     <div class="reward-note-dot" data-note="2"></div>
                     <div class="reward-note-dot" data-note="3"></div>
+                    <div class="reward-note-dot" data-note="4"></div>
                 </div>
             </div>
             <div class="reward-piece-name" id="reward-piece-name"></div>
@@ -3772,7 +3914,7 @@ function calculateApproachNotes(piece, targetNote, sel) {
 
 function calculateNeighborNotes(piece, targetNote, sel) {
     if (targetNote === null) return [];
-    const above = piece.label === 'From Above';
+    const above = piece.label === 'Down-Up';
     const s2 = getInterval(sel,'int1'), s4 = getInterval(sel,'int3');
     if (above) return [targetNote, targetNote+s2, targetNote, targetNote-s4];
     else return [targetNote, targetNote-s2, targetNote, targetNote+s4];
@@ -3781,7 +3923,7 @@ function calculateNeighborNotes(piece, targetNote, sel) {
 function calculateEnclosureNotes(piece, targetNote, sel) {
     if (targetNote === null) return [];
     const s12=getInterval(sel,'int1'), s34=getInterval(sel,'int2'), s4t=getInterval(sel,'int3');
-    if (piece.label === 'From Above') {
+    if (piece.label === 'Down-Up') {
         const n2=targetNote+s12, n1=n2+s12, n4=targetNote-s4t, n3=n4-s34;
         return [n1,n2,n3,n4];
     } else {
@@ -3967,7 +4109,7 @@ function playNote(freq, startTime, duration) {
     gain.gain.setValueAtTime(0.25, startTime + duration - 0.1);
     gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
     osc.frequency.value = freq;
-    osc.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
+    osc.connect(filter); filter.connect(gain); gain.connect(getMasterGain());
     osc.start(startTime); osc.stop(startTime + duration + 0.1);
 }
 
@@ -3985,6 +4127,7 @@ function stopPlayback() {
         masterGain = null;
     }
     document.querySelectorAll('.playhead-active').forEach(el => el.classList.remove('playhead-active'));
+    document.querySelectorAll('.chord-label.playhead-active').forEach(el => el.classList.remove('playhead-active'));
     const btn = document.getElementById('play-btn');
     if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); }
 }
@@ -4000,7 +4143,7 @@ const LEVEL_TEMPLATES = [
     {id:"ch1_01", ch:1, name:"First Chorus",    len:2, rem:1, pool:["Arpeggio"], newPc:"Arpeggio", hints:3, time:60,  craft:'hidden', tutorial:"Listen to the melody, then drag the piece into the highlighted column."},
     {id:"ch1_02", ch:1, name:"Turnaround",      len:3, rem:1, pool:["Arpeggio"], newPc:null, hints:3, time:90,  craft:'hidden', tutorial:"Tap any filled column to hear just that part of the melody."},
     {id:"ch1_03", ch:1, name:"Going Down",      len:2, rem:1, pool:["Arpeggio"], newPc:null, hints:3, time:60,  craft:'flip',   tutorial:"This piece needs to go the other way!"},
-    {id:"ch1_04", ch:1, name:"High Wire",       len:3, rem:1, pool:["Arpeggio"], newPc:null, hints:3, time:90,  craft:'flip'},
+    {id:"ch1_04", ch:1, name:"High Wire",       len:3, rem:1, pool:["Arpeggio"], newPc:null, hints:3, time:90,  craft:'flip', requireFlip:true},
     {id:"ch1_05", ch:1, name:"Walking Bass",    len:4, rem:1, pool:["Arpeggio"], newPc:null, hints:3, time:100, craft:'flip'},
     {id:"ch1_06", ch:1, name:"Double Up",       len:3, rem:2, pool:["Arpeggio"], newPc:null, hints:3, time:120, craft:'full',   tutorial:"You need two pieces but only have one!"},
     {id:"ch1_07", ch:1, name:"Contrary Motion", len:4, rem:2, pool:["Arpeggio"], newPc:null, hints:2, time:120, craft:'full'},
@@ -4154,7 +4297,7 @@ const TUTORIAL_LEVELS = {
         id:"ch2_01", chapter:2, name:"Close Quarters",
         chords:["Dm7","G7"], targetChord:"Cmaj7",
         solution:[
-            {col:0, pieceName:"Neighbor", pieceLabel:"From Above", position:1},
+            {col:0, pieceName:"Neighbor", pieceLabel:"Down-Up", position:1},
             {col:1, pieceName:"Arpeggio", pieceLabel:"Ascending", position:0.5}
         ],
         targetPiece:{position:0},
@@ -4169,7 +4312,7 @@ const TUTORIAL_LEVELS = {
         chords:["Dm7","G7"], targetChord:"Cmaj7",
         solution:[
             {col:0, pieceName:"Approach", pieceLabel:"Ascending", position:1},
-            {col:1, pieceName:"Neighbor", pieceLabel:"From Above", position:0.5}
+            {col:1, pieceName:"Neighbor", pieceLabel:"Down-Up", position:0.5}
         ],
         targetPiece:{position:0.5},
         removeCols:[0],
@@ -4182,7 +4325,7 @@ const TUTORIAL_LEVELS = {
         id:"ch4_01", chapter:4, name:"The Cage",
         chords:["Dm7","G7"], targetChord:"Cmaj7",
         solution:[
-            {col:0, pieceName:"Enclosure", pieceLabel:"From Below", position:0},
+            {col:0, pieceName:"Enclosure", pieceLabel:"Up-Down", position:0},
             {col:1, pieceName:"Arpeggio", pieceLabel:"Descending", position:0.5}
         ],
         targetPiece:{position:1},
@@ -4196,8 +4339,8 @@ const TUTORIAL_LEVELS = {
         id:"ch5_01", chapter:5, name:"Open Mic",
         chords:["Dm7","G7"], targetChord:"Cmaj7",
         solution:[
-            {col:0, pieceName:"Enclosure", pieceLabel:"From Below", position:1},
-            {col:1, pieceName:"Neighbor", pieceLabel:"From Above", position:1}
+            {col:0, pieceName:"Enclosure", pieceLabel:"Up-Down", position:1},
+            {col:1, pieceName:"Neighbor", pieceLabel:"Down-Up", position:1}
         ],
         targetPiece:{position:1},
         removeCols:[0],
@@ -4216,12 +4359,12 @@ const LEVELS = LEVEL_TEMPLATES.map(t => ({id: t.id, chapter: t.ch, name: t.name}
 const PIECE_RULES = {
     'Arpeggio|Ascending':   { entry:1.0, exit:0.0 },
     'Arpeggio|Descending':  { entry:0.0, exit:1.0 },
-    'Neighbor|From Above':  { entry:0.5, exit:0.5 },
-    'Neighbor|From Below':  { entry:0.5, exit:0.5 },
+    'Neighbor|Down-Up':  { entry:0.5, exit:0.5 },
+    'Neighbor|Up-Down':  { entry:0.5, exit:0.5 },
     'Approach|Ascending':   { entry:1.0, exit:0.0 },
     'Approach|Descending':  { entry:0.0, exit:1.0 },
-    'Enclosure|From Above': { entry:0.0, exit:0.5 },
-    'Enclosure|From Below': { entry:1.0, exit:0.5 },
+    'Enclosure|Down-Up': { entry:0.0, exit:0.5 },
+    'Enclosure|Up-Down': { entry:1.0, exit:0.5 },
 };
 
 // ==================================================================
@@ -4385,6 +4528,16 @@ function generateRandomPuzzle(template) {
             }
 
             if (removeCols.length < template.rem) { positions = null; continue; }
+
+            // requireFlip: ensure at least one removed col uses the non-default label
+            if (template.requireFlip) {
+                const hasFlipped = removeCols.some(c => {
+                    const fm = FLIP_MAP[pieces[c].baseName];
+                    return fm && pieces[c].label !== fm.defaultLabel;
+                });
+                if (!hasFlipped) { positions = null; continue; }
+            }
+
             removeCols.sort((a, b) => a - b);
 
             // 6. Build trayBasePieces — unique base names of removed pieces
@@ -4494,8 +4647,8 @@ function renderChapterIcon(iconStr, size) {
 const FLIP_MAP = {
     'Arpeggio':  { defaultLabel: 'Ascending',  flipH: 'Descending' },
     'Approach':  { defaultLabel: 'Ascending',  flipH: 'Descending' },
-    'Neighbor':  { defaultLabel: 'From Above', flipH: 'From Below' },
-    'Enclosure': { defaultLabel: 'From Above', flipH: 'From Below' },
+    'Neighbor':  { defaultLabel: 'Down-Up', flipH: 'Up-Down' },
+    'Enclosure': { defaultLabel: 'Down-Up', flipH: 'Up-Down' },
 };
 
 function getFlippedLabel(baseName, flipH) {
@@ -4618,7 +4771,7 @@ function dismissOverlay(id, callback) {
     }, 250);
 }
 
-function goToMap() {
+function goToMap(overrideChapter) {
     if (composerMode) {
         exitComposerMode();
         return;
@@ -4641,8 +4794,13 @@ function goToMap() {
     removeSpotlight();
     const levelNameEl = document.getElementById('puzzle-level-name');
     if (levelNameEl) levelNameEl.classList.remove('sing-back');
-    // Remember which chapter tab to show
-    if (currentLevelData) activeChapterTab = currentLevelData.chapter;
+    // Remember which chapter tab to show — callers can pass overrideChapter
+    // to navigate to a specific chapter (e.g. after reward screen unlocks next chapter)
+    if (overrideChapter) {
+        activeChapterTab = overrideChapter;
+    } else if (currentLevelData) {
+        activeChapterTab = currentLevelData.chapter;
+    }
     showScreen('map');
 }
 
@@ -4769,7 +4927,14 @@ function renderLevelNode(level) {
         </div>`;
     }
 
+    // Check if this is the very first uncompleted level in the chapter (the "next" level)
+    const isNext = !chapterLevels.slice(0, num - 1).some(l => {
+        const p = getLevelProgress(l.id);
+        return isLevelUnlocked(l) && !p.completed;
+    });
+    const badge = isNext ? '<span class="level-next-badge">NEXT</span>' : '';
     return `<div class="level-node playable" onclick="startLevel('${level.id}')">
+        ${badge}
         <div class="level-num">${num}</div>
         <div class="level-name">${level.name}</div>
         <div class="level-stars-display" style="color:var(--text-muted);">· · ·</div>
@@ -4780,6 +4945,8 @@ function renderLevelNode(level) {
 // PUZZLE: LOAD LEVEL
 // ==================================================================
 function startLevel(levelId) {
+    // Unlock AudioContext now (synchronous, within user gesture) so auto-play works later
+    getAudioCtx();
     composerMode = false; // reset composer mode when starting a normal level
     hideComposerToolbar();
     document.getElementById('hint-btn').style.display = '';
@@ -4921,8 +5088,27 @@ function startLevel(levelId) {
         if (craftMode === 'flip') scheduleFlipProactiveHint();
         if (craftMode === 'full' && currentLevelData.removeCols.length >= 2) scheduleDupeProactiveHint();
 
+        // Pulsing glow on Play button to attract attention
+        const playBtn = document.getElementById('play-btn');
+        if (playBtn) playBtn.classList.add('attract');
+
+        // One-time hint about between-grid placement (half positions)
+        if (!gameProgress['_halfPosTipDone'] && currentLevelData.solution &&
+            currentLevelData.solution.some(s => s.position % 1 !== 0)) {
+            gameProgress['_halfPosTipDone'] = true;
+            saveProgress();
+            setTimeout(() => showToast('Pieces can snap between grid rows too — try different heights!', 'info', 4000), 2500);
+        }
+
         if (currentLevelData.tutorial) {
             showTutorialStep1();
+        }
+
+        // Auto-play melody after a short delay so the user hears the line immediately.
+        // Skip auto-play on the very first level (ch1_01) so the tutorial tooltip
+        // has time to teach the user about the Play button before anything happens.
+        if (currentLevel !== 'ch1_01') {
+            setTimeout(() => { if (!isPlaying) playMelody(); }, 1000);
         }
     });
 }
@@ -5130,6 +5316,37 @@ function updateCellSize() {
 // ==================================================================
 // PIECE TRAY  (flip toggle lives on each card, drag directly)
 // ==================================================================
+// Smoothly collapse a tray piece, then splice data arrays and re-render
+function collapseTrayPiece(index, callback) {
+    const cards = document.querySelectorAll('#piece-tray .tray-piece');
+    const card = cards[index];
+    if (!card) {
+        // No DOM element — just do it immediately
+        trayAvailable.splice(index, 1);
+        trayFlipState.splice(index, 1);
+        renderTray();
+        if (callback) callback();
+        return;
+    }
+    // Lock tray height to prevent parent layout shift
+    const tray = document.getElementById('piece-tray');
+    tray.style.minHeight = tray.offsetHeight + 'px';
+    card.classList.add('collapsing');
+    let spliceDone = false;
+    function doSplice() {
+        if (spliceDone) return;
+        spliceDone = true;
+        trayAvailable.splice(index, 1);
+        trayFlipState.splice(index, 1);
+        renderTray();
+        tray.style.minHeight = '';
+        if (callback) callback();
+    }
+    card.addEventListener('transitionend', doSplice, { once: true });
+    // Safety fallback in case transitionend doesn't fire
+    setTimeout(doSplice, 300);
+}
+
 function renderTray() {
     const tray = document.getElementById('piece-tray');
     tray.innerHTML = '';
@@ -5162,9 +5379,10 @@ function renderTray() {
         let hoverTimer = null;
         card.addEventListener('mouseenter', () => {
             hoverTimer = setTimeout(() => {
+                const dur = playPiecePreview(baseName, label) || 1.5;
+                card.style.setProperty('--preview-dur', dur + 's');
                 card.classList.add('tray-playing');
-                playPiecePreview(baseName, label);
-                setTimeout(() => card.classList.remove('tray-playing'), 2000);
+                setTimeout(() => card.classList.remove('tray-playing'), dur * 1000 + 100);
             }, 1000);
         });
         card.addEventListener('mouseleave', () => {
@@ -5333,7 +5551,6 @@ function showCraftFlipTooltip() {
     if (!dropZone) return;
     showTooltipAt(dropZone, 'Right piece, wrong direction! Drag it here to flip it ⇌', 'arrow-up');
     markFlipTooltipDone();
-    setTimeout(() => removeTutorialTooltip(), 6000);
 }
 
 // Proactive flip tooltip: fires after 15s on a level requiring flip
@@ -5354,10 +5571,9 @@ function scheduleFlipProactiveHint() {
             if (dropZone) {
                 showTooltipAt(dropZone, 'Need a different direction? Drag a piece here to flip it ⇌', 'arrow-up');
                 markFlipTooltipDone();
-                setTimeout(() => removeTutorialTooltip(), 6000);
             }
         }
-    }, 15000);
+    }, currentLevelData.tutorial ? 8000 : 15000); // faster hint on tutorial levels
 }
 
 // Dupe tooltip: fires when tray is empty but unsolved columns remain
@@ -5372,7 +5588,6 @@ function showCraftDupeTooltip() {
         : 'Need more pieces? Drag one here, then duplicate it!';
     showTooltipAt(target, text, 'arrow-up');
     markDupeTooltipDone();
-    setTimeout(() => removeTutorialTooltip(), 6000);
 }
 
 function scheduleDupeProactiveHint() {
@@ -5510,6 +5725,45 @@ function updateCraftDrop() {
     // Update compat aliases to top of stack
     craftBaseName = top.baseName;
     craftFlipH = top.flipH;
+
+    // Allow dragging the piece back out of the craft drop zone
+    dz.style.cursor = 'grab';
+    dz.removeEventListener('mousedown', craftDzDragOut);
+    dz.removeEventListener('touchstart', craftDzDragOut);
+    dz.addEventListener('mousedown', craftDzDragOut);
+    dz.addEventListener('touchstart', craftDzDragOut, { passive: false });
+}
+
+function craftDzDragOut(e) {
+    if (craftStack.length === 0) return;
+    const top = craftStack[craftStack.length - 1];
+    const label = getFlippedLabel(top.baseName, top.flipH);
+    const piece = findPiece(top.baseName, label);
+    if (!piece) return;
+    e.preventDefault();
+    e.stopPropagation();
+    // Return only the EXTRA pieces to tray (not the one being dragged)
+    craftStack.slice(0, -1).forEach(entry => {
+        trayAvailable.push(entry.baseName);
+        trayFlipState.push(entry.flipH);
+    });
+    craftStack = [];
+    clearCraftOutput();
+    const dz = document.getElementById('craft-drop-zone');
+    dz.innerHTML = '<span style="font-size:22px;">↓</span>';
+    dz.classList.remove('has-piece', 'flipped');
+    document.getElementById('craft-piece-label').textContent = '';
+    document.getElementById('craft-variant-label').textContent = '';
+    document.getElementById('craft-flip-btn').classList.remove('ready', 'active');
+    document.getElementById('craft-dupe-btn').classList.remove('ready');
+    renderTray();
+    // Start dragging the top piece — finishDrag will return it to tray if dropped on nothing
+    draggedFromCraft = true;
+    if (e.type === 'touchstart') {
+        startDragTouch(e, piece, null);
+    } else {
+        startDrag(e, piece, null);
+    }
 }
 
 // showOutputPieces: display N heterogeneous result pieces in the output zone
@@ -5567,8 +5821,12 @@ function showOutputPieces(pieces, mode) {
         const hint = document.getElementById('craft-claim-hint');
         if (hint) hint.classList.add('visible');
         output.style.cursor = 'grab';
-        output.addEventListener('mousedown', craftOutputDragStart, { once: true });
-        output.addEventListener('touchstart', craftOutputTouchStart, { passive: false, once: true });
+        output.removeEventListener('mousedown', craftOutputDragStart);
+        output.removeEventListener('touchstart', craftOutputTouchStart);
+        output.removeEventListener('click', craftOutputClick);
+        output.addEventListener('mousedown', craftOutputDragStart);
+        output.addEventListener('touchstart', craftOutputTouchStart, { passive: false });
+        output.addEventListener('click', craftOutputClick);
         // Advance craft tutorial to step 3 (spotlight output)
         if (craftTutorialStep === 2) advanceCraftTutorial();
     }, 450);
@@ -5580,6 +5838,13 @@ function showOutputPiece(baseName, flipH, isDupe) {
         showOutputPieces([{ baseName, flipH }, { baseName, flipH }], 'dupe');
     } else {
         showOutputPieces([{ baseName, flipH }], 'flip');
+    }
+}
+
+function craftOutputClick() {
+    // Only claim on click if not currently dragging (drag sets draggedFromCraft)
+    if (!draggedFromCraft && !draggedPiece) {
+        claimOutputPiece();
     }
 }
 
@@ -6095,8 +6360,17 @@ function finishDrag(clientX, clientY) {
                 checkAnswer(currentSnapCol);
             }
         } else {
-            // Dropped on nothing — claim all to tray
-            claimOutputPiece();
+            // Dropped on nothing — claim output pieces to tray, or return dragged piece directly
+            if (craftOutputPiece) {
+                claimOutputPiece();
+            } else if (draggedPiece) {
+                // Piece was dragged out of craft drop zone (no craftOutputPiece) — return to tray
+                const map = FLIP_MAP[draggedPiece.name];
+                const wasFlipped = map && map.flipH && draggedPiece.label === map.flipH;
+                trayAvailable.push(draggedPiece.name);
+                trayFlipState.push(!!wasFlipped);
+                renderTray();
+            }
         }
         if (dragPreview) { dragPreview.remove(); dragPreview = null; }
         draggedPiece = null; draggedFromGrid = null; draggedFromCraft = false;
@@ -6132,18 +6406,17 @@ function finishDrag(clientX, clientY) {
         const flipState = draggedTrayIndex >= 0 ? !!trayFlipState[draggedTrayIndex] : false;
         placePieceInCraft(baseName, flipState);
 
-        // Consume from tray if it was a tray drag
-        if (draggedTrayIndex >= 0) {
-            trayAvailable.splice(draggedTrayIndex, 1);
-            trayFlipState.splice(draggedTrayIndex, 1);
-        }
-
         // Remove from grid if dragged from grid
         if (draggedFromGrid) {
             gridState[draggedFromGrid.col] = null;
         }
 
-        renderTray();
+        // Consume from tray with smooth collapse, or just re-render if from grid
+        if (draggedTrayIndex >= 0) {
+            collapseTrayPiece(draggedTrayIndex);
+        } else {
+            renderTray();
+        }
         renderGrid();
         applyHighlights();
 
@@ -6162,13 +6435,12 @@ function finishDrag(clientX, clientY) {
             gridState[currentSnapCol] = { piece: draggedPiece, position: currentSnapPos, selectedIntervals: sel };
             sfx('place');
 
-            // Consume the piece from the tray
+            // Consume the piece from the tray with smooth collapse
             if (draggedTrayIndex >= 0) {
-                trayAvailable.splice(draggedTrayIndex, 1);
-                trayFlipState.splice(draggedTrayIndex, 1);
+                collapseTrayPiece(draggedTrayIndex);
+            } else {
+                renderTray();
             }
-
-            renderTray();
             renderGrid();
             { const _snapEl = document.querySelector(`.grid-column[data-col="${currentSnapCol}"] .placed-piece`);
               if (_snapEl) { _snapEl.classList.add('snap-in'); _snapEl.addEventListener('animationend', () => _snapEl.classList.remove('snap-in'), {once:true}); } }
@@ -6193,6 +6465,7 @@ function finishDrag(clientX, clientY) {
         renderGrid();
         applyHighlights();
     }
+
 
     if (dragPreview) { dragPreview.remove(); dragPreview = null; }
     draggedPiece = null; draggedFromGrid = null; draggedFromCraft = false;
@@ -6291,15 +6564,29 @@ function checkAnswer(col) {
         const allSolved = currentLevelData.removeCols.every(c => isSolved(c));
 
         if (allSolved) {
-            // Final piece — skip intermediate effects, go straight to celebration
+            // Final piece — stop any ongoing melody to avoid echo, then celebrate
+            stopPlayback();
             if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
             sfx('correct');
             setTimeout(() => completeLevel(), 600);
         } else {
-            // Non-final correct piece — green outline + sound
+            // Non-final correct piece — green outline + play that column's notes
             sfx('correct');
             const el = document.querySelector(`.grid-column[data-col="${col}"] .placed-piece`);
             if (el) el.classList.add('piece-correct');
+            // Play a quick snippet of just this column's notes as confirmation
+            if (fullMelodyNotes && fullMelodyNotes.pieceNotes[col]) {
+                const colNotes = fullMelodyNotes.pieceNotes[col];
+                getAudioCtx(); getMasterGain();
+                const eighth = getEighth();
+                const sw = soundParams.swing;
+                let t = audioCtx.currentTime + 0.15;
+                colNotes.forEach((midi, i) => {
+                    const dur = (i % 2 === 0) ? eighth * 2 * sw : eighth * 2 * (1 - sw);
+                    playNote(midiToFreq(midi), t, dur * 0.9);
+                    t += dur;
+                });
+            }
             currentHintCol = null;
             currentHintLevel = 0;
             applyHighlights();
@@ -6451,14 +6738,45 @@ function playCelebrationMelody(callback) {
 
     // After melody finishes + 0.5s buffer, clean up and call callback
     const totalMs = (currentTime - audioCtx.currentTime) * 1000 + 500;
-    const finishTid = setTimeout(() => {
+
+    let celebrationDone = false;
+    function finishCelebration() {
+        if (celebrationDone) return;
+        celebrationDone = true;
+        celebrationTimeouts.forEach(t => clearTimeout(t));
+        celebrationTimeouts = [];
+        stopPlayback();
         document.querySelectorAll('.playhead-active').forEach(el => el.classList.remove('playhead-active'));
         document.querySelectorAll('.celebrate-gold, .celebrate-pulse').forEach(el => {
             el.classList.remove('celebrate-gold', 'celebrate-pulse');
         });
+        const pa = document.querySelector('.puzzle-area');
+        if (pa) pa.removeEventListener('click', skipHandler);
+        // Restore play button
+        const btn = document.getElementById('play-btn');
+        if (btn) {
+            btn.textContent = '▶';
+            btn.classList.remove('skippable');
+            btn.removeEventListener('click', skipHandler);
+        }
         callback();
-    }, totalMs);
+    }
+
+    const finishTid = setTimeout(finishCelebration, totalMs);
     celebrationTimeouts.push(finishTid);
+
+    // Turn play button into a skip button during celebration
+    function skipHandler() { finishCelebration(); }
+    setTimeout(() => {
+        const pa = document.querySelector('.puzzle-area');
+        if (pa) pa.addEventListener('click', skipHandler);
+        const btn = document.getElementById('play-btn');
+        if (btn) {
+            btn.textContent = '⏭';
+            btn.classList.add('skippable');
+            btn.addEventListener('click', skipHandler);
+        }
+    }, 400); // small delay so the final placement click doesn't immediately skip
 }
 
 function completeLevel() {
@@ -6504,8 +6822,8 @@ const HINT_DESCRIPTIONS = {
     'Arpeggio Descending': 'The melody moves downward through the chord tones.',
     'Approach Ascending': 'The melody steps upward into the target note.',
     'Approach Descending': 'The melody steps downward into the target note.',
-    'Neighbor From Above': 'The melody decorates the target note from above.',
-    'Neighbor From Below': 'The melody decorates the target note from below.',
+    'Neighbor Down-Up': 'The melody goes down then up around the target note.',
+    'Neighbor Up-Down': 'The melody goes up then down around the target note.',
     'Enclosure': 'The melody circles around the target note from both sides.'
 };
 
@@ -6979,6 +7297,8 @@ function spawnNoteParticles(col) {
 function playMelody() {
     removeTutorialTooltip(); // dismiss step-1 tooltip when user presses play
     onPlayerAction();
+    const playBtn = document.getElementById('play-btn');
+    if (playBtn) playBtn.classList.remove('attract');
     getAudioCtx(); // ensure context is alive
 
     const notes = fullMelodyNotes;
@@ -7015,8 +7335,12 @@ function playMelody() {
         const delayMs = (audioTime - audioCtx.currentTime) * 1000;
         const id = setTimeout(() => {
             document.querySelectorAll('.playhead-active').forEach(el => el.classList.remove('playhead-active'));
+            document.querySelectorAll('.chord-label.playhead-active').forEach(el => el.classList.remove('playhead-active'));
             const colEl = document.querySelector(`.grid-column[data-col="${col}"]`);
             if (colEl) colEl.querySelectorAll('.grid-cell').forEach(c => c.classList.add('playhead-active'));
+            // Highlight the chord label for this column
+            const chordLabels = document.querySelectorAll('.chord-label');
+            if (chordLabels[col]) chordLabels[col].classList.add('playhead-active');
         }, Math.max(0, delayMs));
         playbackTimeouts.push(id);
     }
@@ -7054,6 +7378,15 @@ function updateStarsDisplay() {
         s.className = 'topbar-star';
         s.textContent = '★';
         container.appendChild(s);
+    }
+}
+
+function toggleStarInfo() {
+    const popup = document.getElementById('star-info-popup');
+    popup.classList.toggle('hidden');
+    if (!popup.classList.contains('hidden')) {
+        // Auto-hide after 4 seconds
+        setTimeout(() => popup.classList.add('hidden'), 4000);
     }
 }
 
@@ -7155,7 +7488,7 @@ function playPiecePreview(baseName, label) {
         const sel = selectRandomIntervals(piece);
         notes = calculatePieceNotes(piece, chord, targetNote, sel);
     }
-    if (!notes || notes.length === 0) return;
+    if (!notes || notes.length === 0) return 0;
 
     const eighth = getEighth();
     const sw = soundParams.swing;
@@ -7167,16 +7500,17 @@ function playPiecePreview(baseName, label) {
         playNote(midiToFreq(midi), t, dur * 0.9);
         t += dur;
     });
+    return t - audioCtx.currentTime; // total duration in seconds
 }
 
-function showToast(msg, type) {
+function showToast(msg, type, duration) {
     const existing = document.querySelector('.game-toast');
     if (existing) existing.remove();
     const toast = document.createElement('div');
     toast.className = 'game-toast ' + (type || 'info');
     toast.textContent = msg;
     document.body.appendChild(toast);
-    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 2200);
+    setTimeout(() => { if (toast.parentNode) toast.remove(); }, duration || 2200);
 }
 
 function showSideNudge(msg) {
@@ -7331,9 +7665,6 @@ function showTutorialStep2WithSpotlight() {
         showSpotlight(firstPiece, emptyCol);
         const text = currentLevelData.tutorial || 'Drag the piece into the highlighted column.';
         setTimeout(() => showTooltipAt(firstPiece, text, ''), 300);
-        // Remove spotlight after piece is placed (or after timeout)
-        setTimeout(() => removeSpotlight(), 12000);
-        setTimeout(() => removeTutorialTooltip(), 8500);
     }
 }
 
@@ -7421,7 +7752,6 @@ function showTutorialStep2() {
         setTimeout(() => {
             showTooltipAt(firstPiece, text, '');
         }, 300);
-        setTimeout(() => removeTutorialTooltip(), 8500);
     }
 }
 
@@ -7555,10 +7885,8 @@ function nextLevel() {
             }
 
             // Navigate to next chapter tab if the chapter just became unlocked.
-            if (getChapterStars(currentChapter) >= nextCh.unlockStars) {
-                activeChapterTab = nextCh.id;
-            }
-            goToMap();
+            const navTo = (getChapterStars(currentChapter) >= nextCh.unlockStars) ? nextCh.id : undefined;
+            goToMap(navTo);
         } else {
             startLevel(chapterLevels[idx + 1].id);
         }
@@ -7809,9 +8137,9 @@ function updateLastPlayedTimestamp() {
 // ==================================================================
 const PIECE_INTRO_HINTS = {
     'Arpeggio': { a: 'Ascending — hear how it jumps up through the chord?', b: 'Descending — hear how it leaps down?' },
-    'Neighbor': { a: 'From Above — hear how it dips down and returns?', b: 'From Below — hear how it reaches up and comes back?' },
+    'Neighbor': { a: 'Down-Up — hear how it dips down and returns?', b: 'Up-Down — hear how it reaches up and comes back?' },
     'Approach': { a: 'Ascending — hear the chromatic walk upward?', b: 'Descending — hear it stepping down into the note?' },
-    'Enclosure': { a: 'From Above — it starts above, dips below, then lands.', b: 'From Below — it starts below, rises above, then lands.' },
+    'Enclosure': { a: 'Down-Up — it starts above, dips below, then lands.', b: 'Up-Down — it starts below, rises above, then lands.' },
 };
 
 let pieceIntroState = { pieceName: null, labelA: null, labelB: null, quizAnswer: null, quizRound: 1, quizOrder: [], callback: null };
@@ -8074,10 +8402,10 @@ const PIECE_TAGLINES = {
 
 // Dot positions (x%, y%) tracing each piece type's melodic contour
 const PIECE_DOT_CONTOURS = {
-    'Arpeggio':  [{x:10,y:85},{x:35,y:55},{x:60,y:30},{x:85,y:10}],
-    'Neighbor':  [{x:10,y:50},{x:35,y:25},{x:60,y:50},{x:85,y:75}],
-    'Approach':  [{x:10,y:85},{x:35,y:65},{x:60,y:45},{x:85,y:25}],
-    'Enclosure': [{x:10,y:15},{x:35,y:35},{x:60,y:85},{x:85,y:65}],
+    'Arpeggio':  [{x:8,y:85},{x:28,y:55},{x:48,y:30},{x:68,y:10},{x:88,y:50}],
+    'Neighbor':  [{x:8,y:50},{x:28,y:25},{x:48,y:50},{x:68,y:75},{x:88,y:50}],
+    'Approach':  [{x:8,y:85},{x:28,y:65},{x:48,y:45},{x:68,y:25},{x:88,y:50}],
+    'Enclosure': [{x:8,y:15},{x:28,y:35},{x:48,y:85},{x:68,y:65},{x:88,y:50}],
 };
 
 let rewardNextChapter = null;
@@ -8093,7 +8421,9 @@ function generateRewardNotes(pieceName) {
     const piece = findPiece(pieceName, map.defaultLabel);
     if (!piece) return [];
     const sel = selectRandomIntervals(piece);
-    return calculatePieceNotes(piece, chord, targetNote, sel);
+    const notes = calculatePieceNotes(piece, chord, targetNote, sel);
+    notes.push(targetNote); // resolve to target note so the sample sounds complete
+    return notes;
 }
 
 function positionRewardDots(pieceName) {
@@ -8203,11 +8533,9 @@ function spawnRewardParticles(container) {
 
 function dismissReward() {
     dismissOverlay('reward-overlay', () => {
-        if (rewardNextChapter) {
-            activeChapterTab = rewardNextChapter;
-            rewardNextChapter = null;
-        }
-        goToMap();
+        const nextCh = rewardNextChapter;
+        rewardNextChapter = null;
+        goToMap(nextCh || undefined);
     });
 }
 

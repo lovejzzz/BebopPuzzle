@@ -6,17 +6,20 @@ A jazz music theory game that teaches bebop vocabulary through tactile puzzle-so
 
 ---
 
-## What's New in v1.25
+## What's New in v1.35
 
-- **Redesigned warmup quiz** — real piece thumbnails, mystery "?" card with flip reveal, variant-level choices, "More quiz" or "I'm ready" at the end
-- **Singing encouragement** — idle nudge with 35 unique messages encouraging players to sing the melody
-- **Correct placement feedback** — green outline + sound on correctly placed pieces
-- **Craft table hint** — gives the missing piece directly to your tray when you need it
-- **Hover-to-play** — hold over a tray piece for 1s to hear its audio preview
-- **Escape key** dismisses any open overlay
-- **Smooth overlay transitions** — fade-out animations when closing modals
-- **Tutorial spotlight fix** — target elements now properly highlighted above the dim overlay
-- **Bug fixes** — celebration timeout leak, game complete navigation, warmup piece filtering, CSS variables, tablet breakpoint
+- **Auto-play melody** — melody plays automatically when entering a level
+- **Skip celebration** — play button becomes a skip button during the victory replay, or click anywhere to jump to results
+- **No more echo** — fixed audio overlap when celebration played over unfinished melody
+- **Reward samples fixed** — piece previews now resolve to the target note
+- **Craft table drag-out** — drag pieces back out of the craft zone to return them to your hand
+- **Clearer labels** — "From Above"/"From Below" renamed to "Down-Up"/"Up-Down"
+- **Better map navigation** — "NEXT" badge on first uncompleted level, correct chapter shown after rewards
+- **Chord highlighting** — chord labels glow gold in sync with the playhead during playback
+- **Persistent tooltips** — tutorial hints stay until you perform the action, no more auto-dismiss
+- **Tray preview animation** — gold fill sweep when hovering to preview a piece
+- **Responsive fixes** — improved small-screen layout with scrollable tray and proper touch targets
+- **Bug fixes** — craft output drag, piece duplication, tray layout jump, celebration skip error
 
 ---
 
@@ -116,12 +119,12 @@ All settings persist across sessions.
 |-------|---------|-------|------|---------------------|
 | Arpeggio | Ascending | 1.0 | 0.0 | Chord tones going up |
 | Arpeggio | Descending | 0.0 | 1.0 | Chord tones going down |
-| Neighbor | From Above | 0.5 | 0.5 | Steps down to target, returns |
-| Neighbor | From Below | 0.5 | 0.5 | Steps up to target, returns |
+| Neighbor | Down-Up | 0.5 | 0.5 | Steps down to target, returns |
+| Neighbor | Up-Down | 0.5 | 0.5 | Steps up to target, returns |
 | Approach | Ascending | 1.0 | 0.0 | Chromatic walk up to target |
 | Approach | Descending | 0.0 | 1.0 | Chromatic walk down to target |
-| Enclosure | From Above | 0.0 | 0.5 | Surrounds target, starts above |
-| Enclosure | From Below | 1.0 | 0.5 | Surrounds target, starts below |
+| Enclosure | Down-Up | 0.0 | 0.5 | Surrounds target, starts above |
+| Enclosure | Up-Down | 1.0 | 0.5 | Surrounds target, starts below |
 
 **Connection rule:** pieces connect when `posA + exitA = posB + entryB`
 

@@ -353,7 +353,7 @@
     {
       "id": 1770068026763,
       "name": "Enclosure",
-      "label": "Up-Down",
+      "label": "From Above",
       "entryY": 1,
       "exitY": 0.5,
       "allowInversions": false,
@@ -406,7 +406,7 @@
     {
       "id": 1770068006809,
       "name": "Enclosure",
-      "label": "Down-Up",
+      "label": "From Below",
       "entryY": 0,
       "exitY": 0.5,
       "allowInversions": false,

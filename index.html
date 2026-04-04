@@ -1629,7 +1629,7 @@
             width: 80px; height: 80px; border-radius: 8px; object-fit: contain;
         }
         .piece-intro-mystery-card.revealed .piece-intro-var-label {
-            font-size: 11px; white-space: nowrap;
+            font-size: 11px; max-width: 80px; text-align: center; word-wrap: break-word;
         }
         .piece-intro-mystery-card.thrown {
             animation: cardThrow 0.5s ease forwards;
@@ -3309,7 +3309,7 @@
             <div class="changelog-section">
                 <div class="changelog-section-title">Labels &amp; UI</div>
                 <ul class="changelog-list">
-                    <li>Renamed "From Above"/"From Below" to "Down-Up"/"Up-Down" for clarity</li>
+                    <li>Enclosure labels changed to "From Above"/"From Below"</li>
                     <li>"NEXT" badge on the first uncompleted level in the chapter map</li>
                     <li>Stronger gold pulse on playable levels</li>
                     <li>Chord labels highlight gold during melody playback</li>
@@ -3923,7 +3923,7 @@ function calculateNeighborNotes(piece, targetNote, sel) {
 function calculateEnclosureNotes(piece, targetNote, sel) {
     if (targetNote === null) return [];
     const s12=getInterval(sel,'int1'), s34=getInterval(sel,'int2'), s4t=getInterval(sel,'int3');
-    if (piece.label === 'Down-Up') {
+    if (piece.label === 'From Below') {
         const n2=targetNote+s12, n1=n2+s12, n4=targetNote-s4t, n3=n4-s34;
         return [n1,n2,n3,n4];
     } else {
@@ -4325,7 +4325,7 @@ const TUTORIAL_LEVELS = {
         id:"ch4_01", chapter:4, name:"The Cage",
         chords:["Dm7","G7"], targetChord:"Cmaj7",
         solution:[
-            {col:0, pieceName:"Enclosure", pieceLabel:"Up-Down", position:0},
+            {col:0, pieceName:"Enclosure", pieceLabel:"From Above", position:0},
             {col:1, pieceName:"Arpeggio", pieceLabel:"Descending", position:0.5}
         ],
         targetPiece:{position:1},
@@ -4339,7 +4339,7 @@ const TUTORIAL_LEVELS = {
         id:"ch5_01", chapter:5, name:"Open Mic",
         chords:["Dm7","G7"], targetChord:"Cmaj7",
         solution:[
-            {col:0, pieceName:"Enclosure", pieceLabel:"Up-Down", position:1},
+            {col:0, pieceName:"Enclosure", pieceLabel:"From Above", position:1},
             {col:1, pieceName:"Neighbor", pieceLabel:"Down-Up", position:1}
         ],
         targetPiece:{position:1},
@@ -4363,8 +4363,8 @@ const PIECE_RULES = {
     'Neighbor|Up-Down':  { entry:0.5, exit:0.5 },
     'Approach|Ascending':   { entry:1.0, exit:0.0 },
     'Approach|Descending':  { entry:0.0, exit:1.0 },
-    'Enclosure|Down-Up': { entry:0.0, exit:0.5 },
-    'Enclosure|Up-Down': { entry:1.0, exit:0.5 },
+    'Enclosure|From Below': { entry:0.0, exit:0.5 },
+    'Enclosure|From Above': { entry:1.0, exit:0.5 },
 };
 
 // ==================================================================
@@ -4648,7 +4648,7 @@ const FLIP_MAP = {
     'Arpeggio':  { defaultLabel: 'Ascending',  flipH: 'Descending' },
     'Approach':  { defaultLabel: 'Ascending',  flipH: 'Descending' },
     'Neighbor':  { defaultLabel: 'Down-Up', flipH: 'Up-Down' },
-    'Enclosure': { defaultLabel: 'Down-Up', flipH: 'Up-Down' },
+    'Enclosure': { defaultLabel: 'From Below', flipH: 'From Above' },
 };
 
 function getFlippedLabel(baseName, flipH) {
@@ -8139,7 +8139,7 @@ const PIECE_INTRO_HINTS = {
     'Arpeggio': { a: 'Ascending — hear how it jumps up through the chord?', b: 'Descending — hear how it leaps down?' },
     'Neighbor': { a: 'Down-Up — hear how it dips down and returns?', b: 'Up-Down — hear how it reaches up and comes back?' },
     'Approach': { a: 'Ascending — hear the chromatic walk upward?', b: 'Descending — hear it stepping down into the note?' },
-    'Enclosure': { a: 'Down-Up — it starts above, dips below, then lands.', b: 'Up-Down — it starts below, rises above, then lands.' },
+    'Enclosure': { a: 'From Below — it starts below, rises above, then lands.', b: 'From Above — it starts above, dips below, then lands.' },
 };
 
 let pieceIntroState = { pieceName: null, labelA: null, labelB: null, quizAnswer: null, quizRound: 1, quizOrder: [], callback: null };
@@ -8258,6 +8258,9 @@ function startPieceIntroQuiz() {
     const { labelA, labelB, quizOrder, quizRound } = pieceIntroState;
     const which = quizOrder[quizRound - 1];
     pieceIntroState.quizAnswer = which;
+
+    // Reset mystery card to default state (clears stale reveal from previous intro)
+    resetMysteryCard();
 
     document.getElementById('piece-intro-round').textContent = 'Round ' + quizRound + ' of 2';
     document.getElementById('piece-intro-quiz-prompt').textContent = 'Which one is this?';

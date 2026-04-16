@@ -2199,6 +2199,8 @@
             letter-spacing: 0.06em;
             color: var(--text-secondary);
             text-align: center;
+            min-height: 15px; /* prevent layout shift when text appears */
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             z-index: 1;
             min-height: 14px;
         }
@@ -2207,7 +2209,8 @@
             color: var(--purple);
             text-align: center;
             z-index: 1;
-            min-height: 10px;
+            min-height: 14px; /* prevent layout shift when text appears */
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
         /* Shared craft button style (Flip & Duplicate, equal weight) */

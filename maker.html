@@ -496,8 +496,10 @@
             <div class="label-pills">
                 <span class="label-pill" onclick="setLabel('Ascending')">Asc</span>
                 <span class="label-pill" onclick="setLabel('Descending')">Desc</span>
-                <span class="label-pill" onclick="setLabel('Down-Up')">Above</span>
-                <span class="label-pill" onclick="setLabel('Up-Down')">Below</span>
+                <span class="label-pill" onclick="setLabel('Down-Up')">Down-Up</span>
+                <span class="label-pill" onclick="setLabel('Up-Down')">Up-Down</span>
+                <span class="label-pill" onclick="setLabel('From Above')">From Above</span>
+                <span class="label-pill" onclick="setLabel('From Below')">From Below</span>
             </div>
         </div>
 
@@ -542,6 +544,7 @@
 
         <div class="save-section">
             <button class="btn-save" onclick="saveToLibrary()">Save to Library</button>
+            <button class="btn-new" onclick="exportPiecePNG()">Export PNG</button>
             <button class="btn-new" onclick="newCanvas()">+ New Piece</button>
         </div>
     </div>
@@ -1082,8 +1085,10 @@ function saveToLibrary() {
     if (!S.elements.length) { toast('Nothing to save'); return; }
     const name = document.getElementById('piece-name').value.trim() || 'Untitled';
     const label = document.getElementById('piece-label').value.trim() || '';
-    const entryY = parseFloat(document.getElementById('piece-entryY').value) || 0.5;
-    const exitY = parseFloat(document.getElementById('piece-exitY').value) || 0.5;
+    const entryYRaw = parseFloat(document.getElementById('piece-entryY').value);
+    const entryY = isNaN(entryYRaw) ? 0.5 : entryYRaw;
+    const exitYRaw = parseFloat(document.getElementById('piece-exitY').value);
+    const exitY = isNaN(exitYRaw) ? 0.5 : exitYRaw;
     const allowInv = document.getElementById('allow-inversions').checked;
 
     // Check duplicate
@@ -1159,8 +1164,8 @@ function exportLibraryJS() {
 
 function exportLibraryJSON() {
     const data = { version: 1, exportDate: new Date().toISOString(), library: S.library };
-    downloadBlob(JSON.stringify(data,null,2), 'bebop-library.json', 'application/json');
-    toast('Exported JSON');
+    downloadBlob(JSON.stringify(data,null,2), 'default-library.json', 'application/json');
+    toast('Exported default-library.json');
 }
 
 function importLibraryJSON() {
@@ -1177,15 +1182,73 @@ function importLibraryJSON() {
                 if (jsonStart > 0) text = text.substring(jsonStart).replace(/;\s*$/, '');
                 const data = JSON.parse(text);
                 if (data.library && Array.isArray(data.library)) {
-                    S.library = [...S.library, ...data.library];
+                    // Deduplicate by name+label, imported pieces overwrite existing
+                    const existingKeys = new Set(S.library.map(p => p.name + '|' + p.label));
+                    const newPieces = data.library.filter(p => !existingKeys.has(p.name + '|' + p.label));
+                    const updated = data.library.filter(p => existingKeys.has(p.name + '|' + p.label));
+                    // Replace existing matches
+                    updated.forEach(imp => {
+                        const idx = S.library.findIndex(p => p.name === imp.name && p.label === imp.label);
+                        if (idx !== -1) S.library[idx] = imp;
+                    });
+                    S.library = [...S.library, ...newPieces];
                     renderLibrary();
-                    toast(`Imported ${data.library.length} pieces`);
+                    toast(`Imported ${data.library.length} pieces (${newPieces.length} new, ${updated.length} updated)`);
                 }
             } catch(err) { toast('Import failed: invalid file'); }
         };
         reader.readAsText(file);
     };
     input.click();
+}
+
+function exportPiecePNG() {
+    if (!S.elements.length) { toast('Nothing to export'); return; }
+    const size = S.canvasSize;
+    const offscreen = document.createElement('canvas');
+    offscreen.width = size; offscreen.height = size;
+    const octx = offscreen.getContext('2d');
+
+    // Wood grain
+    if (!woodGrain) woodGrain = createWoodGrain();
+    octx.drawImage(woodGrain, 0, 0);
+
+    // Border
+    octx.strokeStyle = 'rgba(0,0,0,0.1)'; octx.lineWidth = 12;
+    octx.strokeRect(6, 6, size - 12, size - 12);
+
+    // Elements (no selection glow)
+    S.elements.forEach(el => {
+        octx.save(); octx.lineCap = 'round'; octx.lineJoin = 'round';
+        const c = el.color || '#5d4037';
+        octx.strokeStyle = c; octx.fillStyle = c; octx.lineWidth = el.width;
+        const x1 = el.p1.x * size, y1 = el.p1.y * size;
+        const x2 = el.p2?.x * size, y2 = el.p2?.y * size;
+        if (el.type === 'line') {
+            octx.beginPath(); octx.moveTo(x1, y1); octx.lineTo(x2, y2); octx.stroke();
+        } else if (el.type === 'dotted') {
+            const len = Math.hypot(x2 - x1, y2 - y1);
+            if (len > 0) {
+                const u = len / (2 * el.segments - 1);
+                octx.setLineDash([u, u]);
+                octx.beginPath(); octx.moveTo(x1, y1); octx.lineTo(x2, y2); octx.stroke();
+                octx.setLineDash([]);
+            }
+        } else if (el.type === 'dot') {
+            octx.beginPath(); octx.arc(x1, y1, el.width / 2, 0, Math.PI * 2); octx.fill();
+        }
+        octx.restore();
+    });
+
+    const name = document.getElementById('piece-name').value.trim() || 'piece';
+    offscreen.toBlob(blob => {
+        const link = document.createElement('a');
+        link.download = `${name}.png`;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        URL.revokeObjectURL(link.href);
+    }, 'image/png');
+    toast('Exported PNG');
 }
 
 function downloadBlob(content, filename, type) {

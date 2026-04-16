@@ -6,20 +6,23 @@ A jazz music theory game that teaches bebop vocabulary through tactile puzzle-so
 
 ---
 
-## What's New in v1.35
+## What's New in v1.40
 
-- **Auto-play melody** — melody plays automatically when entering a level
-- **Skip celebration** — play button becomes a skip button during the victory replay, or click anywhere to jump to results
-- **No more echo** — fixed audio overlap when celebration played over unfinished melody
-- **Reward samples fixed** — piece previews now resolve to the target note
-- **Craft table drag-out** — drag pieces back out of the craft zone to return them to your hand
-- **Clearer labels** — "From Above"/"From Below" renamed to "Down-Up"/"Up-Down"
-- **Better map navigation** — "NEXT" badge on first uncompleted level, correct chapter shown after rewards
-- **Chord highlighting** — chord labels glow gold in sync with the playhead during playback
-- **Persistent tooltips** — tutorial hints stay until you perform the action, no more auto-dismiss
-- **Tray preview animation** — gold fill sweep when hovering to preview a piece
-- **Responsive fixes** — improved small-screen layout with scrollable tray and proper touch targets
-- **Bug fixes** — craft output drag, piece duplication, tray layout jump, celebration skip error
+### Gamification
+- **Listen-based stars** — star rating now rewards deep listening (listen count) instead of speed (time)
+- **Daily Challenge** — a new seeded puzzle every day, accessible from the landing page
+- **Wrong placement feedback** — targeted hints like "Right piece! Try flipping the direction"
+- **Streak counter** — tracks consecutive practice days with milestone achievements
+- **Chapter flavor text** — completing a chapter connects your new skill to real jazz artists
+- **Composer Mode unlocks earlier** — now available after Chapter 3 instead of all 6 chapters
+- **Jam Session intro** — explains distractor pieces and listen limits before Chapter 6
+
+### Bug Fixes & UI
+- 17 bug fixes including audio desync, tray piece loss, overlay persistence, animation glitches
+- All touch targets meet 44px minimum (slider thumbs, back buttons, tabs)
+- Tray layout redesigned to fit 4 pieces on desktop and mobile
+- Mobile craft table wraps to second row for more tray space
+- iOS Safari 100dvh fix, modal scroll fix, resize debounce
 
 ---
 
@@ -59,7 +62,11 @@ Each level gives you a limited number of hints:
 
 ### Stars
 
-Earn 1–3 stars per level based on speed, hint usage, and wrong placements. Stars unlock new chapters.
+Earn 1-3 stars per level based on listen count, hint usage, and mistakes. Stars unlock new chapters.
+
+- 3 stars: 2 or fewer listens, no hints, no mistakes
+- 2 stars: 4 or fewer listens, at most 1 hint or mistake
+- 1 star: completed
 
 ---
 
@@ -89,7 +96,7 @@ The ultimate challenge. Extra distractor pieces in the tray and a limited number
 
 ## Composer Mode
 
-Unlock Composer Mode by completing all 6 chapters. This is your free-play sandbox:
+Unlock Composer Mode by completing Chapters 1-3. This is your free-play sandbox:
 
 - **Empty canvas** — start with a blank grid and all 4 piece types
 - **Editable chords** — type any chord symbol (Dm7, G7alt, Cmaj7, etc.) directly into the chord row
@@ -150,7 +157,6 @@ Single-file game. No build step, no dependencies, no server. Just open `index.ht
 
 - `maker.html` — visual piece editor for creating and modifying puzzle piece shapes
 - `library-data.js` — piece visual data (thumbnails, drawing paths, interval patterns)
-- `playground.html` — sandbox for testing piece connections
 
 ---
 

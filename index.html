@@ -22,6 +22,8 @@
             --bg-elevated: #1c2333;
             --border-subtle: rgba(255,255,255,0.06);
             --border-medium: rgba(255,255,255,0.1);
+            --border-dim: rgba(255,255,255,0.08);
+            --text-dim: #5a6270;
             --gold: #f0a830;
             --gold-dim: #c4872a;
             --gold-glow: rgba(240,168,48,0.3);
@@ -47,7 +49,9 @@
             background: var(--bg-deep);
             color: var(--text-primary);
             overflow: hidden;
-            height: 100vh;
+            height: 100dvh;
+            height: 100vh; /* fallback for older browsers */
+            @supports (height: 100dvh) { height: 100dvh; }
             width: 100vw;
             -webkit-font-smoothing: antialiased;
         }
@@ -177,6 +181,17 @@
             transform: translateY(-1px);
         }
 
+        .landing-btn-daily {
+            background: linear-gradient(135deg, #5b8def 0%, #3b6fd4 100%);
+            color: #fff;
+            box-shadow: 0 4px 24px rgba(91,141,239,0.25), inset 0 1px 0 rgba(255,255,255,0.15);
+        }
+        .landing-btn-daily:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 40px rgba(91,141,239,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+        }
+        .landing-btn-daily .daily-check { color: #34d399; margin-left: 6px; }
+
         .landing-btn-composer {
             background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
             color: #fff;
@@ -281,7 +296,7 @@
         }
 
         .map-back {
-            width: 40px; height: 40px;
+            width: 44px; height: 44px;
             border-radius: 12px; border: 1px solid var(--border-medium);
             background: var(--bg-card);
             color: var(--text-secondary);
@@ -317,7 +332,9 @@
 
         .map-tab {
             flex-shrink: 0;
-            padding: 10px 16px 12px;
+            padding: 12px 16px 14px;
+            min-height: 44px;
+            box-sizing: border-box;
             font-size: 12px; font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.04em;
@@ -458,7 +475,7 @@
             font-size: 16px;
         }
         .level-name {
-            font-size: 9px; font-weight: 600;
+            font-size: 10px; font-weight: 600;
             color: var(--text-muted);
             text-align: center;
             line-height: 1.2;
@@ -471,7 +488,7 @@
         .level-node.locked-node .level-num { color: var(--text-muted); }
 
         .level-stars-display {
-            font-size: 9px;
+            font-size: 10px;
             letter-spacing: 1px;
         }
 
@@ -481,6 +498,7 @@
         #screen-puzzle {
             display: flex; flex-direction: column;
             height: 100vh;
+            @supports (height: 100dvh) { height: 100dvh; }
         }
 
         .puzzle-topbar {
@@ -495,7 +513,7 @@
         }
 
         .topbar-back {
-            width: 36px; height: 36px;
+            width: 44px; height: 44px;
             border-radius: 10px;
             background: transparent;
             border: 1px solid var(--border-medium);
@@ -570,6 +588,7 @@
         .hint-btn {
             display: flex; align-items: center; gap: 5px;
             padding: 7px 14px;
+            min-height: 44px; box-sizing: border-box;
             border-radius: 10px;
             background: rgba(240,168,48,0.08);
             border: 1px solid rgba(240,168,48,0.15);
@@ -605,6 +624,7 @@
         .guide-me-btn.hidden { display: none; }
 
         .timer-display {
+            display: none; /* replaced by listen-count scoring */
             font-family: 'JetBrains Mono', monospace;
             font-size: 13px;
             font-weight: 500;
@@ -808,7 +828,7 @@
         }
 
         .bottombar-inner {
-            max-width: 700px;
+            max-width: 900px;
             margin: 0 auto;
             display: flex;
             align-items: center;
@@ -894,14 +914,26 @@
         /* Piece tray — cocktail napkin coaster style */
         .piece-tray {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             overflow-x: auto;
             flex: 1;
+            min-width: 0; /* allow flex shrink properly */
             padding: 8px 2px 4px;
             scrollbar-width: none;
             min-height: 92px;
             align-items: center;
+            /* fade hint when scrollable */
+            -webkit-mask-image: linear-gradient(to right, black calc(100% - 16px), transparent);
+            mask-image: linear-gradient(to right, black calc(100% - 16px), transparent);
         }
+        .piece-tray:not(.tray-overflow) {
+            -webkit-mask-image: none;
+            mask-image: none;
+        }
+        .piece-tray.tray-compact { gap: 6px; }
+        .piece-tray.tray-compact .tray-piece { padding: 6px 5px 4px; }
+        .piece-tray.tray-compact .tray-piece-thumb { width: 56px; height: 56px; }
+        .piece-tray.tray-compact .tray-piece-thumb img { width: 56px; height: 56px; }
         .piece-tray::-webkit-scrollbar { display: none; }
 
         .tray-piece {
@@ -968,10 +1000,10 @@
         }
 
         .tray-piece-label {
-            font-size: 7px;
+            font-size: 10px;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.06em;
             color: #6b5c4a;
             text-align: center;
             line-height: 1.2;
@@ -979,10 +1011,10 @@
             max-width: 68px;
         }
         .tray-piece-variant {
-            font-size: 6.5px;
+            font-size: 9px;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.06em;
+            letter-spacing: 0.04em;
             color: #9a8b78;
             text-align: center;
             font-family: 'Inter', sans-serif;
@@ -1084,7 +1116,7 @@
             border-radius: 14px;
             box-shadow: 0 12px 40px rgba(0,0,0,0.5);
             border: 1px solid var(--border-medium);
-            animation: pop-in 0.2s ease-out;
+            animation: modal-pop 0.2s ease-out;
         }
 
         .hint-piece-option {
@@ -1145,7 +1177,7 @@
         }
         .tempo-hint.hidden { display: none; }
         .tempo-hint-title {
-            font-size: 8px; font-weight: 800;
+            font-size: 10px; font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             color: var(--gold);
@@ -1171,14 +1203,14 @@
         .tempo-hint-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 18px; height: 18px;
+            width: 28px; height: 28px;
             border-radius: 50%;
             background: var(--gold);
             cursor: pointer;
             box-shadow: 0 2px 6px rgba(212,175,55,0.4);
         }
         .tempo-hint-slider::-moz-range-thumb {
-            width: 18px; height: 18px;
+            width: 28px; height: 28px;
             border-radius: 50%;
             background: var(--gold);
             cursor: pointer;
@@ -1186,7 +1218,7 @@
         }
         .tempo-hint-labels {
             display: flex; justify-content: space-between;
-            font-size: 8px; color: var(--text-muted);
+            font-size: 10px; color: var(--text-muted);
             margin: -4px 2px 0; font-weight: 600;
         }
 
@@ -1262,6 +1294,7 @@
             backdrop-filter: blur(8px);
             z-index: 50;
             display: flex; align-items: center; justify-content: center;
+            overflow-y: auto;
             animation: fade-in 0.3s ease-out;
         }
         .success-overlay.hidden { display: none; }
@@ -1328,7 +1361,8 @@
         }
 
         .success-btn {
-            padding: 12px 28px;
+            padding: 14px 28px;
+            min-height: 48px; box-sizing: border-box;
             border-radius: 12px;
             font-weight: 700;
             font-size: 13px;
@@ -1492,6 +1526,7 @@
             backdrop-filter: blur(12px);
             z-index: 65;
             display: flex; align-items: center; justify-content: center;
+            overflow-y: auto;
             animation: fade-in 0.4s ease-out;
         }
         .warmup-overlay.hidden { display: none; }
@@ -1547,6 +1582,7 @@
             backdrop-filter: blur(12px);
             z-index: 65;
             display: flex; align-items: center; justify-content: center;
+            overflow-y: auto;
             animation: fade-in 0.4s ease-out;
         }
         .piece-intro-overlay.hidden { display: none; }
@@ -1696,6 +1732,7 @@
             backdrop-filter: blur(12px);
             z-index: 60;
             display: flex; align-items: center; justify-content: center;
+            overflow-y: auto;
             animation: fade-in 0.4s ease-out;
         }
         .reward-overlay.hidden { display: none; }
@@ -1880,6 +1917,7 @@
             background: rgba(7,9,15,0.92);
             z-index: 110;
             display: flex; align-items: center; justify-content: center;
+            overflow-y: auto;
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
         }
@@ -2969,9 +3007,33 @@
             .hint-btn { min-width: 44px; min-height: 44px; }
             .craft-btn { min-width: 44px; min-height: 44px; }
             .star-info-btn { display: none; }
+            .tempo-hint { padding: 8px 10px; }
+            .tempo-hint-value { font-size: 14px; }
+            .tempo-hint-labels { font-size: 9px; }
             .success-modal, .warmup-modal, .piece-intro-modal, .reward-modal {
                 max-width: 300px;
             }
+            .piece-tray.tray-compact .tray-piece-thumb { width: 44px; height: 44px; }
+            .piece-tray.tray-compact .tray-piece-thumb img { width: 44px; height: 44px; }
+            .piece-tray.tray-compact .tray-piece-label { font-size: 9px; }
+            .piece-tray.tray-compact .tray-piece-variant { font-size: 8px; }
+        }
+        /* Mobile: wrap tray bar so craft table goes to second row */
+        @media (max-width: 640px) {
+            .bottombar-inner { flex-wrap: wrap; justify-content: center; gap: 8px; }
+            .piece-tray { flex-basis: 0; min-width: 100px; }
+            .craft-tray-divider { display: none !important; }
+            .craft-inline.visible { flex-basis: 100%; display: flex; justify-content: center; }
+            .craft-inline-body { gap: 10px; }
+            .craft-drop-zone { width: 52px; height: 52px; min-width: 52px; }
+            .craft-inline-output-wrap { min-width: 52px; }
+            .craft-output { width: 52px; height: 52px; border-radius: 10px; }
+            .craft-output img { width: 44px; height: 44px; }
+            /* Compact tempo panel on mobile to avoid grid overlap */
+            .tempo-hint { width: 120px; padding: 6px 10px; right: 4px; margin-bottom: 4px; }
+            .tempo-hint-value { font-size: 14px; margin-bottom: 2px; }
+            .tempo-hint-labels { font-size: 9px; }
+            .tempo-hint-title { font-size: 9px; margin-bottom: 3px; }
         }
 
         /* =============================================
@@ -3027,12 +3089,18 @@
             outline: none;
         }
         .settings-slider::-webkit-slider-thumb {
-            appearance: none; width: 16px; height: 16px;
+            appearance: none; width: 28px; height: 28px;
             background: var(--gold); border-radius: 50%;
             cursor: pointer; box-shadow: 0 0 8px var(--gold-glow);
         }
+        .settings-slider::-moz-range-thumb {
+            width: 28px; height: 28px;
+            background: var(--gold); border-radius: 50%;
+            cursor: pointer; border: none;
+        }
         .settings-btn {
-            width: 100%; padding: 12px; margin-top: 8px;
+            width: 100%; padding: 14px; margin-top: 8px;
+            min-height: 48px; box-sizing: border-box;
             border-radius: 12px; font-size: 12px; font-weight: 700;
             text-transform: uppercase; letter-spacing: 0.08em;
             cursor: pointer; transition: all 0.2s; border: none;
@@ -3045,7 +3113,8 @@
         .settings-back {
             background: none; border: none;
             color: var(--text-muted); font-size: 13px; font-weight: 600;
-            cursor: pointer; padding: 4px 0; margin-bottom: 16px;
+            cursor: pointer; padding: 10px 0; margin-bottom: 8px;
+            min-height: 44px; box-sizing: border-box;
             transition: color 0.2s; text-align: left;
         }
         .settings-back:hover { color: var(--text-primary); }
@@ -3086,7 +3155,7 @@
             max-height: 80vh;
             overflow-y: auto;
             box-shadow: 0 24px 80px rgba(0,0,0,0.5);
-            animation: pop-in 0.3s ease-out;
+            animation: modal-pop 0.3s ease-out;
         }
         .changelog-header {
             display: flex; align-items: center; justify-content: space-between;
@@ -3231,7 +3300,8 @@
         </div>
         <div style="display: flex; flex-direction: column; gap: 12px; align-items: center;">
             <button class="landing-btn landing-btn-primary" onclick="onPlayPressed()">Play</button>
-            <button class="landing-btn landing-btn-composer" id="composer-btn" onclick="onComposerPressed()">🎹 Composer Mode</button>
+            <button class="landing-btn landing-btn-daily" id="daily-btn" onclick="onDailyPressed()">Daily Challenge</button>
+            <button class="landing-btn landing-btn-composer" id="composer-btn" onclick="onComposerPressed()">\ud83c\udfb9 Composer Mode</button>
             <button class="landing-btn landing-btn-secondary" onclick="showScreen('settings')">Settings</button>
         </div>
     </div>
@@ -3259,7 +3329,7 @@
                 <button class="settings-btn settings-btn-danger" onclick="confirmResetProgress()">Reset All Progress</button>
             </div>
             <div class="settings-footer">
-                Bebop Puzzle <span class="settings-version" onclick="showChangelog()">v1.35</span><br>Made By Tian Xing
+                Bebop Puzzle <span class="settings-version" onclick="showChangelog()">v1.40</span><br>Made By Tian Xing
             </div>
         </div>
     </div>
@@ -3274,7 +3344,52 @@
                 <button class="changelog-close" onclick="closeChangelog()">✕</button>
             </div>
 
-            <div class="changelog-version-tag">v1.35</div>
+            <div class="changelog-version-tag">v1.40</div>
+
+            <div class="changelog-section">
+                <div class="changelog-section-title">Gamification</div>
+                <ul class="changelog-list">
+                    <li>Star rating now based on listen count (not time) — rewards deep listening</li>
+                    <li>Wrong placements give targeted feedback ("Right piece! Try flipping" etc.)</li>
+                    <li>Chapter completion shows jazz flavor text connecting skills to real artists</li>
+                    <li>Daily Challenge — a new seeded puzzle every day on the landing page</li>
+                    <li>Streak counter tracks consecutive practice days with milestone achievements</li>
+                    <li>Best listen count stored and shown per level</li>
+                    <li>Composer Mode now unlocks after Chapter 3 (was: all chapters)</li>
+                    <li>Jam Session intro screen explains distractor pieces and listen limits</li>
+                </ul>
+            </div>
+
+            <div class="changelog-section">
+                <div class="changelog-section-title">Bug Fixes</div>
+                <ul class="changelog-list">
+                    <li>Fixed Sound Design panel invisible borders (missing CSS variables)</li>
+                    <li>Fixed hint popup and changelog animation jump (pop-in translate)</li>
+                    <li>Fixed BPM not resetting between levels (compounding slowdown)</li>
+                    <li>Fixed tray piece vanishing when dropped on occupied column</li>
+                    <li>Fixed hint adding pieces beyond tray capacity</li>
+                    <li>Fixed rapid drag during tray collapse causing index mismatch</li>
+                    <li>Fixed guided mode timeouts surviving map navigation</li>
+                    <li>Fixed success overlay persisting after navigating to map</li>
+                    <li>Fixed modal overlays not scrollable on short viewports</li>
+                </ul>
+            </div>
+
+            <div class="changelog-section">
+                <div class="changelog-section-title">UI/UX</div>
+                <ul class="changelog-list">
+                    <li>Tray now fits 4 pieces on both desktop and mobile (compact mode)</li>
+                    <li>Mobile: craft table wraps to second row for more tray space</li>
+                    <li>All touch targets meet 44px minimum (back buttons, tabs, sliders)</li>
+                    <li>Slider thumbs enlarged from 16px to 28px for easier grabbing</li>
+                    <li>All font sizes meet 10px readable minimum</li>
+                    <li>iOS Safari 100dvh fix for address bar cutoff</li>
+                    <li>Debounced window resize handler</li>
+                </ul>
+            </div>
+
+            <hr style="border:none;border-top:1px solid var(--border-subtle);margin:16px 0;">
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Previous (v1.35)</div>
 
             <div class="changelog-section">
                 <div class="changelog-section-title">Audio</div>
@@ -4623,12 +4738,18 @@ function generateRandomPuzzle(template) {
 }
 
 const CHAPTERS = [
-    { id:1, name:"Arpeggios",   icon:"Arpeggio",  unlockStars:0,  color:"gold",   reward:null },
-    { id:2, name:"Neighbors",   icon:"Neighbor",   unlockStars:10, color:"purple", reward:"Neighbor" },
-    { id:3, name:"Approaches",  icon:"Approach",   unlockStars:18, color:"blue",   reward:"Approach" },
-    { id:4, name:"Enclosures",  icon:"Enclosure",  unlockStars:20, color:"green",  reward:"Enclosure" },
-    { id:5, name:"All Mixed",   icon:"🎷",         unlockStars:22, color:"red",    reward:null },
-    { id:6, name:"Jam Session",  icon:"🎤",         unlockStars:25, color:"orange", reward:null }
+    { id:1, name:"Arpeggios",   icon:"Arpeggio",  unlockStars:0,  color:"gold",   reward:null,
+      flavorText:"You can hear arpeggios now. Listen to any Charlie Parker solo \u2014 you'll spot them everywhere." },
+    { id:2, name:"Neighbors",   icon:"Neighbor",   unlockStars:10, color:"purple", reward:"Neighbor",
+      flavorText:"Neighbor tones are the ornaments of bebop. Listen for them in Thelonious Monk's melodies." },
+    { id:3, name:"Approaches",  icon:"Approach",   unlockStars:18, color:"blue",   reward:"Approach",
+      flavorText:"Chromatic approaches are Bird's signature move. Try spotting them in 'Donna Lee.'" },
+    { id:4, name:"Enclosures",  icon:"Enclosure",  unlockStars:20, color:"green",  reward:"Enclosure",
+      flavorText:"Enclosures surround the target like a cage. Dizzy Gillespie loved these." },
+    { id:5, name:"All Mixed",   icon:"\ud83c\udfb7",         unlockStars:22, color:"red",    reward:null,
+      flavorText:"You can now hear all four shapes mixed together. That's real bebop vocabulary." },
+    { id:6, name:"Jam Session",  icon:"\ud83c\udfa4",         unlockStars:25, color:"orange", reward:null,
+      flavorText:"You've trained your ear to pick voices out of the crowd. Welcome to the bandstand." }
 ];
 
 // Helper: render a chapter icon — piece thumbnail if available, otherwise emoji
@@ -4670,6 +4791,7 @@ let currentLevelData = null;
 let levelStartTime = 0;
 let hintsUsed = 0;
 let wrongPlacements = 0;
+let totalListens = 0;
 let hintsRemaining = 3;
 let currentHintCol = null;
 let currentHintLevel = 0;
@@ -4698,6 +4820,7 @@ let stuckIdleTimer = null;   // fires after 45s of no action
 let stuckLastAction = 0;     // timestamp of last meaningful action
 let guideMeOffered = false;  // whether "Guide Me" has been shown this attempt
 let isGuidedMode = false;    // active guided walkthrough
+let guidedStepTimeouts = [];  // tracked timeouts for guided mode cleanup
 
 function initGridState() {
     gridState = {};
@@ -4709,6 +4832,30 @@ function initGridState() {
 // ==================================================================
 function saveProgress() {
     try { localStorage.setItem('bebopPuzzleGame', JSON.stringify(gameProgress)); } catch(e) {}
+}
+
+// Streak tracking — consecutive days with at least one level completed (no hints)
+function updateStreak() {
+    const today = new Date().toISOString().slice(0, 10);
+    const lastDate = gameProgress['_lastStreakDate'] || '';
+    const streak = gameProgress['_streak'] || 0;
+    if (lastDate === today) return; // already counted today
+    // Check if yesterday
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    if (lastDate === yesterday) {
+        gameProgress['_streak'] = streak + 1;
+    } else if (lastDate === '') {
+        gameProgress['_streak'] = 1;
+    } else {
+        gameProgress['_streak'] = 1; // streak broken
+    }
+    gameProgress['_lastStreakDate'] = today;
+    // Milestones
+    const newStreak = gameProgress['_streak'];
+    const milestones = [3, 5, 10, 20, 50];
+    if (milestones.includes(newStreak)) {
+        setTimeout(() => showAchievement('\ud83d\udd25', newStreak + '-Day Streak!', 'Keep the practice going'), 2000);
+    }
 }
 
 function loadProgress() {
@@ -4757,7 +4904,7 @@ function showScreen(name) {
         target.classList.add('active');
     }
     if (name === 'map') renderMap();
-    if (name === 'landing') updateComposerButton();
+    if (name === 'landing') { updateComposerButton(); updateDailyButton(); }
 }
 
 function dismissOverlay(id, callback) {
@@ -4779,6 +4926,10 @@ function goToMap(overrideChapter) {
     stopPlayback();
     celebrationTimeouts.forEach(t => clearTimeout(t));
     celebrationTimeouts = [];
+    guidedStepTimeouts.forEach(t => clearTimeout(t));
+    guidedStepTimeouts = [];
+    isGuidedMode = false;
+    isDailyMode = false;
     hideCraftTable();
     trayFlipState = [];
     trayAvailable = [];
@@ -4792,6 +4943,11 @@ function goToMap(overrideChapter) {
     if (stuckIdleTimer) { clearInterval(stuckIdleTimer); stuckIdleTimer = null; }
     dismissSideNudge();
     removeSpotlight();
+    // Dismiss all modal overlays that may still be visible
+    ['success-overlay','warmup-overlay','piece-intro-overlay','reward-overlay','game-complete-overlay'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.classList.remove('overlay-dismissing'); el.classList.add('hidden'); }
+    });
     const levelNameEl = document.getElementById('puzzle-level-name');
     if (levelNameEl) levelNameEl.classList.remove('sing-back');
     // Remember which chapter tab to show — callers can pass overrideChapter
@@ -4819,7 +4975,9 @@ const COLOR_MAP = {
 };
 
 function renderMap() {
-    document.getElementById('total-stars-display').textContent = '★ ' + getTotalStars();
+    const streak = gameProgress['_streak'] || 0;
+    const streakStr = streak > 0 ? '  \ud83d\udd25 ' + streak : '';
+    document.getElementById('total-stars-display').textContent = '\u2605 ' + getTotalStars() + streakStr;
 
     // Render tabs
     const tabsEl = document.getElementById('map-tabs');
@@ -4955,6 +5113,8 @@ function startLevel(levelId) {
     stopPlayback(); // ensure any ongoing playback is halted before loading new level
     celebrationTimeouts.forEach(t => clearTimeout(t));
     celebrationTimeouts = [];
+    guidedStepTimeouts.forEach(t => clearTimeout(t));
+    guidedStepTimeouts = [];
     clearHintVisuals();
     dismissSideNudge();
     if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
@@ -4966,6 +5126,14 @@ function startLevel(levelId) {
         gameProgress['_intro_' + template.newPc] = true;
         saveProgress();
         showPieceIntro(template.newPc, () => startLevel(levelId));
+        return;
+    }
+
+    // Jam Session intro — shown once before the first Ch6 level
+    if (template.ch === 6 && !gameProgress['_jamIntro']) {
+        gameProgress['_jamIntro'] = true;
+        saveProgress();
+        showJamSessionIntro(() => startLevel(levelId));
         return;
     }
 
@@ -5015,6 +5183,7 @@ function startLevel(levelId) {
     // Reset stats
     hintsUsed = 0;
     wrongPlacements = 0;
+    totalListens = 0;
     hintsRemaining = currentLevelData.hints || 3;
     currentHintCol = null;
     currentHintLevel = 0;
@@ -5033,6 +5202,7 @@ function startLevel(levelId) {
     hideGuideMe();
 
     // Invisible retry scaffolding — subtle difficulty reduction on repeated attempts
+    currentBPM = 90; // reset before retry scaffolding (prevents compounding across levels)
     const retryCount = gameProgress['_retry_' + currentLevel] || 0;
     if (retryCount >= 2) hintsRemaining = Math.max(hintsRemaining, (currentLevelData.hints || 3) + 1); // bonus hint
     if (retryCount >= 3) currentBPM = Math.round(currentBPM * 0.85); // 15% slower
@@ -5202,7 +5372,7 @@ function sizeCells() {
     const gridW = puzzleArea.clientWidth - 32;
     const cellFromW = Math.floor((gridW - (totalCols - 1) * cellGap) / totalCols);
 
-    const size = Math.max(36, Math.min(cellFromH, cellFromW, 140));
+    const size = Math.max(44, Math.min(cellFromH, cellFromW, 140));
 
     document.querySelectorAll('.grid-cell').forEach(c => {
         c.style.height = size + 'px';
@@ -5318,12 +5488,13 @@ function updateCellSize() {
 // ==================================================================
 // Smoothly collapse a tray piece, then splice data arrays and re-render
 function collapseTrayPiece(index, callback) {
+    // Splice data arrays immediately to prevent stale-index bugs from rapid drags
+    trayAvailable.splice(index, 1);
+    trayFlipState.splice(index, 1);
+
     const cards = document.querySelectorAll('#piece-tray .tray-piece');
     const card = cards[index];
     if (!card) {
-        // No DOM element — just do it immediately
-        trayAvailable.splice(index, 1);
-        trayFlipState.splice(index, 1);
         renderTray();
         if (callback) callback();
         return;
@@ -5332,25 +5503,27 @@ function collapseTrayPiece(index, callback) {
     const tray = document.getElementById('piece-tray');
     tray.style.minHeight = tray.offsetHeight + 'px';
     card.classList.add('collapsing');
-    let spliceDone = false;
-    function doSplice() {
-        if (spliceDone) return;
-        spliceDone = true;
-        trayAvailable.splice(index, 1);
-        trayFlipState.splice(index, 1);
+    let cleaned = false;
+    function doCleanup() {
+        if (cleaned) return;
+        cleaned = true;
         renderTray();
         tray.style.minHeight = '';
         if (callback) callback();
     }
-    card.addEventListener('transitionend', doSplice, { once: true });
+    card.addEventListener('transitionend', doCleanup, { once: true });
     // Safety fallback in case transitionend doesn't fire
-    setTimeout(doSplice, 300);
+    setTimeout(doCleanup, 300);
 }
 
 function renderTray() {
     const tray = document.getElementById('piece-tray');
     tray.innerHTML = '';
     if (!currentLevelData) return;
+
+    // Compact mode when tray is crowded
+    const compact = trayAvailable.length >= 4;
+    tray.classList.toggle('tray-compact', compact);
 
     // Render one card per entry in trayAvailable (duplicates = multiple cards)
     trayAvailable.forEach((baseName, idx) => {
@@ -5411,6 +5584,10 @@ function renderTray() {
         }, {passive: false});
 
         tray.appendChild(card);
+    });
+    // Toggle scroll fade indicator
+    requestAnimationFrame(() => {
+        tray.classList.toggle('tray-overflow', tray.scrollWidth > tray.clientWidth + 4);
     });
 }
 
@@ -6453,6 +6630,9 @@ function finishDrag(clientX, clientY) {
             gridState[draggedFromGrid.col] = { piece: draggedPiece, position: draggedFromGrid.position, selectedIntervals: getSolutionIntervals(draggedFromGrid.col) || selectRandomIntervals(draggedPiece) };
             renderGrid();
             applyHighlights();
+        } else if (draggedTrayIndex >= 0) {
+            // Can't place tray piece here (occupied column) — restore tray visuals
+            renderTray();
         }
     } else if (draggedFromGrid && !currentSnapCol) {
         // Dropped on nothing — return piece to tray and clear grid slot
@@ -6603,6 +6783,23 @@ function checkAnswer(col) {
             'Sing the line, then find the shape',
         ];
         showToast(WRONG_MESSAGES[Math.floor(Math.random() * WRONG_MESSAGES.length)], 'error');
+        // Targeted feedback — tell the player what went wrong
+        const SHAPE_DESC = {
+            'Arpeggio': 'jumping through chord tones',
+            'Neighbor': 'staying close, stepping away and back',
+            'Approach': 'walking step by step',
+            'Enclosure': 'circling from both sides'
+        };
+        let feedback = '';
+        if (nameMatch && !labelMatch) {
+            feedback = 'Right piece! Try flipping the direction';
+        } else if (nameMatch && !posMatch) {
+            feedback = 'Right piece, wrong row \u2014 listen for the pitch level';
+        } else if (!nameMatch) {
+            const correctDesc = SHAPE_DESC[answer.pieceName] || '';
+            feedback = 'Listen for something ' + correctDesc;
+        }
+        if (feedback) setTimeout(() => showToast(feedback, 'info', 3000), 1200);
         // Detect "right piece, wrong direction" → show flip tooltip
         if (nameMatch && !labelMatch && shouldShowFlipTooltip()) {
             setTimeout(() => showCraftFlipTooltip(), 500);
@@ -6785,14 +6982,17 @@ function completeLevel() {
     if (stuckIdleTimer) { clearInterval(stuckIdleTimer); stuckIdleTimer = null; }
     hideGuideMe();
     const elapsed = Math.floor((Date.now() - levelStartTime) / 1000);
-    const stars = calculateStars(elapsed);
+    const stars = calculateStars();
 
     const prev = getLevelProgress(currentLevel);
     gameProgress[currentLevel] = {
         completed: true,
         stars: Math.max(prev.stars || 0, stars),
-        bestTime: prev.bestTime ? Math.min(prev.bestTime, elapsed) : elapsed
+        bestTime: prev.bestTime ? Math.min(prev.bestTime, elapsed) : elapsed,
+        bestListens: prev.bestListens ? Math.min(prev.bestListens, totalListens) : totalListens
     };
+    // Streak tracking
+    updateStreak();
     // Reset retry scaffolding on any completion so replays feel fresh
     delete gameProgress['_retry_' + currentLevel];
     saveProgress();
@@ -6800,16 +7000,15 @@ function completeLevel() {
 
     // Play celebration melody, then show the success modal
     playCelebrationMelody(() => {
-        showSuccessModal(stars, elapsed);
+        showSuccessModal(stars, totalListens);
     });
 }
 
-function calculateStars(elapsed) {
-    const threshold = currentLevelData.timeThreshold || currentLevelData.time || 999;
-    // 3★: perfect — no hints, no mistakes, within time
-    if (hintsUsed === 0 && wrongPlacements === 0 && elapsed <= threshold) return 3;
-    // 2★: mostly clean — at most 1 hint or 1 mistake (not both), within 2× time
-    if (hintsUsed + wrongPlacements <= 1 && elapsed <= threshold * 2) return 2;
+function calculateStars() {
+    // 3★: sharp ears — ≤2 listens, no hints, no mistakes
+    if (totalListens <= 2 && hintsUsed === 0 && wrongPlacements === 0) return 3;
+    // 2★: solid — ≤4 listens and at most 1 hint or mistake
+    if (totalListens <= 4 && hintsUsed + wrongPlacements <= 1) return 2;
     // 1★: completed
     return 1;
 }
@@ -6898,6 +7097,7 @@ function tryCraftHint(unsolved) {
 
         const map = FLIP_MAP[answer.pieceName];
         if (!map) continue;
+        if (trayAvailable.length >= maxTraySize) return false; // respect tray cap
         const needsFlip = answer.pieceLabel !== map.defaultLabel;
 
         trayAvailable.push(answer.pieceName);
@@ -7214,7 +7414,7 @@ function guidedStep(stepIdx) {
         // must use their ears, not just replay what they watched from memory
         isGuidedMode = false;
         showToast('Now try a fresh one on your own!', 'success');
-        setTimeout(() => startLevel(currentLevel), 1200);
+        guidedStepTimeouts.push(setTimeout(() => startLevel(currentLevel), 1200));
         return;
     }
 
@@ -7237,10 +7437,10 @@ function guidedStep(stepIdx) {
         'Enclosure': 'Hear it circle the note? That\'s the Enclosure.'
     };
     const explain = PIECE_EXPLAIN[answer.pieceName] || '';
-    setTimeout(() => showToast(`${answer.pieceName} ${answer.pieceLabel} — ${explain}`, 'info'), 800);
+    guidedStepTimeouts.push(setTimeout(() => showToast(`${answer.pieceName} ${answer.pieceLabel} — ${explain}`, 'info'), 800));
 
     // Auto-place after a delay so the player sees/hears it
-    setTimeout(() => {
+    guidedStepTimeouts.push(setTimeout(() => {
         const piece = findPiece(answer.pieceName, answer.pieceLabel);
         if (!piece) { guidedStep(stepIdx + 1); return; }
         const sel = answer.selectedIntervals || {};
@@ -7248,10 +7448,10 @@ function guidedStep(stepIdx) {
         sfx('place');
         renderGrid();
         applyHighlights();
-        setTimeout(() => flashConnectedNeighbors(col), 250);
+        guidedStepTimeouts.push(setTimeout(() => flashConnectedNeighbors(col), 250));
         // Next step
-        setTimeout(() => guidedStep(stepIdx + 1), 1500);
-    }, 2500);
+        guidedStepTimeouts.push(setTimeout(() => guidedStep(stepIdx + 1), 1500));
+    }, 2500));
 }
 
 // ==================================================================
@@ -7315,6 +7515,7 @@ function playMelody() {
     }
 
     isPlaying = true;
+    if (!composerMode) totalListens++;
     const btn = document.getElementById('play-btn');
     btn.textContent = '■';
     btn.classList.add('playing');
@@ -7755,7 +7956,7 @@ function showTutorialStep2() {
     }
 }
 
-function showSuccessModal(stars, elapsed) {
+function showSuccessModal(stars, listens) {
     const overlay = document.getElementById('success-overlay');
     const modal = document.getElementById('success-modal');
     const perfectTextEl = document.getElementById('success-perfect-text');
@@ -7832,8 +8033,10 @@ function showSuccessModal(stars, elapsed) {
         }
     }
 
-    var m = Math.floor(elapsed / 60), s = elapsed % 60;
-    document.getElementById('success-stats').innerHTML = 'Time <span class="success-stat-value">' + m + ':' + s.toString().padStart(2,'0') + '</span>&nbsp;\u00b7&nbsp;Hints <span class="success-stat-value">' + hintsUsed + '</span>&nbsp;\u00b7&nbsp;Mistakes <span class="success-stat-value">' + wrongPlacements + '</span>';
+    // Stats line: listens, hints, mistakes
+    const prev = getLevelProgress(currentLevel);
+    const bestStr = prev.bestListens ? ' (best: ' + prev.bestListens + ')' : '';
+    document.getElementById('success-stats').innerHTML = 'Listens <span class="success-stat-value">' + listens + bestStr + '</span>&nbsp;\u00b7&nbsp;Hints <span class="success-stat-value">' + hintsUsed + '</span>&nbsp;\u00b7&nbsp;Mistakes <span class="success-stat-value">' + wrongPlacements + '</span>';
 
     // Show star criteria hint when player didn't get 3 stars
     var infoEl = document.getElementById('success-star-info');
@@ -7843,12 +8046,27 @@ function showSuccessModal(stars, elapsed) {
         infoEl.style.cssText = 'font-size:0.72em;color:#998;margin-top:6px;';
         document.getElementById('success-stats').after(infoEl);
     }
-    var threshold = currentLevelData.timeThreshold || currentLevelData.time || 999;
-    var tm = Math.floor(threshold / 60), ts = threshold % 60;
     if (stars < 3) {
-        infoEl.textContent = '\u2605\u2605\u2605 = no hints, no mistakes, under ' + tm + ':' + ts.toString().padStart(2,'0');
+        infoEl.textContent = '\u2605\u2605\u2605 = \u22642 listens, no hints, no mistakes';
     } else {
         infoEl.textContent = '';
+    }
+
+    // Chapter completion flavor text
+    const chapterLevels = LEVEL_TEMPLATES.filter(t => t.ch === currentLevelData.chapter);
+    const isLastInChapter = chapterLevels[chapterLevels.length - 1]?.id === currentLevel;
+    const chapterData = CHAPTERS.find(c => c.id === currentLevelData.chapter);
+    const flavorEl = document.getElementById('success-flavor') || (() => {
+        const el = document.createElement('div');
+        el.id = 'success-flavor';
+        el.style.cssText = 'font-size:12px;color:var(--text-secondary);margin-top:12px;font-style:italic;line-height:1.4;max-width:280px;margin-left:auto;margin-right:auto;';
+        document.getElementById('success-stats').parentElement.appendChild(el);
+        return el;
+    })();
+    if (isLastInChapter && chapterData && chapterData.flavorText) {
+        flavorEl.textContent = chapterData.flavorText;
+    } else {
+        flavorEl.textContent = '';
     }
 }
 
@@ -7871,6 +8089,13 @@ function nextLevel() {
         if (idx === chapterLevels.length - 1) {
             const currentChapter = currentLevelData.chapter;
             const nextCh = CHAPTERS.find(c => c.id === currentChapter + 1);
+
+            // Composer Mode unlock check — fires when Ch3 is completed
+            if (currentChapter === 3 && isComposerUnlocked() && !gameProgress['_composerAchievement']) {
+                gameProgress['_composerAchievement'] = true;
+                saveProgress();
+                setTimeout(() => showAchievement('\ud83c\udfb9', 'Composer Mode Unlocked!', 'Create your own melodies in the Practice Room'), 1500);
+            }
 
             // Show reward screen for next chapter's new piece (once only)
             if (nextCh && nextCh.reward && !gameProgress['_reward_' + nextCh.reward]) {
@@ -8143,6 +8368,27 @@ const PIECE_INTRO_HINTS = {
 };
 
 let pieceIntroState = { pieceName: null, labelA: null, labelB: null, quizAnswer: null, quizRound: 1, quizOrder: [], callback: null };
+
+function showJamSessionIntro(callback) {
+    const overlay = document.getElementById('piece-intro-overlay');
+    overlay.classList.remove('hidden');
+    overlay.innerHTML = `
+        <div class="piece-intro-modal" style="text-align:center;">
+            <div style="font-size:48px;margin-bottom:12px;">\ud83c\udfa4</div>
+            <h2 class="piece-intro-title">Jam Session</h2>
+            <p style="color:var(--text-secondary);font-size:14px;line-height:1.5;margin:16px 0;">
+                In a real jam, you hear everything at once.<br><br>
+                <strong style="color:var(--gold);">Extra pieces</strong> will appear in your tray as distractors \u2014 not every piece belongs.<br><br>
+                You also have <strong style="color:var(--gold);">limited listens</strong>. Trust your ears!
+            </p>
+            <button class="piece-intro-skip" style="margin-top:8px;">
+                Let's Go \u2192
+            </button>
+        </div>
+    `;
+    // Wire up the button properly
+    overlay.querySelector('.piece-intro-skip').onclick = () => dismissOverlay('piece-intro-overlay', callback);
+}
 
 const PIECE_CONTRAST = {
     'Arpeggio': 'The Arpeggio leaps through the notes of the chord — hear the jump?',
@@ -9342,9 +9588,11 @@ let composerMode = false;
 let composerChordLen = 4;
 
 function isComposerUnlocked() {
-    return CHAPTERS.every(ch => {
-        const chLevels = LEVELS.filter(l => l.chapter === ch.id);
-        return chLevels.every(l => getLevelProgress(l.id).completed);
+    // Unlocks after completing Chapters 1-3 (Arpeggios, Neighbors, Approaches)
+    const required = [1, 2, 3];
+    return required.every(chId => {
+        const chLevels = LEVEL_TEMPLATES.filter(t => t.ch === chId);
+        return chLevels.every(t => getLevelProgress(t.id).completed);
     });
 }
 
@@ -9354,15 +9602,142 @@ function updateComposerButton() {
     const unlocked = isComposerUnlocked();
     btn.classList.toggle('locked', !unlocked);
     if (!unlocked) {
-        btn.textContent = '🔒 Composer Mode';
+        btn.textContent = '\ud83d\udd12 Composer Mode';
     } else {
-        btn.textContent = '🎹 Composer Mode';
+        btn.textContent = '\ud83c\udfb9 Composer Mode';
     }
 }
 
+// ==================================================================
+// DAILY CHALLENGE — seeded puzzle that changes every day
+// ==================================================================
+function seededRandom(seed) {
+    // Simple mulberry32 PRNG
+    let t = seed | 0;
+    return function() {
+        t = (t + 0x6D2B79F5) | 0;
+        let x = Math.imul(t ^ (t >>> 15), 1 | t);
+        x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x;
+        return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+    };
+}
+
+function hashDateString(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash |= 0;
+    }
+    return Math.abs(hash);
+}
+
+function getDailyDateString() {
+    return new Date().toISOString().slice(0, 10);
+}
+
+function isDailyCompleted() {
+    return !!gameProgress['_daily_' + getDailyDateString()];
+}
+
+function updateDailyButton() {
+    const btn = document.getElementById('daily-btn');
+    if (!btn) return;
+    if (isDailyCompleted()) {
+        btn.innerHTML = 'Daily Challenge <span class="daily-check">\u2713</span>';
+    } else {
+        btn.textContent = 'Daily Challenge';
+    }
+}
+
+let isDailyMode = false;
+
+function onDailyPressed() {
+    sfx('click');
+    isDailyMode = true;
+
+    // Seed RNG from today's date
+    const dateStr = getDailyDateString();
+    const seed = hashDateString(dateStr);
+    const rng = seededRandom(seed);
+
+    // Pick a template from Ch3-Ch5 (player needs some skill)
+    const dailyPool = LEVEL_TEMPLATES.filter(t => t.ch >= 2 && t.ch <= 5 && t.len >= 3);
+    const template = dailyPool[Math.floor(rng() * dailyPool.length)];
+
+    // Temporarily replace Math.random with seeded version for puzzle generation
+    const origRandom = Math.random;
+    Math.random = rng;
+    const levelData = generateRandomPuzzle(template);
+    Math.random = origRandom;
+
+    if (!levelData) {
+        showToast('Could not generate daily puzzle — try again', 'error');
+        isDailyMode = false;
+        return;
+    }
+
+    // Override level data for daily mode
+    levelData.name = 'Daily Challenge';
+    levelData.chapter = template.ch;
+
+    // Start the puzzle directly
+    currentLevelData = levelData;
+    currentLevel = '_daily_' + dateStr;
+    numCols = levelData.chords.length;
+    initGridState();
+
+    levelData.solution.forEach(s => {
+        const piece = findPiece(s.pieceName, s.pieceLabel);
+        if (piece) {
+            if (!s.selectedIntervals) s.selectedIntervals = selectRandomIntervals(piece);
+            gridState[s.col] = { piece, position: s.position, selectedIntervals: s.selectedIntervals };
+        }
+    });
+    const targetPiece = library.find(p => p.name === 'Target');
+    if (targetPiece) gridState[numCols] = { piece: targetPiece, position: levelData.targetPiece.position, selectedIntervals: {} };
+
+    fullMelodyNotes = computeFullMelodyNotes();
+    levelData.removeCols.forEach(col => { gridState[col] = null; });
+
+    trayAvailable = [...(levelData.trayBasePieces || [])];
+    trayFlipState = new Array(trayAvailable.length).fill(false);
+    maxTraySize = 4;
+
+    hintsUsed = 0;
+    wrongPlacements = 0;
+    totalListens = 0;
+    hintsRemaining = levelData.hints || 3;
+    currentHintCol = null;
+    currentHintLevel = 0;
+    levelStartTime = Date.now();
+
+    showScreen('puzzle');
+    buildGrid();
+    renderGrid();
+    renderTray();
+    applyHighlights();
+    showCraftTable();
+
+    // Override topbar display
+    const levelNameEl = document.getElementById('puzzle-level-name');
+    if (levelNameEl) levelNameEl.textContent = 'DAILY CHALLENGE';
+}
+
+// Hook into completeLevel for daily mode
+const _origCompleteLevel = completeLevel;
+completeLevel = function() {
+    _origCompleteLevel();
+    if (isDailyMode) {
+        const dateStr = getDailyDateString();
+        gameProgress['_daily_' + dateStr] = true;
+        saveProgress();
+        isDailyMode = false;
+    }
+};
+
 function onComposerPressed() {
     if (!isComposerUnlocked()) {
-        showToast('Complete all chapters to unlock Composer Mode', 'info');
+        showToast('Complete Chapters 1\u20143 to unlock Composer Mode', 'info');
         return;
     }
     sfx('click');
@@ -9615,6 +9990,7 @@ async function init() {
     initCraftOutput();
     showScreen('landing');
     updateComposerButton();
+    updateDailyButton();
 
     // Warmup now triggers when player presses Play (see onPlayPressed)
 
@@ -9658,12 +10034,16 @@ document.addEventListener('DOMContentLoaded', init);
     });
 })();
 
+let _resizeTimer = null;
 window.addEventListener('resize', () => {
-    if (document.getElementById('screen-puzzle').classList.contains('active')) {
-        sizeCells();
-        renderGrid();
-        applyHighlights();
-    }
+    if (_resizeTimer) clearTimeout(_resizeTimer);
+    _resizeTimer = setTimeout(() => {
+        if (document.getElementById('screen-puzzle').classList.contains('active')) {
+            sizeCells();
+            renderGrid();
+            applyHighlights();
+        }
+    }, 100);
 });
 </script>
 </body>

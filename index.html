@@ -788,6 +788,10 @@
             position: relative;
             z-index: 10;
         }
+        /* Lock bottombar height after first render to prevent layout shift during drag */
+        .puzzle-bottombar.height-locked {
+            min-height: var(--bottombar-h);
+        }
 
         /* The wooden tray surface */
         .tray-surface {
@@ -5186,6 +5190,9 @@ function startLevel(levelId) {
     trayAvailable = [...(currentLevelData.trayBasePieces || [])];
     trayFlipState = new Array(trayAvailable.length).fill(false);
     maxTraySize = 4;
+    // Set compact mode once based on max possible tray size (prevents size toggling mid-gameplay)
+    const trayEl = document.getElementById('piece-tray');
+    if (trayEl) trayEl.classList.toggle('tray-compact', maxTraySize >= 4);
 
     // Reset stats
     hintsUsed = 0;
@@ -5249,6 +5256,16 @@ function startLevel(levelId) {
             showCraftTable();
             const dupeBtn = document.getElementById('craft-dupe-btn');
             if (dupeBtn) dupeBtn.style.display = craftMode === 'flip' ? 'none' : '';
+        }
+
+        // Lock bottombar height to prevent layout shift during drag
+        const bottombar = document.querySelector('.puzzle-bottombar');
+        if (bottombar) {
+            bottombar.classList.remove('height-locked');
+            requestAnimationFrame(() => {
+                bottombar.style.setProperty('--bottombar-h', bottombar.offsetHeight + 'px');
+                bottombar.classList.add('height-locked');
+            });
         }
 
         // Show persistent tempo slider
@@ -5506,16 +5523,18 @@ function collapseTrayPiece(index, callback) {
         if (callback) callback();
         return;
     }
-    // Lock tray height to prevent parent layout shift
+    // Lock tray height during collapse animation to prevent layout shift
     const tray = document.getElementById('piece-tray');
-    tray.style.minHeight = tray.offsetHeight + 'px';
+    const lockedH = tray.offsetHeight;
+    tray.style.minHeight = lockedH + 'px';
     card.classList.add('collapsing');
     let cleaned = false;
     function doCleanup() {
         if (cleaned) return;
         cleaned = true;
         renderTray();
-        tray.style.minHeight = '';
+        // Keep minHeight locked — the bottombar height-lock handles overall stability
+        tray.style.minHeight = lockedH + 'px';
         if (callback) callback();
     }
     card.addEventListener('transitionend', doCleanup, { once: true });
@@ -5528,9 +5547,7 @@ function renderTray() {
     tray.innerHTML = '';
     if (!currentLevelData) return;
 
-    // Compact mode when tray is crowded
-    const compact = trayAvailable.length >= 4;
-    tray.classList.toggle('tray-compact', compact);
+    // Compact mode is set once at level start (see startLevel) — don't toggle mid-gameplay
 
     // Render one card per entry in trayAvailable (duplicates = multiple cards)
     trayAvailable.forEach((baseName, idx) => {
@@ -9722,6 +9739,8 @@ function onDailyPressed() {
     trayAvailable = [...(levelData.trayBasePieces || [])];
     trayFlipState = new Array(trayAvailable.length).fill(false);
     maxTraySize = 4;
+    const trayEl = document.getElementById('piece-tray');
+    if (trayEl) trayEl.classList.toggle('tray-compact', maxTraySize >= 4);
 
     hintsUsed = 0;
     wrongPlacements = 0;

@@ -130,8 +130,8 @@ All settings persist across sessions.
 | Neighbor | Up-Down | 0.5 | 0.5 | Steps up to target, returns |
 | Approach | Ascending | 1.0 | 0.0 | Chromatic walk up to target |
 | Approach | Descending | 0.0 | 1.0 | Chromatic walk down to target |
-| Enclosure | Down-Up | 0.0 | 0.5 | Surrounds target, starts above |
-| Enclosure | Up-Down | 1.0 | 0.5 | Surrounds target, starts below |
+| Enclosure | From Below | 0.0 | 0.5 | Starts below target, leaps above, resolves |
+| Enclosure | From Above | 1.0 | 0.5 | Starts above target, dips below, resolves |
 
 **Connection rule:** pieces connect when `posA + exitA = posB + entryB`
 

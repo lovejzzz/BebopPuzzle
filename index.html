@@ -4043,10 +4043,12 @@ function calculateNeighborNotes(piece, targetNote, sel) {
 function calculateEnclosureNotes(piece, targetNote, sel) {
     if (targetNote === null) return [];
     const s12=getInterval(sel,'int1'), s34=getInterval(sel,'int2'), s4t=getInterval(sel,'int3');
-    if (piece.label === 'From Below') {
+    if (piece.label === 'From Above') {
+        // First two notes are ABOVE the target, then leaps below
         const n2=targetNote+s12, n1=n2+s12, n4=targetNote-s4t, n3=n4-s34;
         return [n1,n2,n3,n4];
     } else {
+        // First two notes are BELOW the target, then leaps above
         const n2=targetNote-s12, n1=n2-s12, n4=targetNote+s4t, n3=n4+s34;
         return [n1,n2,n3,n4];
     }

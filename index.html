@@ -5999,18 +5999,20 @@ function showOutputPieces(pieces, mode) {
 
     spawnSparkles(output, 3);
 
+    // Make claimable + draggable immediately (don't wait for pop-in animation)
+    output.classList.add('claimable');
+    output.style.cursor = 'grab';
+    output.removeEventListener('mousedown', craftOutputDragStart);
+    output.removeEventListener('touchstart', craftOutputTouchStart);
+    output.removeEventListener('click', craftOutputClick);
+    output.addEventListener('mousedown', craftOutputDragStart);
+    output.addEventListener('touchstart', craftOutputTouchStart, { passive: false });
+    output.addEventListener('click', craftOutputClick);
+
     setTimeout(() => {
         output.classList.remove('popping-in');
-        output.classList.add('claimable');
         const hint = document.getElementById('craft-claim-hint');
         if (hint) hint.classList.add('visible');
-        output.style.cursor = 'grab';
-        output.removeEventListener('mousedown', craftOutputDragStart);
-        output.removeEventListener('touchstart', craftOutputTouchStart);
-        output.removeEventListener('click', craftOutputClick);
-        output.addEventListener('mousedown', craftOutputDragStart);
-        output.addEventListener('touchstart', craftOutputTouchStart, { passive: false });
-        output.addEventListener('click', craftOutputClick);
         // Advance craft tutorial to step 3 (spotlight output)
         if (craftTutorialStep === 2) advanceCraftTutorial();
     }, 450);

@@ -413,6 +413,169 @@
             color: var(--gold); font-weight: 700;
         }
 
+        .practice-panel {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        .next-goal-card {
+            border-radius: 8px;
+            border: 1px solid rgba(240,168,48,0.18);
+            background: linear-gradient(135deg, rgba(240,168,48,0.08), rgba(91,141,239,0.04));
+            padding: 12px 14px;
+        }
+        .next-goal-label,
+        .mission-label {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 4px;
+        }
+        .next-goal-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 3px;
+        }
+        .next-goal-detail {
+            font-size: 12px;
+            line-height: 1.4;
+            color: var(--text-secondary);
+        }
+        .mission-strip {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+        }
+        .mission-card {
+            min-width: 0;
+            position: relative;
+            border-radius: 8px;
+            border: 1px solid var(--border-medium);
+            background: rgba(255,255,255,0.03);
+            padding: 10px;
+            padding-right: 38px;
+        }
+        .mission-card.complete {
+            border-color: rgba(52,211,153,0.35);
+            background: rgba(52,211,153,0.08);
+        }
+        .mission-card-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 22px;
+            height: 22px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(52,211,153,0.45);
+            background: rgba(52,211,153,0.12);
+            color: var(--green);
+            font-size: 13px;
+            font-weight: 900;
+            opacity: 0;
+            transform: scale(0.72);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .mission-card.complete .mission-card-badge {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .mission-name {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--text-primary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .mission-desc {
+            min-height: 28px;
+            margin: 3px 0 7px;
+            font-size: 10px;
+            line-height: 1.35;
+            color: var(--text-muted);
+        }
+        .mission-progress {
+            height: 4px;
+            border-radius: 2px;
+            background: var(--bg-elevated);
+            overflow: hidden;
+        }
+        .mission-progress-fill {
+            height: 100%;
+            border-radius: inherit;
+            background: var(--gold);
+            transition: width 0.35s ease;
+        }
+        .mission-card.complete .mission-progress-fill { background: var(--green); }
+        .mission-count {
+            margin-top: 5px;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .mission-top-badge {
+            position: fixed;
+            top: max(14px, env(safe-area-inset-top));
+            right: 18px;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            max-width: min(340px, calc(100vw - 36px));
+            border-radius: 999px;
+            border: 1px solid rgba(52,211,153,0.45);
+            background: rgba(11, 18, 22, 0.94);
+            box-shadow: 0 18px 44px rgba(0,0,0,0.34), 0 0 26px rgba(52,211,153,0.14);
+            padding: 8px 13px 8px 8px;
+            pointer-events: none;
+            animation: mission-badge-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .mission-top-badge.out {
+            animation: mission-badge-out 0.25s ease-in both;
+        }
+        .mission-top-badge-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(52,211,153,0.16);
+            color: var(--green);
+            font-weight: 900;
+            font-size: 16px;
+        }
+        .mission-top-badge-label {
+            font-size: 9px;
+            line-height: 1;
+            color: var(--green);
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+        .mission-top-badge-title {
+            margin-top: 3px;
+            font-size: 12px;
+            line-height: 1.2;
+            color: var(--text-primary);
+            font-weight: 800;
+        }
+        @keyframes mission-badge-in {
+            0% { opacity: 0; transform: translateY(-16px) scale(0.96); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes mission-badge-out {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-10px) scale(0.97); }
+        }
+
         /* --- Level Grid (3 columns, rectangular cards) --- */
         .chapter-levels {
             display: grid;
@@ -1311,8 +1474,8 @@
         .success-modal {
             background: var(--bg-card);
             border: 1px solid var(--border-medium);
-            border-radius: 20px;
-            padding: 36px 40px;
+            border-radius: 16px;
+            padding: 30px 34px;
             text-align: center;
             max-width: 360px;
             width: 90%;
@@ -1330,15 +1493,15 @@
         .success-subtitle {
             font-size: 13px; color: var(--text-muted);
             font-weight: 500;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .success-stars {
-            display: flex; gap: 8px; justify-content: center;
-            margin-bottom: 24px;
+            display: flex; gap: 6px; justify-content: center;
+            margin-bottom: 18px;
         }
         .success-star {
-            font-size: 40px;
+            font-size: 34px;
             color: var(--text-muted);
             transition: all 0.4s ease;
         }
@@ -1356,13 +1519,44 @@
         .success-stats {
             font-size: 13px;
             color: var(--text-muted);
-            margin-bottom: 28px;
-            line-height: 1.8;
+            margin-bottom: 12px;
+            line-height: 1.5;
         }
         .success-stat-value {
             color: var(--text-secondary);
             font-weight: 700;
             font-family: 'JetBrains Mono', monospace;
+        }
+
+        .success-feedback {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            max-width: 280px;
+            margin: 0 auto 10px;
+        }
+        .success-next-goal {
+            font-size: 12px;
+            color: var(--gold);
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+        .success-missions {
+            display: none;
+        }
+        .success-mission-pill {
+            border-radius: 8px;
+            border: 1px solid var(--border-medium);
+            background: rgba(255,255,255,0.04);
+            color: var(--text-secondary);
+            font-size: 10px;
+            font-weight: 700;
+            padding: 5px 8px;
+        }
+        .success-mission-pill.complete {
+            border-color: rgba(52,211,153,0.35);
+            background: rgba(52,211,153,0.1);
+            color: var(--green);
         }
 
         .success-actions {
@@ -2722,6 +2916,70 @@
         .placed-piece.celebrate-pulse[data-piece-type="Enclosure"] { animation: celebrate-pulse-enclosure 0.5s ease-out; z-index: 10; }
         .placed-piece.celebrate-pulse[data-piece-type="Target"]    { animation: celebrate-pulse-target 0.5s ease-out; z-index: 10; }
 
+        @keyframes resolution-ring-pulse {
+            0%   { box-shadow: 0 0 0 0 rgba(240,168,48,0); filter: brightness(1); }
+            30%  { box-shadow: 0 0 26px 10px rgba(240,168,48,0.42); filter: brightness(1.35); }
+            100% { box-shadow: 0 0 0 0 rgba(240,168,48,0); filter: brightness(1); }
+        }
+        .grid-column.resolution-ring .grid-cell {
+            border-color: rgba(240,168,48,0.65) !important;
+            animation: resolution-ring-pulse 0.9s ease-out;
+        }
+        .resolution-flash {
+            position: fixed;
+            inset: 0;
+            z-index: 35;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at 50% 42%, rgba(240,168,48,0.22), transparent 35%),
+                radial-gradient(circle at 50% 42%, rgba(91,141,239,0.12), transparent 55%);
+            animation: resolution-flash-fade 0.85s ease-out forwards;
+        }
+        @keyframes resolution-flash-fade {
+            0% { opacity: 0; }
+            18% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        .resolution-badge {
+            position: fixed;
+            left: 50%;
+            top: 18%;
+            transform: translateX(-50%);
+            z-index: 56;
+            pointer-events: none;
+            border-radius: 8px;
+            border: 1px solid rgba(240,168,48,0.3);
+            background: rgba(20,14,8,0.86);
+            color: var(--gold);
+            box-shadow: 0 0 30px rgba(240,168,48,0.18);
+            padding: 7px 14px;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            animation: resolution-badge-pop 1.1s ease-out forwards;
+        }
+        @keyframes resolution-badge-pop {
+            0% { opacity: 0; transform: translateX(-50%) translateY(10px) scale(0.9); }
+            20% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+            80% { opacity: 1; transform: translateX(-50%) translateY(-2px) scale(1); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-14px) scale(0.96); }
+        }
+        .resolution-particle {
+            position: fixed;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--gold);
+            z-index: 55;
+            pointer-events: none;
+            animation: resolution-particle-fly 0.95s ease-out forwards;
+        }
+        @keyframes resolution-particle-fly {
+            0% { opacity: 1; transform: translate(0,0) scale(1); }
+            100% { opacity: 0; transform: translate(var(--rx), var(--ry)) scale(0.2); }
+        }
+
         /* ---- Sound Panel (vintage amp style) ---- */
         .sound-panel-overlay {
             position: fixed; inset: 0;
@@ -2999,6 +3257,8 @@
             .puzzle-topbar { padding: 12px 16px; }
             .puzzle-area { padding: 12px; }
             .puzzle-bottombar { padding: 12px 16px 20px; }
+            .mission-strip { grid-template-columns: 1fr; }
+            .mission-desc { min-height: 0; }
             .tray-piece-thumb { width: 60px; height: 60px; }
             .tray-piece-thumb img { width: 60px; height: 60px; }
             .success-modal, .warmup-modal, .piece-intro-modal, .reward-modal {
@@ -3022,6 +3282,8 @@
             .tempo-hint { padding: 8px 10px; }
             .tempo-hint-value { font-size: 14px; }
             .tempo-hint-labels { font-size: 9px; }
+            .mission-strip { grid-template-columns: 1fr; }
+            .mission-desc { min-height: 0; }
             .success-modal, .warmup-modal, .piece-intro-modal, .reward-modal {
                 max-width: 300px;
             }
@@ -3341,7 +3603,7 @@
                 <button class="settings-btn settings-btn-danger" onclick="confirmResetProgress()">Reset All Progress</button>
             </div>
             <div class="settings-footer">
-                Bebop Puzzle <span class="settings-version" onclick="showChangelog()">v1.40</span><br>Made By Tian Xing
+                Bebop Puzzle <span class="settings-version" onclick="showChangelog()">v1.45</span><br>Made By Tian Xing
             </div>
         </div>
     </div>
@@ -3356,7 +3618,40 @@
                 <button class="changelog-close" onclick="closeChangelog()">✕</button>
             </div>
 
-            <div class="changelog-version-tag">v1.40</div>
+            <div class="changelog-version-tag">v1.45</div>
+
+            <div class="changelog-section">
+                <div class="changelog-section-title">Goals & Missions</div>
+                <ul class="changelog-list">
+                    <li>Added Daily Missions with progress cards on the chapter page</li>
+                    <li>Completed missions now show persistent check badges on mission cards</li>
+                    <li>Mission completions trigger a compact top-screen badge during play</li>
+                    <li>Added a visible next-goal panel so players always know what to do next</li>
+                </ul>
+            </div>
+
+            <div class="changelog-section">
+                <div class="changelog-section-title">Solve Feedback</div>
+                <ul class="changelog-list">
+                    <li>Updated star copy to match listen-based scoring</li>
+                    <li>Added richer resolution feedback when a melody solves</li>
+                    <li>Simplified the Complete screen into a minimal result, stats, and next step</li>
+                    <li>Improved success feedback for first clears, star upgrades, and new bests</li>
+                </ul>
+            </div>
+
+            <div class="changelog-section">
+                <div class="changelog-section-title">Performance & Polish</div>
+                <ul class="changelog-list">
+                    <li>Throttled drag snap checks to reduce jank during mouse and touch dragging</li>
+                    <li>Cached drag grid metrics while dragging instead of recalculating every move</li>
+                    <li>Cleaned up stale auto-play, tutorial, and screen-transition timers</li>
+                    <li>Reduced repeated playhead DOM scans during melody playback</li>
+                </ul>
+            </div>
+
+            <hr style="border:none;border-top:1px solid var(--border-subtle);margin:16px 0;">
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Previous (v1.40)</div>
 
             <div class="changelog-section">
                 <div class="changelog-section-title">Gamification</div>
@@ -3619,9 +3914,9 @@
                 <div class="star-info-btn" id="star-info-btn" onclick="toggleStarInfo()" title="Star rating info">ⓘ</div>
                 <div class="star-info-popup hidden" id="star-info-popup">
                     <div style="font-weight:700;margin-bottom:4px;">Star Rating</div>
-                    <div>★★★ No hints, no mistakes, within time</div>
-                    <div>★★☆ At most 1 hint or mistake</div>
-                    <div>★☆☆ Level completed</div>
+                    <div>★★★ ≤2 listens, no hints, no mistakes</div>
+                    <div>★★☆ ≤4 listens, at most 1 hint or mistake</div>
+                    <div>★☆☆ Complete the level</div>
                 </div>
             </div>
             <div class="topbar-right">
@@ -3700,6 +3995,9 @@
             <div id="success-perfect-text"></div>
             <div class="success-stars" id="success-stars"></div>
             <div class="success-stats" id="success-stats"></div>
+            <div class="success-feedback" id="success-feedback"></div>
+            <div class="success-next-goal" id="success-next-goal"></div>
+            <div class="success-missions" id="success-missions"></div>
             <div class="success-actions">
                 <button class="success-btn success-btn-retry" onclick="retryLevel()">Retry</button>
                 <button class="success-btn success-btn-next" onclick="nextLevel()">Next</button>
@@ -4089,6 +4387,7 @@ function getEighth() { return 60 / currentBPM / 2; }
 let isPlaying = false;
 let playbackTimeouts = [];
 let celebrationTimeouts = [];
+let activePlayheadEls = [];
 
 // Sound design parameters (0–1 range, persisted)
 let soundParams = { tone: 0.9, drive: 0.0, reverb: 0.03, tremRate: 0.2, tremDepth: 0.1, swing: 0.64 };
@@ -4242,6 +4541,29 @@ function playNote(freq, startTime, duration) {
     osc.start(startTime); osc.stop(startTime + duration + 0.1);
 }
 
+function clearPlayhead() {
+    activePlayheadEls.forEach(el => el.classList.remove('playhead-active'));
+    activePlayheadEls = [];
+}
+
+function setPlayheadColumn(col, includeChord = true) {
+    clearPlayhead();
+    const colEl = document.querySelector(`.grid-column[data-col="${col}"]`);
+    if (colEl) {
+        colEl.querySelectorAll('.grid-cell').forEach(c => {
+            c.classList.add('playhead-active');
+            activePlayheadEls.push(c);
+        });
+    }
+    if (includeChord) {
+        const chordLabel = document.querySelectorAll('.chord-label')[col];
+        if (chordLabel) {
+            chordLabel.classList.add('playhead-active');
+            activePlayheadEls.push(chordLabel);
+        }
+    }
+}
+
 function stopPlayback() {
     // Cancel all pending playhead/stop timeouts without closing the shared context
     playbackTimeouts.forEach(t => clearTimeout(t));
@@ -4255,13 +4577,16 @@ function stopPlayback() {
         masterGain.disconnect();
         masterGain = null;
     }
-    document.querySelectorAll('.playhead-active').forEach(el => el.classList.remove('playhead-active'));
-    document.querySelectorAll('.chord-label.playhead-active').forEach(el => el.classList.remove('playhead-active'));
+    clearPlayhead();
     const btn = document.getElementById('play-btn');
     if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); }
 }
 
-function togglePlay() { if (isPlaying) { stopPlayback(); return; } playMelody(); }
+function togglePlay() {
+    clearAutoPlayTimeout();
+    if (isPlaying) { stopPlayback(); return; }
+    playMelody();
+}
 
 // ==================================================================
 // LEVEL TEMPLATES — constraints only, puzzles generated dynamically
@@ -4810,6 +5135,8 @@ let hintsRemaining = 3;
 let currentHintCol = null;
 let currentHintLevel = 0;
 let timerInterval = null;
+let autoPlayTimeout = null;
+let levelSetupTimeouts = [];
 
 // Per-piece flip state (parallel array to trayAvailable, true = flipped)
 let trayFlipState = [];
@@ -4822,11 +5149,15 @@ let draggedFromCraft = false;
 let dragPreview = null;
 let currentSnapCol = null;
 let currentSnapPos = null;
+let dragRaf = null;
+let pendingDragPoint = null;
+let dragGridMetrics = null;
 let cellSize = 0;
 let fullMelodyNotes = null;
 let gameProgress = {};
 let listensRemaining = 0;
 let maxTraySize = 0;
+let lastCompletionSummary = null;
 
 // Stuck detection state
 let stuckColWrong = {};      // per-column wrong placement count
@@ -4839,6 +5170,36 @@ let guidedStepTimeouts = [];  // tracked timeouts for guided mode cleanup
 function initGridState() {
     gridState = {};
     for (let i = 0; i <= numCols; i++) gridState[i] = null;
+}
+
+function clearAutoPlayTimeout() {
+    if (autoPlayTimeout) {
+        clearTimeout(autoPlayTimeout);
+        autoPlayTimeout = null;
+    }
+}
+
+function scheduleAutoPlay(levelId) {
+    clearAutoPlayTimeout();
+    autoPlayTimeout = setTimeout(() => {
+        autoPlayTimeout = null;
+        const puzzleActive = document.getElementById('screen-puzzle')?.classList.contains('active');
+        if (currentLevel === levelId && puzzleActive && !isPlaying) playMelody();
+    }, 1000);
+}
+
+function scheduleLevelSetupTimeout(fn, delay) {
+    const id = setTimeout(() => {
+        levelSetupTimeouts = levelSetupTimeouts.filter(t => t !== id);
+        fn();
+    }, delay);
+    levelSetupTimeouts.push(id);
+    return id;
+}
+
+function clearLevelSetupTimeouts() {
+    levelSetupTimeouts.forEach(t => clearTimeout(t));
+    levelSetupTimeouts = [];
 }
 
 // ==================================================================
@@ -4890,6 +5251,214 @@ function getTotalStars() {
     return LEVELS.reduce((sum, l) => sum + (getLevelProgress(l.id).stars || 0), 0);
 }
 
+function escapeHtml(str) {
+    return String(str ?? '').replace(/[&<>"']/g, ch => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[ch]));
+}
+
+const DAILY_MISSION_DEFS = [
+    { id: 'complete2', title: 'Two Choruses', desc: 'Complete 2 levels today', target: 2 },
+    { id: 'clean1', title: 'Clean Take', desc: 'Finish 1 level without hints', target: 1 },
+    { id: 'perfect1', title: 'Perfect Ears', desc: 'Earn one 3-star solve', target: 1 },
+];
+
+let missionBadgeQueue = [];
+let missionBadgeShowing = false;
+
+function showMissionBadge(def, delay = 0) {
+    setTimeout(() => {
+        missionBadgeQueue.push(def);
+        if (!missionBadgeShowing) processMissionBadgeQueue();
+    }, delay);
+}
+
+function processMissionBadgeQueue() {
+    if (missionBadgeQueue.length === 0) {
+        missionBadgeShowing = false;
+        return;
+    }
+    missionBadgeShowing = true;
+    const def = missionBadgeQueue.shift();
+    document.querySelectorAll('.mission-top-badge').forEach(el => el.remove());
+
+    const badge = document.createElement('div');
+    badge.className = 'mission-top-badge';
+    badge.innerHTML = `
+        <div class="mission-top-badge-icon">✓</div>
+        <div>
+            <div class="mission-top-badge-label">Mission Complete</div>
+            <div class="mission-top-badge-title">${escapeHtml(def.title)}</div>
+        </div>
+    `;
+    document.body.appendChild(badge);
+    sfx('star');
+
+    setTimeout(() => {
+        badge.classList.add('out');
+        setTimeout(() => {
+            badge.remove();
+            processMissionBadgeQueue();
+        }, 260);
+    }, 2400);
+}
+
+function getDailyMissionState() {
+    const today = getDailyDateString();
+    if (gameProgress['_missionDate'] !== today || !gameProgress['_missions']) {
+        gameProgress['_missionDate'] = today;
+        gameProgress['_missions'] = {};
+    }
+    DAILY_MISSION_DEFS.forEach(def => {
+        if (!gameProgress['_missions'][def.id]) {
+            gameProgress['_missions'][def.id] = { progress: 0, completed: false };
+        }
+    });
+    return gameProgress['_missions'];
+}
+
+function bumpMissionProgress(state, id, amount) {
+    const def = DAILY_MISSION_DEFS.find(m => m.id === id);
+    const m = state[id];
+    if (!def || !m || m.completed) return false;
+    const before = m.progress || 0;
+    m.progress = Math.min(def.target, before + amount);
+    return m.progress !== before;
+}
+
+function updateMissionProgress(result) {
+    const state = getDailyMissionState();
+    const before = {};
+    DAILY_MISSION_DEFS.forEach(def => {
+        before[def.id] = {
+            progress: state[def.id]?.progress || 0,
+            completed: !!state[def.id]?.completed
+        };
+    });
+
+    bumpMissionProgress(state, 'complete2', 1);
+    if (result.hintsUsed === 0) bumpMissionProgress(state, 'clean1', 1);
+    if (result.stars === 3) bumpMissionProgress(state, 'perfect1', 1);
+
+    const updated = [];
+    const completed = [];
+    DAILY_MISSION_DEFS.forEach(def => {
+        const m = state[def.id];
+        let completedNow = false;
+        if (!m.completed && m.progress >= def.target) {
+            m.completed = true;
+            completedNow = true;
+            completed.push(def);
+        }
+        const changed = before[def.id].progress !== m.progress || before[def.id].completed !== m.completed;
+        updated.push({ ...def, progress: m.progress, completed: m.completed, completedNow, changed });
+    });
+
+    completed.forEach((def, i) => showMissionBadge(def, 700 + i * 350));
+
+    return { updated, completed };
+}
+
+function getNextPlayableLevel() {
+    return LEVELS.find(l => isLevelUnlocked(l) && !getLevelProgress(l.id).completed);
+}
+
+function getFirstUpgradeLevel() {
+    return LEVELS.find(l => {
+        const p = getLevelProgress(l.id);
+        return p.completed && (p.stars || 0) < 3;
+    });
+}
+
+function getNextChapterUnlockGoal() {
+    for (const ch of CHAPTERS) {
+        if (ch.id === 1 || isChapterUnlocked(ch.id)) continue;
+        const prev = ch.id - 1;
+        const have = getChapterStars(prev);
+        const need = Math.max(0, ch.unlockStars - have);
+        return {
+            title: `Unlock Chapter ${ch.id}: ${ch.name}`,
+            detail: need > 0 ? `Earn ${need} more ★ in Chapter ${prev}.` : 'Ready to unlock.',
+            progress: ch.unlockStars > 0 ? Math.min(100, Math.round((have / ch.unlockStars) * 100)) : 100
+        };
+    }
+    return null;
+}
+
+function getComposerGoal() {
+    if (isComposerUnlocked()) return null;
+    const missing = [1, 2, 3].filter(chId => {
+        const chLevels = LEVEL_TEMPLATES.filter(t => t.ch === chId);
+        return !chLevels.every(t => getLevelProgress(t.id).completed);
+    });
+    if (missing.length === 0) return null;
+    return {
+        title: 'Unlock Composer Mode',
+        detail: `Complete Chapter${missing.length > 1 ? 's' : ''} ${missing.join(', ')}.`,
+        progress: Math.round(((3 - missing.length) / 3) * 100)
+    };
+}
+
+function getNextGoal() {
+    const nextLevel = getNextPlayableLevel();
+    if (nextLevel) {
+        const chapterLevels = LEVELS.filter(l => l.chapter === nextLevel.chapter);
+        const num = chapterLevels.indexOf(nextLevel) + 1;
+        return {
+            label: 'Next Goal',
+            title: `Ch.${nextLevel.chapter} Level ${num}: ${nextLevel.name}`,
+            detail: 'Listen first, sing it back, then place the missing shape.',
+            progress: 0
+        };
+    }
+
+    const upgrade = getFirstUpgradeLevel();
+    if (upgrade) {
+        const p = getLevelProgress(upgrade.id);
+        return {
+            label: 'Upgrade Goal',
+            title: `Perfect ${upgrade.name}`,
+            detail: `Current best: ${p.stars || 1}★. Try for ≤2 listens, no hints, no mistakes.`,
+            progress: Math.round(((p.stars || 1) / 3) * 100)
+        };
+    }
+
+    return {
+        label: 'Free Play',
+        title: isComposerUnlocked() ? 'Write a lick in Composer Mode' : 'Replay a favorite level',
+        detail: isComposerUnlocked() ? 'Use the vocabulary you unlocked to build your own line.' : 'Sharpen old levels while Composer Mode is still locked.',
+        progress: 100
+    };
+}
+
+function renderPracticePanel() {
+    const state = getDailyMissionState();
+    const goal = getNextGoal();
+    const unlockGoal = getNextChapterUnlockGoal() || getComposerGoal();
+    const missionCards = DAILY_MISSION_DEFS.map(def => {
+        const m = state[def.id] || { progress: 0, completed: false };
+        const pct = Math.min(100, Math.round(((m.progress || 0) / def.target) * 100));
+        return `<div class="mission-card${m.completed ? ' complete' : ''}">
+            <div class="mission-card-badge" title="Mission complete">✓</div>
+            <div class="mission-name">${escapeHtml(def.title)}</div>
+            <div class="mission-desc">${escapeHtml(def.desc)}</div>
+            <div class="mission-progress"><div class="mission-progress-fill" style="width:${pct}%"></div></div>
+            <div class="mission-count">${m.completed ? 'Complete' : `${m.progress || 0}/${def.target}`}</div>
+        </div>`;
+    }).join('');
+    const unlockHtml = unlockGoal ? `<div class="next-goal-detail" style="margin-top:6px;color:var(--gold);">${escapeHtml(unlockGoal.detail)}</div>` : '';
+    return `<div class="practice-panel">
+        <div class="next-goal-card">
+            <div class="next-goal-label">${escapeHtml(goal.label)}</div>
+            <div class="next-goal-title">${escapeHtml(goal.title)}</div>
+            <div class="next-goal-detail">${escapeHtml(goal.detail)}</div>
+            ${unlockHtml}
+        </div>
+        <div class="mission-label">Daily Missions</div>
+        <div class="mission-strip">${missionCards}</div>
+    </div>`;
+}
+
 function isChapterUnlocked(chapterId) {
     if (chapterId === 1) return true;
     const prev = chapterId - 1;
@@ -4937,6 +5506,9 @@ function goToMap(overrideChapter) {
         exitComposerMode();
         return;
     }
+    clearAutoPlayTimeout();
+    clearLevelSetupTimeouts();
+    cancelDragProcessing();
     stopPlayback();
     celebrationTimeouts.forEach(t => clearTimeout(t));
     celebrationTimeouts = [];
@@ -5049,6 +5621,7 @@ function renderChapterContent(chapterId) {
     const colors = COLOR_MAP[ch.color] || COLOR_MAP.gold;
     const pct = maxStars > 0 ? Math.round((stars / maxStars) * 100) : 0;
     content.innerHTML = `
+        ${renderPracticePanel()}
         <div class="chapter-info">
             <div class="chapter-info-header">
                 <div class="chapter-info-icon" style="background:${colors.bg}; border: 1px solid ${colors.border};">
@@ -5119,6 +5692,9 @@ function renderLevelNode(level) {
 function startLevel(levelId) {
     // Unlock AudioContext now (synchronous, within user gesture) so auto-play works later
     getAudioCtx();
+    clearAutoPlayTimeout();
+    clearLevelSetupTimeouts();
+    cancelDragProcessing();
     composerMode = false; // reset composer mode when starting a normal level
     hideComposerToolbar();
     document.getElementById('hint-btn').style.display = '';
@@ -5276,9 +5852,13 @@ function startLevel(levelId) {
 
         // Craft table onboarding: step-by-step tutorial on first encounter
         if (craftMode === 'flip' && shouldShowCraftTutorial('flip')) {
-            setTimeout(() => startCraftTutorial('flip'), 800);
+            scheduleLevelSetupTimeout(() => {
+                if (currentLevel === levelId && document.getElementById('screen-puzzle')?.classList.contains('active')) startCraftTutorial('flip');
+            }, 800);
         } else if (craftMode === 'full' && shouldShowCraftTutorial('dupe') && currentLevelData.removeCols.length >= 2) {
-            setTimeout(() => startCraftTutorial('dupe'), 800);
+            scheduleLevelSetupTimeout(() => {
+                if (currentLevel === levelId && document.getElementById('screen-puzzle')?.classList.contains('active')) startCraftTutorial('dupe');
+            }, 800);
         }
 
         // Schedule proactive craft tooltips (fallback if tutorial already done)
@@ -5294,7 +5874,11 @@ function startLevel(levelId) {
             currentLevelData.solution.some(s => s.position % 1 !== 0)) {
             gameProgress['_halfPosTipDone'] = true;
             saveProgress();
-            setTimeout(() => showToast('Pieces can snap between grid rows too — try different heights!', 'info', 4000), 2500);
+            scheduleLevelSetupTimeout(() => {
+                if (currentLevel === levelId && document.getElementById('screen-puzzle')?.classList.contains('active')) {
+                    showToast('Pieces can snap between grid rows too — try different heights!', 'info', 4000);
+                }
+            }, 2500);
         }
 
         if (currentLevelData.tutorial) {
@@ -5305,7 +5889,7 @@ function startLevel(levelId) {
         // Skip auto-play on the very first level (ch1_01) so the tutorial tooltip
         // has time to teach the user about the Play button before anything happens.
         if (currentLevel !== 'ch1_01') {
-            setTimeout(() => { if (!isPlaying) playMelody(); }, 1000);
+            scheduleAutoPlay(levelId);
         }
     });
 }
@@ -6367,6 +6951,73 @@ function isCraftDrop(clientX, clientY) {
 // ==================================================================
 // DRAG & DROP
 // ==================================================================
+function collectDragGridMetrics() {
+    const cellGap = window.innerWidth <= 480 ? 8 : 12;
+    return Array.from(document.querySelectorAll('.grid-column')).map(col => {
+        const firstCell = col.querySelector('.grid-cell');
+        if (!firstCell) return null;
+        return {
+            col,
+            colIndex: parseInt(col.dataset.col),
+            rect: col.getBoundingClientRect(),
+            cellH: firstCell.offsetHeight,
+            cellGap
+        };
+    }).filter(Boolean);
+}
+
+function prepareDragMetrics() {
+    dragGridMetrics = collectDragGridMetrics();
+}
+
+function scheduleDragProcess(x, y) {
+    pendingDragPoint = { x, y };
+    if (dragRaf) return;
+    dragRaf = requestAnimationFrame(() => {
+        dragRaf = null;
+        const point = pendingDragPoint;
+        pendingDragPoint = null;
+        if (point && draggedPiece) processDragAt(point.x, point.y);
+    });
+}
+
+function finalizeDragProcessing(clientX, clientY) {
+    if (dragRaf) {
+        cancelAnimationFrame(dragRaf);
+        dragRaf = null;
+    }
+    pendingDragPoint = null;
+    if (typeof clientX === 'number' && typeof clientY === 'number' && draggedPiece) {
+        processDragAt(clientX, clientY);
+    }
+    document.querySelector('.snap-preview')?.remove();
+    document.getElementById('craft-drop-zone')?.classList.remove('drag-hover');
+    dragGridMetrics = null;
+}
+
+function cancelDragProcessing() {
+    if (dragRaf) {
+        cancelAnimationFrame(dragRaf);
+        dragRaf = null;
+    }
+    pendingDragPoint = null;
+    dragGridMetrics = null;
+    document.removeEventListener('mousemove', onDragMove);
+    document.removeEventListener('mouseup', onDragEnd);
+    document.removeEventListener('touchmove', onTouchMove);
+    document.removeEventListener('touchend', onTouchEnd);
+    document.querySelector('.snap-preview')?.remove();
+    document.getElementById('craft-drop-zone')?.classList.remove('drag-hover');
+    document.querySelectorAll('.tray-piece').forEach(t => t.classList.remove('dragging'));
+    if (dragPreview) { dragPreview.remove(); dragPreview = null; }
+    draggedPiece = null;
+    draggedFromGrid = null;
+    draggedFromCraft = false;
+    currentSnapCol = null;
+    currentSnapPos = null;
+    draggedTrayIndex = -1;
+}
+
 function getValidSnapPositions(piece, colIndex) {
     let allPositions = [0, 0.5, 1, 1.5, 2];
     if (colIndex === numCols) allPositions = [-0.5, 0, 0.5, 1, 1.5, 2, 2.5];
@@ -6420,6 +7071,8 @@ function startDrag(e, piece, fromGrid) {
     dragPreview.innerHTML = `<img src="${piece.thumbnail}" draggable="false">`;
     document.body.appendChild(dragPreview);
     updateDragPreview(e.clientX, e.clientY, false);
+    prepareDragMetrics();
+    scheduleDragProcess(e.clientX, e.clientY);
 
     document.addEventListener('mousemove', onDragMove);
     document.addEventListener('mouseup', onDragEnd);
@@ -6444,6 +7097,8 @@ function startDragTouch(e, piece, fromGrid) {
     dragPreview.innerHTML = `<img src="${piece.thumbnail}" draggable="false">`;
     document.body.appendChild(dragPreview);
     updateDragPreview(touch.clientX, touch.clientY, true);
+    prepareDragMetrics();
+    scheduleDragProcess(touch.clientX, touch.clientY);
 
     document.addEventListener('touchmove', onTouchMove, {passive:false});
     document.addEventListener('touchend', onTouchEnd);
@@ -6460,14 +7115,11 @@ function updateDragPreview(x, y, isTouchEvent) {
 
 function processDragAt(x, y) {
     document.querySelector('.snap-preview')?.remove();
-    document.querySelectorAll('.grid-cell').forEach(c => c.classList.remove('drag-over'));
 
-    const cellGap = window.innerWidth <= 480 ? 8 : 12;
     let foundSnap = false;
+    const columns = dragGridMetrics || collectDragGridMetrics();
 
-    document.querySelectorAll('.grid-column').forEach(col => {
-        const rect = col.getBoundingClientRect();
-        const colIndex = parseInt(col.dataset.col);
+    columns.forEach(({ col, colIndex, rect, cellH, cellGap }) => {
         if (x < rect.left || x > rect.right) return;
         // Must also be within the vertical bounds of the column (prevents tray/bottombar false-positives)
         if (y < rect.top - 20 || y > rect.bottom + 20) return;
@@ -6475,8 +7127,6 @@ function processDragAt(x, y) {
         if (draggedPiece.name === 'Target') return;
         if (!isEmptyCol(colIndex) && !draggedFromGrid && !draggedFromCraft) return;
 
-        const cells = col.querySelectorAll('.grid-cell');
-        const cellH = cells[0].offsetHeight;
         const relY = y - rect.top;
         const positions = getValidSnapPositions(draggedPiece, colIndex);
 
@@ -6509,7 +7159,7 @@ function processDragAt(x, y) {
 
 function onDragMove(e) {
     updateDragPreview(e.clientX, e.clientY, false);
-    processDragAt(e.clientX, e.clientY);
+    scheduleDragProcess(e.clientX, e.clientY);
 }
 
 function onTouchMove(e) {
@@ -6517,12 +7167,11 @@ function onTouchMove(e) {
     const touch = e.touches[0];
     updateDragPreview(touch.clientX, touch.clientY, true);
     // Use the actual finger position for snap detection (not the lifted preview)
-    processDragAt(touch.clientX, touch.clientY);
+    scheduleDragProcess(touch.clientX, touch.clientY);
 }
 
 function finishDrag(clientX, clientY) {
-    document.querySelector('.snap-preview')?.remove();
-    document.querySelectorAll('.grid-cell').forEach(c => c.classList.remove('drag-over'));
+    finalizeDragProcessing(clientX, clientY);
     document.querySelectorAll('.tray-piece').forEach(t => t.classList.remove('dragging'));
     document.getElementById('craft-drop-zone')?.classList.remove('drag-hover');
 
@@ -6777,7 +7426,12 @@ function checkAnswer(col) {
             stopPlayback();
             if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
             sfx('correct');
-            setTimeout(() => completeLevel(), 600);
+            const solvedLevelId = currentLevel;
+            scheduleLevelSetupTimeout(() => {
+                if (currentLevel === solvedLevelId && document.getElementById('screen-puzzle')?.classList.contains('active')) {
+                    completeLevel();
+                }
+            }, 600);
         } else {
             // Non-final correct piece — green outline + play that column's notes
             sfx('correct');
@@ -6857,6 +7511,79 @@ function checkAnswer(col) {
     }
 }
 
+function nearestChordTone(chord, degree, centerMidi) {
+    let best = null;
+    let bestDist = Infinity;
+    for (let oct = 2; oct <= 6; oct++) {
+        const midi = chord.getChordTone(degree, oct);
+        const dist = Math.abs(midi - centerMidi);
+        if (dist < bestDist) {
+            best = midi;
+            bestDist = dist;
+        }
+    }
+    return best;
+}
+
+function playResolutionChord(startTime, targetNote) {
+    if (!currentLevelData || !targetNote) return;
+    const chord = parseChord(currentLevelData.targetChord);
+    if (!chord) return;
+    const eighth = getEighth();
+    const centers = [targetNote - 14, targetNote - 7, targetNote, targetNote + 4];
+    const degrees = [0, 2, 3, 1];
+    const tones = degrees.map((degree, i) => nearestChordTone(chord, degree, centers[i]))
+        .filter(n => n !== null && n !== undefined);
+    [...new Set(tones)].sort((a, b) => a - b).forEach((midi, i) => {
+        playNote(midiToFreq(midi), startTime + i * 0.018, eighth * 3.1);
+    });
+}
+
+function spawnResolutionParticles() {
+    const targetEl = document.querySelector(`.grid-column[data-col="${numCols}"] .placed-piece`);
+    if (!targetEl) return;
+    const rect = targetEl.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const colors = ['var(--gold)', '#fde68a', '#5b8def', '#34d399'];
+    for (let i = 0; i < 18; i++) {
+        const p = document.createElement('div');
+        p.className = 'resolution-particle';
+        const angle = (Math.PI * 2 * i) / 18 + (Math.random() - 0.5) * 0.25;
+        const dist = 42 + Math.random() * 46;
+        p.style.left = cx + 'px';
+        p.style.top = cy + 'px';
+        p.style.background = colors[i % colors.length];
+        p.style.setProperty('--rx', Math.cos(angle) * dist + 'px');
+        p.style.setProperty('--ry', Math.sin(angle) * dist + 'px');
+        document.body.appendChild(p);
+        p.addEventListener('animationend', () => p.remove(), { once: true });
+    }
+}
+
+function triggerResolutionJuice() {
+    document.querySelectorAll('.resolution-flash,.resolution-badge,.resolution-particle').forEach(el => el.remove());
+    const flash = document.createElement('div');
+    flash.className = 'resolution-flash';
+    document.body.appendChild(flash);
+    flash.addEventListener('animationend', () => flash.remove(), { once: true });
+
+    const badge = document.createElement('div');
+    badge.className = 'resolution-badge';
+    badge.textContent = 'Resolved';
+    document.body.appendChild(badge);
+    badge.addEventListener('animationend', () => badge.remove(), { once: true });
+
+    const targetCol = document.querySelector(`.grid-column[data-col="${numCols}"]`);
+    if (targetCol) {
+        targetCol.classList.remove('resolution-ring');
+        void targetCol.offsetWidth;
+        targetCol.classList.add('resolution-ring');
+        setTimeout(() => targetCol.classList.remove('resolution-ring'), 950);
+    }
+    spawnResolutionParticles();
+}
+
 function playCelebrationMelody(callback) {
     const notes = fullMelodyNotes;
     if (!notes || !notes.targetNote) { callback(); return; }
@@ -6923,9 +7650,7 @@ function playCelebrationMelody(callback) {
         // Schedule playhead highlight
         const phDelayMs = (colAudioTime - audioCtx.currentTime) * 1000;
         const phTid = setTimeout(() => {
-            document.querySelectorAll('.playhead-active').forEach(el => el.classList.remove('playhead-active'));
-            const colEl = document.querySelector(`.grid-column[data-col="${col}"]`);
-            if (colEl) colEl.querySelectorAll('.grid-cell').forEach(c => c.classList.add('playhead-active'));
+            setPlayheadColumn(col, false);
         }, Math.max(0, phDelayMs));
         celebrationTimeouts.push(phTid);
 
@@ -6953,14 +7678,19 @@ function playCelebrationMelody(callback) {
     }
     // Target playhead
     const tphTid = setTimeout(() => {
-        document.querySelectorAll('.playhead-active').forEach(el => el.classList.remove('playhead-active'));
-        const colEl = document.querySelector(`.grid-column[data-col="${numCols}"]`);
-        if (colEl) colEl.querySelectorAll('.grid-cell').forEach(c => c.classList.add('playhead-active'));
+        setPlayheadColumn(numCols, false);
     }, Math.max(0, targetDelayMs));
     celebrationTimeouts.push(tphTid);
 
     playNote(midiToFreq(notes.targetNote), currentTime, eighth * 2);
-    currentTime += eighth * 2;
+    const resolutionTime = currentTime + eighth * 0.55;
+    playResolutionChord(resolutionTime, notes.targetNote);
+    const resolutionTid = setTimeout(() => {
+        triggerResolutionJuice();
+        sfx('star');
+    }, Math.max(0, (resolutionTime - audioCtx.currentTime) * 1000));
+    celebrationTimeouts.push(resolutionTid);
+    currentTime += eighth * 3.2;
 
     // After melody finishes + 0.5s buffer, clean up and call callback
     const totalMs = (currentTime - audioCtx.currentTime) * 1000 + 500;
@@ -6972,10 +7702,12 @@ function playCelebrationMelody(callback) {
         celebrationTimeouts.forEach(t => clearTimeout(t));
         celebrationTimeouts = [];
         stopPlayback();
-        document.querySelectorAll('.playhead-active').forEach(el => el.classList.remove('playhead-active'));
+        clearPlayhead();
         document.querySelectorAll('.celebrate-gold, .celebrate-pulse').forEach(el => {
             el.classList.remove('celebrate-gold', 'celebrate-pulse');
         });
+        document.querySelectorAll('.resolution-ring').forEach(el => el.classList.remove('resolution-ring'));
+        document.querySelectorAll('.resolution-flash,.resolution-badge,.resolution-particle').forEach(el => el.remove());
         const pa = document.querySelector('.puzzle-area');
         if (pa) pa.removeEventListener('click', skipHandler);
         // Restore play button
@@ -7014,12 +7746,25 @@ function completeLevel() {
     const stars = calculateStars();
 
     const prev = getLevelProgress(currentLevel);
+    const prevStars = prev.stars || 0;
+    const prevBestListens = prev.bestListens || null;
+    lastCompletionSummary = {
+        stars,
+        previousStars: prevStars,
+        firstComplete: !prev.completed,
+        starsImproved: stars > prevStars,
+        previousBestListens: prevBestListens,
+        isNewBestListens: !prevBestListens || totalListens < prevBestListens,
+        elapsed,
+        missionResults: null
+    };
     gameProgress[currentLevel] = {
         completed: true,
         stars: Math.max(prev.stars || 0, stars),
         bestTime: prev.bestTime ? Math.min(prev.bestTime, elapsed) : elapsed,
         bestListens: prev.bestListens ? Math.min(prev.bestListens, totalListens) : totalListens
     };
+    lastCompletionSummary.missionResults = updateMissionProgress({ stars, totalListens, hintsUsed, wrongPlacements });
     // Streak tracking
     updateStreak();
     // Reset retry scaffolding on any completion so replays feel fresh
@@ -7524,6 +8269,7 @@ function spawnNoteParticles(col) {
 }
 
 function playMelody() {
+    clearAutoPlayTimeout();
     removeTutorialTooltip(); // dismiss step-1 tooltip when user presses play
     onPlayerAction();
     const playBtn = document.getElementById('play-btn');
@@ -7564,13 +8310,7 @@ function playMelody() {
     function schedulePlayhead(audioTime, col) {
         const delayMs = (audioTime - audioCtx.currentTime) * 1000;
         const id = setTimeout(() => {
-            document.querySelectorAll('.playhead-active').forEach(el => el.classList.remove('playhead-active'));
-            document.querySelectorAll('.chord-label.playhead-active').forEach(el => el.classList.remove('playhead-active'));
-            const colEl = document.querySelector(`.grid-column[data-col="${col}"]`);
-            if (colEl) colEl.querySelectorAll('.grid-cell').forEach(c => c.classList.add('playhead-active'));
-            // Highlight the chord label for this column
-            const chordLabels = document.querySelectorAll('.chord-label');
-            if (chordLabels[col]) chordLabels[col].classList.add('playhead-active');
+            setPlayheadColumn(col);
         }, Math.max(0, delayMs));
         playbackTimeouts.push(id);
     }
@@ -7852,10 +8592,20 @@ function showTutorialStep1() {
         if (listenLimit) {
             // Listen-limit levels (ch6) always show the count
             const msg = `👆 Press ▶ — you have ${listenLimit} listens. Make each one count!`;
-            setTimeout(() => showTooltipAt(playBtn, msg, ''), 400);
+            const levelId = currentLevel;
+            scheduleLevelSetupTimeout(() => {
+                if (currentLevel === levelId && document.getElementById('screen-puzzle')?.classList.contains('active')) {
+                    showTooltipAt(playBtn, msg, '');
+                }
+            }, 400);
         } else if (currentLevel === 'ch1_01' || currentLevel === 'ch1_02') {
             // Only show generic "press play" tooltip on the first two levels
-            setTimeout(() => showTooltipAt(playBtn, '👆 Press ▶ to listen to the melody first!', ''), 400);
+            const levelId = currentLevel;
+            scheduleLevelSetupTimeout(() => {
+                if (currentLevel === levelId && document.getElementById('screen-puzzle')?.classList.contains('active')) {
+                    showTooltipAt(playBtn, '👆 Press ▶ to listen to the melody first!', '');
+                }
+            }, 400);
         }
     }
 }
@@ -7875,7 +8625,9 @@ function onTutorialMelodyPlayed() {
             el.textContent = 'Try replaying it in your head \u2014 what shape did the melody make?';
             el.style.color = 'var(--gold)';
         }
-        setTimeout(() => {
+        const levelId = currentLevel;
+        scheduleLevelSetupTimeout(() => {
+            if (currentLevel !== levelId || !document.getElementById('screen-puzzle')?.classList.contains('active')) return;
             if (el) { el.style.color = ''; }
             gameProgress['_tutorialSpotlightDone'] = true;
             saveProgress();
@@ -7894,7 +8646,12 @@ function showTutorialStep2WithSpotlight() {
         // Spotlight both the tray piece and the empty column
         showSpotlight(firstPiece, emptyCol);
         const text = currentLevelData.tutorial || 'Drag the piece into the highlighted column.';
-        setTimeout(() => showTooltipAt(firstPiece, text, ''), 300);
+        const levelId = currentLevel;
+        scheduleLevelSetupTimeout(() => {
+            if (currentLevel === levelId && document.getElementById('screen-puzzle')?.classList.contains('active')) {
+                showTooltipAt(firstPiece, text, '');
+            }
+        }, 300);
     }
 }
 
@@ -7942,10 +8699,7 @@ function playColumnPreview(col) {
     const swS = eighth * 2 * (1 - sw);
 
     // Highlight the column briefly
-    const colEl = document.querySelector(`.grid-column[data-col="${col}"]`);
-    if (colEl) {
-        colEl.querySelectorAll('.grid-cell').forEach(c => c.classList.add('playhead-active'));
-    }
+    setPlayheadColumn(col, false);
 
     let t = audioCtx.currentTime + 0.05;
 
@@ -7956,7 +8710,7 @@ function playColumnPreview(col) {
     } else {
         const notes = fullMelodyNotes.pieceNotes[col];
         if (!notes || notes.length === 0) {
-            if (colEl) colEl.querySelectorAll('.grid-cell').forEach(c => c.classList.remove('playhead-active'));
+            clearPlayhead();
             return;
         }
         notes.forEach((midi, i) => {
@@ -7968,9 +8722,7 @@ function playColumnPreview(col) {
 
     // Remove highlight after notes finish
     const totalMs = (t - audioCtx.currentTime) * 1000 + 100;
-    setTimeout(() => {
-        if (colEl) colEl.querySelectorAll('.grid-cell').forEach(c => c.classList.remove('playhead-active'));
-    }, totalMs);
+    setTimeout(() => clearPlayhead(), totalMs);
 }
 
 function showTutorialStep2() {
@@ -7979,10 +8731,79 @@ function showTutorialStep2() {
     const firstPiece = document.querySelector('#piece-tray .tray-piece');
     if (firstPiece) {
         const text = currentLevelData.tutorial || 'Drag the piece into the highlighted column.';
-        setTimeout(() => {
-            showTooltipAt(firstPiece, text, '');
+        const levelId = currentLevel;
+        scheduleLevelSetupTimeout(() => {
+            if (currentLevel === levelId && document.getElementById('screen-puzzle')?.classList.contains('active')) {
+                showTooltipAt(firstPiece, text, '');
+            }
         }, 300);
     }
+}
+
+const PIECE_LEARNING_LINES = {
+    'Arpeggio': 'Arpeggio: you heard chord tones leap through the harmony.',
+    'Neighbor': 'Neighbor: you heard a close note move away and return.',
+    'Approach': 'Approach: you heard stepwise motion pull into the target.',
+    'Enclosure': 'Enclosure: you heard the line circle the target from both sides.',
+};
+
+function getLevelLearningLine() {
+    if (!currentLevelData || !currentLevelData.removeCols) return '';
+    const names = [...new Set(currentLevelData.removeCols.map(col => {
+        const s = currentLevelData.solution.find(sol => sol.col === col);
+        return s ? s.pieceName : null;
+    }).filter(Boolean))];
+    if (names.length === 1) return PIECE_LEARNING_LINES[names[0]] || '';
+    if (names.length > 1) return 'You connected ' + names.join(', ') + ' shapes into one resolving line.';
+    return '';
+}
+
+function getThreeStarAdvice(listens) {
+    const misses = [];
+    if (listens > 2) misses.push((listens - 2) + ' fewer listen' + (listens - 2 === 1 ? '' : 's'));
+    if (hintsUsed > 0) misses.push('solve without hints');
+    if (wrongPlacements > 0) misses.push('avoid wrong placements');
+    return misses.length ? misses.join(' · ') : 'keep the same clean take';
+}
+
+function renderSuccessFeedback(stars, listens) {
+    const el = document.getElementById('success-feedback');
+    if (!el) return;
+    const summary = lastCompletionSummary || {};
+    const notes = [];
+    if (summary.firstComplete) notes.push('first clear');
+    else if (summary.starsImproved) notes.push('star upgrade');
+    if (!summary.firstComplete && summary.isNewBestListens) notes.push('new best');
+    const suffix = notes.length ? ` · ${notes.join(' · ')}` : '';
+    if (stars === 3) {
+        el.textContent = `Perfect take${suffix}`;
+    } else if (stars === 2) {
+        el.textContent = `Close to 3★: ${getThreeStarAdvice(listens)}`;
+    } else {
+        el.textContent = `Try again for 3★: ${getThreeStarAdvice(listens)}`;
+    }
+}
+
+function renderSuccessNextGoal(stars, listens) {
+    const el = document.getElementById('success-next-goal');
+    if (!el) return;
+    let goal;
+    if (stars < 3) {
+        goal = {
+            label: 'Retry Target',
+            title: 'Go for 3★',
+            detail: getThreeStarAdvice(listens)
+        };
+    } else {
+        goal = getNextGoal();
+    }
+    el.textContent = stars < 3 ? `Goal: ${goal.detail}` : `Next: ${goal.title}`;
+}
+
+function renderSuccessMissions() {
+    const el = document.getElementById('success-missions');
+    if (!el) return;
+    el.innerHTML = '';
 }
 
 function showSuccessModal(stars, listens) {
@@ -7990,6 +8811,7 @@ function showSuccessModal(stars, listens) {
     const modal = document.getElementById('success-modal');
     const perfectTextEl = document.getElementById('success-perfect-text');
     overlay.classList.remove('hidden');
+    document.querySelector('.success-title').textContent = stars === 3 ? 'Perfect' : 'Complete';
 
     // Clean up tier classes and previous particles
     modal.classList.remove('perfect', 'great');
@@ -8018,11 +8840,6 @@ function showSuccessModal(stars, listens) {
 
     // --- 3 Stars: Perfect celebration ---
     if (stars === 3) {
-        var perfSpan = document.createElement('div');
-        perfSpan.className = 'perfect-text';
-        perfSpan.textContent = 'Perfect!';
-        perfectTextEl.appendChild(perfSpan);
-
         var confettiColors = ['#f0a830', '#d97706', '#fbbf24', '#fffbeb', '#c4872a', '#f59e0b'];
         var modalRect = modal.getBoundingClientRect();
         var cx = modalRect.left + modalRect.width / 2;
@@ -8063,40 +8880,14 @@ function showSuccessModal(stars, listens) {
     }
 
     // Stats line: listens, hints, mistakes
-    const prev = getLevelProgress(currentLevel);
-    const bestStr = prev.bestListens ? ' (best: ' + prev.bestListens + ')' : '';
-    document.getElementById('success-stats').innerHTML = 'Listens <span class="success-stat-value">' + listens + bestStr + '</span>&nbsp;\u00b7&nbsp;Hints <span class="success-stat-value">' + hintsUsed + '</span>&nbsp;\u00b7&nbsp;Mistakes <span class="success-stat-value">' + wrongPlacements + '</span>';
-
-    // Show star criteria hint when player didn't get 3 stars
-    var infoEl = document.getElementById('success-star-info');
-    if (!infoEl) {
-        infoEl = document.createElement('div');
-        infoEl.id = 'success-star-info';
-        infoEl.style.cssText = 'font-size:0.72em;color:#998;margin-top:6px;';
-        document.getElementById('success-stats').after(infoEl);
-    }
-    if (stars < 3) {
-        infoEl.textContent = '\u2605\u2605\u2605 = \u22642 listens, no hints, no mistakes';
-    } else {
-        infoEl.textContent = '';
-    }
-
-    // Chapter completion flavor text
-    const chapterLevels = LEVEL_TEMPLATES.filter(t => t.ch === currentLevelData.chapter);
-    const isLastInChapter = chapterLevels[chapterLevels.length - 1]?.id === currentLevel;
-    const chapterData = CHAPTERS.find(c => c.id === currentLevelData.chapter);
-    const flavorEl = document.getElementById('success-flavor') || (() => {
-        const el = document.createElement('div');
-        el.id = 'success-flavor';
-        el.style.cssText = 'font-size:12px;color:var(--text-secondary);margin-top:12px;font-style:italic;line-height:1.4;max-width:280px;margin-left:auto;margin-right:auto;';
-        document.getElementById('success-stats').parentElement.appendChild(el);
-        return el;
-    })();
-    if (isLastInChapter && chapterData && chapterData.flavorText) {
-        flavorEl.textContent = chapterData.flavorText;
-    } else {
-        flavorEl.textContent = '';
-    }
+    const summary = lastCompletionSummary || {};
+    const bestStr = !summary.firstComplete && summary.isNewBestListens ? ' new best' : '';
+    document.getElementById('success-stats').innerHTML = '<span class="success-stat-value">' + listens + '</span> listens' + bestStr + '&nbsp;\u00b7&nbsp;<span class="success-stat-value">' + hintsUsed + '</span> hints&nbsp;\u00b7&nbsp;<span class="success-stat-value">' + wrongPlacements + '</span> mistakes';
+    renderSuccessFeedback(stars, listens);
+    renderSuccessNextGoal(stars, listens);
+    renderSuccessMissions();
+    document.getElementById('success-star-info')?.remove();
+    document.getElementById('success-flavor')?.remove();
 }
 
 function retryLevel() {
@@ -9559,11 +10350,16 @@ function doResetProgress(btn) {
 // SCREEN TRANSITIONS — directional slides
 // ==================================================================
 let lastScreen = null;
+let screenTransitionToken = 0;
+let screenTransitionTimeouts = [];
 
 const _origShowScreen = showScreen;
 showScreen = function(name) {
     const prev = lastScreen;
     lastScreen = name;
+    const token = ++screenTransitionToken;
+    screenTransitionTimeouts.forEach(t => clearTimeout(t));
+    screenTransitionTimeouts = [];
 
     // First call (init) — use simple instant show
     if (!prev) {
@@ -9581,17 +10377,22 @@ showScreen = function(name) {
     const allScreens = document.querySelectorAll('.screen');
     const target = document.getElementById('screen-' + name);
     if (!target) return;
+    allScreens.forEach(s => s.classList.remove('slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right'));
+    const outgoing = [...allScreens].find(s => s.classList.contains('active')) || document.getElementById('screen-' + prev);
 
     // Slide out current
     allScreens.forEach(s => {
-        if (s.classList.contains('active')) {
+        if (s === outgoing && s !== target) {
             s.classList.remove('active');
             s.classList.add(forward ? 'slide-out-left' : 'slide-out-right');
-            setTimeout(() => {
+            const tid = setTimeout(() => {
+                screenTransitionTimeouts = screenTransitionTimeouts.filter(t => t !== tid);
+                if (token !== screenTransitionToken) return;
                 s.classList.remove('slide-out-left', 'slide-out-right');
                 s.classList.add('hidden');
             }, 400);
-        } else if (!s.classList.contains('hidden')) {
+            screenTransitionTimeouts.push(tid);
+        } else if (s !== target && !s.classList.contains('hidden')) {
             s.classList.add('hidden');
         }
     });
@@ -9601,6 +10402,7 @@ showScreen = function(name) {
     target.classList.add(forward ? 'slide-in-right' : 'slide-in-left');
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
+            if (token !== screenTransitionToken) return;
             target.classList.remove('slide-in-right', 'slide-in-left');
             target.classList.add('active');
         });
@@ -9771,7 +10573,12 @@ completeLevel = function() {
     _origCompleteLevel();
     if (isDailyMode) {
         const dateStr = getDailyDateString();
-        gameProgress['_daily_' + dateStr] = true;
+        const dailyKey = '_daily_' + dateStr;
+        if (gameProgress[dailyKey] && typeof gameProgress[dailyKey] === 'object') {
+            gameProgress[dailyKey].dailyCompleted = true;
+        } else {
+            gameProgress[dailyKey] = true;
+        }
         saveProgress();
         isDailyMode = false;
     }
@@ -9994,6 +10801,9 @@ function onComposerChordChange(e) {
 
 function exitComposerMode() {
     composerMode = false;
+    clearAutoPlayTimeout();
+    clearLevelSetupTimeouts();
+    cancelDragProcessing();
     stopPlayback();
     hideComposerToolbar();
     hideCraftTable();

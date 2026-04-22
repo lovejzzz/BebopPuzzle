@@ -6,23 +6,22 @@ A jazz music theory game that teaches bebop vocabulary through tactile puzzle-so
 
 ---
 
-## What's New in v1.40
+## What's New in v1.45
 
-### Gamification
-- **Listen-based stars** — star rating now rewards deep listening (listen count) instead of speed (time)
-- **Daily Challenge** — a new seeded puzzle every day, accessible from the landing page
-- **Wrong placement feedback** — targeted hints like "Right piece! Try flipping the direction"
-- **Streak counter** — tracks consecutive practice days with milestone achievements
-- **Chapter flavor text** — completing a chapter connects your new skill to real jazz artists
-- **Composer Mode unlocks earlier** — now available after Chapter 3 instead of all 6 chapters
-- **Jam Session intro** — explains distractor pieces and listen limits before Chapter 6
+### Goals & Missions
+- **Daily Missions** — visible mission cards on the chapter page with progress and completion badges
+- **Mission complete badge** — fulfilled missions now show a compact badge at the top of the screen
+- **Next goals** — chapter pages show the next best goal so players always have a clear target
 
-### Bug Fixes & UI
-- 17 bug fixes including audio desync, tray piece loss, overlay persistence, animation glitches
-- All touch targets meet 44px minimum (slider thumbs, back buttons, tabs)
-- Tray layout redesigned to fit 4 pieces on desktop and mobile
-- Mobile craft table wraps to second row for more tray space
-- iOS Safari 100dvh fix, modal scroll fix, resize debounce
+### Solve Feedback
+- **Minimal Complete screen** — success feedback is now cleaner, faster, and less crowded
+- **Richer resolution juice** — solved melodies get stronger visual and audio resolution feedback
+- **Updated star copy** — star criteria now matches listen-based scoring
+
+### Performance & Polish
+- Drag snap checks are throttled and cached to reduce jank during mouse and touch dragging
+- Auto-play, tutorial, and screen-transition timers now clean up more reliably
+- Melody playback uses lighter playhead DOM updates
 
 ---
 

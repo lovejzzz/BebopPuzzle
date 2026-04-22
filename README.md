@@ -9,7 +9,7 @@ A jazz music theory game that teaches bebop vocabulary through tactile puzzle-so
 ## What's New in v1.45
 
 ### Goals & Missions
-- **Daily Missions** — visible mission cards on the chapter page with progress and completion badges
+- **Daily Missions** — unlock from Chapter 2 with progress and completion badges on the chapter page
 - **Mission complete badge** — fulfilled missions now show a compact badge at the top of the screen
 - **Next goals** — chapter pages show the next best goal so players always have a clear target
 
@@ -17,6 +17,7 @@ A jazz music theory game that teaches bebop vocabulary through tactile puzzle-so
 - **Minimal Complete screen** — success feedback is now cleaner, faster, and less crowded
 - **Richer resolution juice** — solved melodies get stronger visual and audio resolution feedback
 - **Updated star copy** — star criteria now matches listen-based scoring
+- **Chapter hierarchy** — chapter pages now read from identity to focus goal, missions, and levels without repeated progress text
 
 ### Performance & Polish
 - Drag snap checks are throttled and cached to reduce jank during mouse and touch dragging

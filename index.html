@@ -214,6 +214,18 @@
             box-shadow: none;
         }
 
+        .landing-btn-boardgame {
+            background: linear-gradient(135deg, rgba(52,211,153,0.18), rgba(91,141,239,0.12));
+            color: var(--text-primary);
+            border: 1px solid rgba(52,211,153,0.28);
+            box-shadow: 0 4px 22px rgba(52,211,153,0.12), inset 0 1px 0 rgba(255,255,255,0.08);
+        }
+        .landing-btn-boardgame:hover {
+            transform: translateY(-2px);
+            border-color: rgba(52,211,153,0.48);
+            box-shadow: 0 8px 34px rgba(52,211,153,0.18), inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+
         /* Composer mode chord inputs */
         .composer-chord-input {
             background: transparent;
@@ -602,6 +614,343 @@
         @keyframes mission-badge-out {
             0% { opacity: 1; transform: translateY(0) scale(1); }
             100% { opacity: 0; transform: translateY(-10px) scale(0.97); }
+        }
+
+        /* =============================================
+           SCREEN: BOARDGAME PRINT KIT
+           ============================================= */
+        #screen-boardgame {
+            background: var(--bg-deep);
+        }
+        .boardgame-header {
+            padding: 18px 20px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-shrink: 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .boardgame-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--text-primary);
+        }
+        .boardgame-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .boardgame-print-btn,
+        .boardgame-small-btn {
+            min-height: 40px;
+            border-radius: 8px;
+            border: 1px solid rgba(52,211,153,0.3);
+            background: rgba(52,211,153,0.1);
+            color: var(--green);
+            padding: 0 14px;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+        .boardgame-small-btn {
+            border-color: var(--border-medium);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+        }
+        .boardgame-scroll {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 20px;
+        }
+        .boardgame-shell {
+            max-width: 920px;
+            margin: 0 auto;
+            display: grid;
+            gap: 16px;
+        }
+        .boardgame-intro {
+            border-radius: 8px;
+            border: 1px solid var(--border-subtle);
+            background: rgba(255,255,255,0.025);
+            padding: 16px;
+        }
+        .boardgame-intro h2 {
+            font-size: 18px;
+            font-weight: 900;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+        .boardgame-intro p {
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.55;
+        }
+        .boardgame-controls {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-card);
+            padding: 12px;
+        }
+        .boardgame-control {
+            display: grid;
+            gap: 5px;
+        }
+        .boardgame-control label {
+            color: var(--text-muted);
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+        .boardgame-control select {
+            min-height: 38px;
+            border-radius: 8px;
+            border: 1px solid var(--border-medium);
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            padding: 0 10px;
+            font: inherit;
+            font-size: 13px;
+            font-weight: 800;
+        }
+        .boardgame-piece-counts {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-subtle);
+            background: rgba(255,255,255,0.025);
+            padding: 12px;
+        }
+        .boardgame-piece-count {
+            min-width: 0;
+            display: grid;
+            grid-template-columns: 38px minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 9px;
+            border-radius: 8px;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-card);
+            padding: 8px;
+        }
+        .boardgame-piece-count img {
+            width: 38px;
+            height: 38px;
+            object-fit: contain;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.04);
+        }
+        .boardgame-piece-count-name {
+            font-size: 12px;
+            font-weight: 900;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .boardgame-piece-count-label {
+            margin-top: 1px;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .boardgame-stepper {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .boardgame-stepper-btn {
+            width: 26px;
+            height: 26px;
+            border-radius: 7px;
+            border: 1px solid var(--border-medium);
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            font-size: 15px;
+            font-weight: 900;
+            cursor: pointer;
+        }
+        .boardgame-stepper-value {
+            min-width: 18px;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 900;
+            color: var(--green);
+        }
+        .boardgame-preview {
+            display: grid;
+            gap: 16px;
+        }
+        .boardgame-page {
+            border-radius: 8px;
+            border: 1px solid var(--border-medium);
+            background: #f8f5ef;
+            color: #171717;
+            padding: 22px;
+            box-shadow: 0 16px 50px rgba(0,0,0,0.25);
+        }
+        .boardgame-page-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 24px;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+        .boardgame-page-subtitle {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #666;
+            margin-bottom: 18px;
+        }
+        .print-board-stage {
+            border-radius: 6px;
+            border: 1px solid #d8d4cc;
+            background: #fffdf8;
+            padding: 16px;
+        }
+        .print-chord-row {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .print-chord-label {
+            min-height: 32px;
+            border-radius: 4px;
+            border: 1px solid #c9c4ba;
+            background: transparent;
+            color: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .print-chord-label.target {
+            border-color: #888;
+            background: transparent;
+            color: #222;
+        }
+        .print-grid {
+            display: grid;
+            gap: 12px;
+            justify-content: center;
+        }
+        .print-grid-col {
+            display: grid;
+            grid-template-rows: repeat(3, 72px);
+            gap: 12px;
+        }
+        .print-grid-cell {
+            border-radius: 4px;
+            border: 1px solid #c9c4ba;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 72px;
+            height: 72px;
+        }
+        .print-grid-col.target .print-grid-cell {
+            border-color: #888;
+            background: transparent;
+        }
+        .print-piece-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, 72px);
+            gap: 12px;
+            justify-content: start;
+        }
+        .print-piece-card {
+            border: 1.5px dashed #333;
+            background: #fffdf8;
+            width: 72px;
+            height: 72px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            break-inside: avoid;
+            overflow: hidden;
+        }
+        .print-piece-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+        .print-piece-name {
+            font-size: 11px;
+            font-weight: 900;
+            text-align: center;
+        }
+        .print-piece-label {
+            font-size: 9px;
+            font-weight: 800;
+            color: #666;
+            text-align: center;
+        }
+        .print-rules {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+            margin-top: 18px;
+        }
+        .print-rules h3 {
+            font-size: 13px;
+            font-weight: 900;
+            margin-bottom: 6px;
+        }
+        .print-rules ol,
+        .print-rules ul {
+            padding-left: 18px;
+            font-size: 11px;
+            line-height: 1.55;
+            color: #333;
+        }
+        @media (max-width: 720px) {
+            .boardgame-controls {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .boardgame-piece-counts {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .print-piece-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .print-rules {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 520px) {
+            .boardgame-header {
+                align-items: flex-start;
+            }
+            .boardgame-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .boardgame-controls {
+                grid-template-columns: 1fr;
+            }
+            .boardgame-piece-counts {
+                grid-template-columns: 1fr;
+            }
         }
 
         .chapter-levels-header {
@@ -3604,6 +3953,101 @@
             100% { opacity: 0; transform: translate(var(--sparkle-x2, 8px), var(--sparkle-y2, -12px)) scale(0.2); }
         }
 
+        @media print {
+            @page { size: letter landscape; margin: 0.35in; }
+            html, body {
+                height: auto !important;
+                width: auto !important;
+                overflow: visible !important;
+                background: #fff !important;
+                color: #111 !important;
+            }
+            .ambient-bg,
+            .noise-overlay,
+            .screen:not(#screen-boardgame),
+            .boardgame-header,
+            .boardgame-intro,
+            .boardgame-controls,
+            .boardgame-piece-counts {
+                display: none !important;
+            }
+            #screen-boardgame {
+                position: static !important;
+                display: block !important;
+                opacity: 1 !important;
+                pointer-events: auto !important;
+                transform: none !important;
+                height: auto !important;
+                overflow: visible !important;
+                background: #fff !important;
+            }
+            .boardgame-scroll {
+                display: block !important;
+                overflow: visible !important;
+                padding: 0 !important;
+            }
+            .boardgame-shell,
+            .boardgame-preview {
+                display: block !important;
+                max-width: none !important;
+                margin: 0 !important;
+            }
+            .boardgame-page {
+                border: none !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+                background: #fff !important;
+                color: #111 !important;
+                padding: 0 !important;
+                width: 10.3in;
+                max-width: 10.3in;
+                page-break-after: always;
+                page-break-inside: avoid;
+            }
+            .boardgame-page:last-child { page-break-after: auto; }
+            .boardgame-page + .boardgame-page { margin-top: 0; }
+            .boardgame-page-title { font-size: 18pt !important; margin-bottom: 0.05in !important; }
+            .boardgame-page-subtitle { font-size: 8pt !important; margin-bottom: 0.15in !important; }
+            .print-board-stage { padding: 0.16in !important; }
+            .print-board-stage {
+                background: #fff !important;
+                border-color: #c9c4ba !important;
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+            .print-chord-row,
+            .print-grid {
+                gap: 0.18in;
+            }
+            .print-chord-row { grid-auto-columns: 1.3in !important; grid-template-columns: unset !important; grid-auto-flow: column !important; }
+            .print-grid { grid-auto-columns: 1.3in !important; grid-template-columns: unset !important; grid-auto-flow: column !important; }
+            .print-chord-label {
+                min-height: 0.4in;
+                width: 1.3in;
+                font-size: 11pt !important;
+                background: transparent !important;
+                color: #555 !important;
+                border-color: #c9c4ba !important;
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+            .print-chord-label.target,
+            .print-grid-col.target .print-grid-cell {
+                background: transparent !important;
+                border-color: #555 !important;
+                color: #222 !important;
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+            .print-grid-col { grid-template-rows: repeat(3, 1.3in); gap: 0.18in; }
+            .print-grid-cell { width: 1.3in; height: 1.3in; min-height: 1.3in; }
+            .print-piece-card { width: 1.3in; height: 1.3in; min-height: 1.3in; padding: 0 !important; }
+            .print-piece-grid {
+                grid-template-columns: repeat(auto-fill, 1.3in) !important;
+                gap: 0.18in !important;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -3623,7 +4067,55 @@
             <button class="landing-btn landing-btn-primary" onclick="onPlayPressed()">Play</button>
             <button class="landing-btn landing-btn-daily" id="daily-btn" onclick="onDailyPressed()">Daily Challenge</button>
             <button class="landing-btn landing-btn-composer" id="composer-btn" onclick="onComposerPressed()">\ud83c\udfb9 Composer Mode</button>
+            <button class="landing-btn landing-btn-boardgame" onclick="onBoardgamePressed()">Boardgame Kit</button>
             <button class="landing-btn landing-btn-secondary" onclick="showScreen('settings')">Settings</button>
+        </div>
+    </div>
+
+    <!-- =============================================
+         SCREEN: BOARDGAME PRINT KIT
+         ============================================= -->
+    <div id="screen-boardgame" class="screen hidden">
+        <div class="boardgame-header">
+            <button class="map-back" onclick="showScreen('landing')">←</button>
+            <div class="boardgame-title">Boardgame Kit</div>
+            <div class="boardgame-actions">
+                <button class="boardgame-small-btn" onclick="renderBoardgameKit()">Refresh</button>
+                <button class="boardgame-print-btn" onclick="printBoardgameKit()">Print</button>
+            </div>
+        </div>
+        <div class="boardgame-scroll">
+            <div class="boardgame-shell">
+                <div class="boardgame-intro">
+                    <h2>Print the puzzle, cut the pieces, play at a table.</h2>
+                    <p>Use the empty grid as a shared board. One player creates or sings a short melody, then the others arrange pieces until the line connects and resolves to the target.</p>
+                </div>
+                <div class="boardgame-controls">
+                    <div class="boardgame-control">
+                        <label for="boardgame-cols">Grid</label>
+                        <select id="boardgame-cols" onchange="renderBoardgameKit()">
+                            <option value="2">2 chords</option>
+                            <option value="3">3 chords</option>
+                            <option value="4" selected>4 chords</option>
+                            <option value="5">5 chords</option>
+                            <option value="6">6 chords</option>
+                        </select>
+                    </div>
+                    <div class="boardgame-control">
+                        <label for="boardgame-set">Pieces</label>
+                        <select id="boardgame-set" onchange="renderBoardgameKit()">
+                            <option value="starter">Starter set</option>
+                            <option value="full" selected>Full set</option>
+                        </select>
+                    </div>
+                    <div class="boardgame-control">
+                        <label>&nbsp;</label>
+                        <button class="boardgame-print-btn" onclick="printBoardgameKit()">Print Kit</button>
+                    </div>
+                </div>
+                <div class="boardgame-piece-counts" id="boardgame-piece-counts"></div>
+                <div class="boardgame-preview" id="boardgame-preview"></div>
+            </div>
         </div>
     </div>
 
@@ -3650,7 +4142,7 @@
                 <button class="settings-btn settings-btn-danger" onclick="confirmResetProgress()">Reset All Progress</button>
             </div>
             <div class="settings-footer">
-                Bebop Puzzle <span class="settings-version" onclick="showChangelog()">v1.45</span><br>Made By Tian Xing
+                Bebop Puzzle <span class="settings-version" onclick="showChangelog()">v1.5</span><br>Made By Tian Xing
             </div>
         </div>
     </div>
@@ -3665,11 +4157,27 @@
                 <button class="changelog-close" onclick="closeChangelog()">✕</button>
             </div>
 
-            <div class="changelog-version-tag">v1.45</div>
+            <div class="changelog-version-tag">v1.5</div>
+
+            <div class="changelog-section">
+                <div class="changelog-section-title">Boardgame Kit</div>
+                <ul class="changelog-list">
+                    <li>Grid options now go from 2 to 6 chords (target column always included)</li>
+                    <li>Cut-out pieces are sized to fit the board grid cells exactly</li>
+                    <li>Cleaner minimalist board styling — light background with thin gray cell outlines</li>
+                    <li>Prints in landscape on a single letter page so the board and pieces are as large as possible</li>
+                    <li>Removed printed rules and labels for a clean, ready-to-cut sheet</li>
+                </ul>
+            </div>
+
+            <hr style="border:none;border-top:1px solid var(--border-subtle);margin:16px 0;">
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Previous (v1.45)</div>
 
             <div class="changelog-section">
                 <div class="changelog-section-title">Goals & Missions</div>
                 <ul class="changelog-list">
+                    <li>Added a printable Boardgame Kit from the main menu</li>
+                    <li>Boardgame Kit includes empty grids, per-piece copy controls, paginated cut-out sheets, and table rules</li>
                     <li>Daily Missions now unlock from Chapter 2 with progress cards on the chapter page</li>
                     <li>Completed missions now show persistent check badges on mission cards</li>
                     <li>Mission completions trigger a compact top-screen badge during play</li>
@@ -10356,6 +10864,159 @@ function previewSoundPanel() {
 }
 
 // ==================================================================
+// BOARDGAME PRINT KIT
+// ==================================================================
+const BOARDGAME_PIECE_SETS = {
+    starter: ['Arpeggio', 'Neighbor'],
+    full: ['Arpeggio', 'Neighbor', 'Approach', 'Enclosure']
+};
+let boardgamePieceCounts = {};
+
+function onBoardgamePressed() {
+    sfx('click');
+    showScreen('boardgame');
+    renderBoardgameKit();
+}
+
+function getBoardgameConfig() {
+    return {
+        cols: parseInt(document.getElementById('boardgame-cols')?.value || '4'),
+        set: document.getElementById('boardgame-set')?.value || 'full'
+    };
+}
+
+function getBoardgamePieceKey(piece) {
+    return `${piece.name}|${piece.label || ''}`;
+}
+
+function getBoardgamePieceOptions(setName) {
+    const order = BOARDGAME_PIECE_SETS[setName] || BOARDGAME_PIECE_SETS.full;
+    const pieces = library
+        .filter(p => order.includes(p.name))
+        .sort((a, b) => order.indexOf(a.name) - order.indexOf(b.name) || String(a.label).localeCompare(String(b.label)));
+    const target = library.find(p => p.name === 'Target');
+    return target ? [...pieces, target] : pieces;
+}
+
+function ensureBoardgamePieceCounts(setName) {
+    getBoardgamePieceOptions(setName).forEach(piece => {
+        const key = getBoardgamePieceKey(piece);
+        if (boardgamePieceCounts[key] === undefined) {
+            boardgamePieceCounts[key] = piece.name === 'Target' ? 1 : 2;
+        }
+    });
+}
+
+function boardgameAdjustPieceCount(encodedKey, delta) {
+    const key = decodeURIComponent(encodedKey);
+    const next = Math.max(0, Math.min(9, (boardgamePieceCounts[key] || 0) + delta));
+    boardgamePieceCounts[key] = next;
+    renderBoardgameKit();
+}
+
+function renderBoardgamePieceControls(config) {
+    const wrap = document.getElementById('boardgame-piece-counts');
+    if (!wrap) return;
+    ensureBoardgamePieceCounts(config.set);
+    const options = getBoardgamePieceOptions(config.set);
+    wrap.innerHTML = options.map(piece => {
+        const key = getBoardgamePieceKey(piece);
+        const count = boardgamePieceCounts[key] || 0;
+        const label = piece.name === 'Target' ? 'Resolution note' : piece.label;
+        return `<div class="boardgame-piece-count">
+            ${piece.thumbnail ? `<img src="${piece.thumbnail}" draggable="false" alt="">` : '<div></div>'}
+            <div style="min-width:0;">
+                <div class="boardgame-piece-count-name">${escapeHtml(piece.name)}</div>
+                <div class="boardgame-piece-count-label">${escapeHtml(label || '')}</div>
+            </div>
+            <div class="boardgame-stepper">
+                <button class="boardgame-stepper-btn" onclick="boardgameAdjustPieceCount('${encodeURIComponent(key)}', -1)">−</button>
+                <div class="boardgame-stepper-value">${count}</div>
+                <button class="boardgame-stepper-btn" onclick="boardgameAdjustPieceCount('${encodeURIComponent(key)}', 1)">+</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function getBoardgamePieces(setName) {
+    ensureBoardgamePieceCounts(setName);
+    const cards = [];
+    getBoardgamePieceOptions(setName).forEach(piece => {
+        const count = boardgamePieceCounts[getBoardgamePieceKey(piece)] || 0;
+        for (let i = 0; i < count; i++) cards.push(piece);
+    });
+    return cards;
+}
+
+function renderPrintGrid(cols) {
+    const totalCols = cols + 1;
+    return `<div class="print-board-stage">
+        <div class="print-chord-row" style="grid-template-columns:repeat(${totalCols}, 72px); justify-content:center;">
+            ${Array.from({ length: totalCols }, (_, col) => {
+                const isTarget = col === cols;
+                return `<div class="print-chord-label${isTarget ? ' target' : ''}">${isTarget ? 'Target' : `Chord ${col + 1}`}</div>`;
+            }).join('')}
+        </div>
+        <div class="print-grid" style="grid-template-columns:repeat(${totalCols}, 72px);">
+            ${Array.from({ length: totalCols }, (_, col) => {
+                const isTarget = col === cols;
+                return `<div class="print-grid-col${isTarget ? ' target' : ''}">
+                    ${Array.from({ length: 3 }, () => '<div class="print-grid-cell"></div>').join('')}
+                </div>`;
+            }).join('')}
+        </div>
+    </div>`;
+}
+
+function renderPrintPieceCard(piece) {
+    return `<div class="print-piece-card">
+        ${piece.thumbnail ? `<img src="${piece.thumbnail}" draggable="false" alt="">` : `<div class="print-piece-name">${escapeHtml(piece.name)}</div>`}
+    </div>`;
+}
+
+function renderPieceSheetPages(pieces) {
+    if (pieces.length === 0) {
+        return `<section class="boardgame-page">
+            <div class="boardgame-page-title">Piece Sheet</div>
+            <div class="boardgame-page-subtitle">No pieces selected</div>
+            <p style="font-size:12px;color:#333;line-height:1.5;">Use the + buttons above to add pieces before printing.</p>
+        </section>`;
+    }
+    const perPage = 28;
+    const pages = [];
+    for (let i = 0; i < pieces.length; i += perPage) {
+        pages.push(pieces.slice(i, i + perPage));
+    }
+    return pages.map((pagePieces, pageIndex) => `<section class="boardgame-page">
+        <div class="boardgame-page-title">Piece Sheet${pages.length > 1 ? ` ${pageIndex + 1}` : ''}</div>
+        <div class="boardgame-page-subtitle">${pagePieces.length} cut-out pieces${pages.length > 1 ? ` · page ${pageIndex + 1} of ${pages.length}` : ''}</div>
+        <div class="print-piece-grid">
+            ${pagePieces.map(renderPrintPieceCard).join('')}
+        </div>
+    </section>`).join('');
+}
+
+function renderBoardgameKit() {
+    const preview = document.getElementById('boardgame-preview');
+    if (!preview) return;
+    const config = getBoardgameConfig();
+    renderBoardgamePieceControls(config);
+    const pieces = getBoardgamePieces(config.set);
+    preview.innerHTML = `
+        <section class="boardgame-page">
+            <div class="boardgame-page-title">Bebop Puzzle Board</div>
+            ${renderPrintGrid(config.cols)}
+        </section>
+        ${renderPieceSheetPages(pieces)}
+    `;
+}
+
+function printBoardgameKit() {
+    renderBoardgameKit();
+    setTimeout(() => window.print(), 50);
+}
+
+// ==================================================================
 // SETTINGS
 // ==================================================================
 function loadSettings() {
@@ -10448,7 +11109,7 @@ showScreen = function(name) {
     }
 
     // Direction logic: landing→map→puzzle (forward), reverse is back
-    const order = ['landing', 'settings', 'map', 'puzzle'];
+    const order = ['landing', 'boardgame', 'settings', 'map', 'puzzle'];
     const prevIdx = order.indexOf(prev);
     const nextIdx = order.indexOf(name);
     const forward = nextIdx >= prevIdx;

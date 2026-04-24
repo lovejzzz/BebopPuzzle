@@ -6,7 +6,20 @@ A jazz music theory game that teaches bebop vocabulary through tactile puzzle-so
 
 ---
 
+## What's New in v1.5
+
+### Boardgame Kit
+- **Landscape single-page print** — board and pieces sized as large as possible on a US letter page
+- **Cut pieces match the grid** — cards are sized to fit the board cells exactly
+- **Minimalist board** — clean light background with thin gray cell outlines
+- **Grid range** — choose 2 to 6 chord columns; target column always included
+- **No clutter** — printed rules and labels removed for a ready-to-cut sheet
+
 ## What's New in v1.45
+
+### Boardgame Kit
+- **Printable offline mode** — print an empty grid, cut-out pieces, and rules from the main menu
+- **Table options** — choose grid length, starter/full piece set, and per-piece copies before printing
 
 ### Goals & Missions
 - **Daily Missions** — unlock from Chapter 2 with progress and completion badges on the chapter page

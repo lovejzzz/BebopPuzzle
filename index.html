@@ -896,6 +896,9 @@
         }
         .boardgame-page-content {
             padding: 22px;
+            min-height: var(--page-height);
+            display: flex;
+            flex-direction: column;
         }
         .boardgame-page-content.board-page-content {
             padding-left: 0;
@@ -905,6 +908,9 @@
         .board-page-content .boardgame-page-subtitle {
             padding-left: 22px;
             padding-right: 22px;
+        }
+        .board-page-content .boardgame-page-title {
+            margin-bottom: 0.18in;
         }
         .boardgame-page-title {
             font-family: 'Playfair Display', Georgia, serif;
@@ -928,6 +934,12 @@
             padding: var(--stage-pad);
             width: max-content;
             margin: 0 auto;
+        }
+        .print-board-layout {
+            min-height: 0;
+            display: flex;
+            flex: 1;
+            flex-direction: column;
         }
         .print-chord-row {
             display: grid;
@@ -1015,12 +1027,14 @@
             display: flex;
             align-items: center;
             gap: 0.12in;
-            margin-top: 0.12in;
+            margin-top: auto;
+            padding-top: 0.18in;
             color: #333;
             font-size: 9px;
             font-weight: 800;
             letter-spacing: 0.05em;
             text-transform: uppercase;
+            opacity: 0.68;
         }
         .print-calibration-line {
             width: 1in;
@@ -2519,6 +2533,40 @@
             font-size: 14px;
             cursor: pointer;
             transition: all 0.2s;
+        }
+        .piece-intro-quiz-choice {
+            max-width: 150px;
+            min-height: 124px;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .piece-intro-quiz-choice img {
+            width: 72px;
+            height: 72px;
+            border-radius: 8px;
+            object-fit: contain;
+            flex: none;
+        }
+        .piece-intro-quiz-choice span {
+            display: block;
+            max-width: 100%;
+            overflow-wrap: anywhere;
+            line-height: 1.15;
+        }
+        .piece-intro-choice-fallback {
+            width: 72px;
+            height: 72px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.06);
+            color: var(--text-secondary);
+            font-size: 24px;
         }
         .piece-intro-choice:hover { background: rgba(240,168,48,0.15); }
         .piece-intro-choice.correct { background: rgba(52,211,153,0.15); border-color: #34d399; color: #34d399; }
@@ -4232,6 +4280,9 @@
                 padding-left: 0 !important;
                 padding-right: 0 !important;
             }
+            .board-page-content .boardgame-page-title {
+                margin-bottom: 0.18in !important;
+            }
             .boardgame-page:last-child { page-break-after: auto; }
             .boardgame-page + .boardgame-page { margin-top: 0; }
             .boardgame-page-title { font-size: 18pt !important; margin-bottom: 0.05in !important; }
@@ -4903,8 +4954,8 @@
                 <div class="piece-intro-quiz" id="piece-intro-quiz">
                     <div class="piece-intro-quiz-prompt" id="piece-intro-quiz-prompt">Which one is this?</div>
                     <div class="piece-intro-quiz-choices">
-                        <button class="piece-intro-choice" id="piece-intro-choice-a" onclick="checkPieceIntroAnswer('a')"></button>
-                        <button class="piece-intro-choice" id="piece-intro-choice-b" onclick="checkPieceIntroAnswer('b')"></button>
+                        <button class="piece-intro-choice piece-intro-quiz-choice" id="piece-intro-choice-a" onclick="checkPieceIntroAnswer('a')"></button>
+                        <button class="piece-intro-choice piece-intro-quiz-choice" id="piece-intro-choice-b" onclick="checkPieceIntroAnswer('b')"></button>
                     </div>
                 </div>
                 <div class="piece-intro-result" id="piece-intro-result"></div>
@@ -10165,6 +10216,18 @@ function playPieceIntroVariant(which) {
     }, totalMs);
 }
 
+function setPieceIntroQuizChoice(buttonId, label) {
+    const { pieceName } = pieceIntroState;
+    const btn = document.getElementById(buttonId);
+    const piece = findPiece(pieceName, label);
+    const thumbnail = piece && piece.thumbnail
+        ? '<img src="' + piece.thumbnail + '" alt="" draggable="false">'
+        : '<span class="piece-intro-choice-fallback">?</span>';
+
+    btn.innerHTML = thumbnail + '<span>' + escapeHtml(label) + '</span>';
+    btn.setAttribute('aria-label', pieceName + ' ' + label);
+}
+
 function pieceIntroNext() {
     removeTutorialTooltip();
     const part1 = document.getElementById('piece-intro-part1');
@@ -10192,10 +10255,10 @@ function startPieceIntroQuiz() {
 
     document.getElementById('piece-intro-round').textContent = 'Round ' + quizRound + ' of 2';
     document.getElementById('piece-intro-quiz-prompt').textContent = 'Which one is this?';
-    document.getElementById('piece-intro-choice-a').textContent = labelA;
-    document.getElementById('piece-intro-choice-b').textContent = labelB;
-    document.getElementById('piece-intro-choice-a').className = 'piece-intro-choice';
-    document.getElementById('piece-intro-choice-b').className = 'piece-intro-choice';
+    setPieceIntroQuizChoice('piece-intro-choice-a', labelA);
+    setPieceIntroQuizChoice('piece-intro-choice-b', labelB);
+    document.getElementById('piece-intro-choice-a').className = 'piece-intro-choice piece-intro-quiz-choice';
+    document.getElementById('piece-intro-choice-b').className = 'piece-intro-choice piece-intro-quiz-choice';
     document.getElementById('piece-intro-result').textContent = '';
 
     // Add playing glow to mystery card and play the quiz variant
@@ -11294,23 +11357,25 @@ function renderPrintCalibration(layout) {
 function renderPrintGrid(layout) {
     const cols = layout.cols;
     const totalCols = layout.totalCols;
-    return `<div class="print-board-stage">
-        <div class="print-chord-row">
-            ${Array.from({ length: totalCols }, (_, col) => {
-                const isTarget = col === cols;
-                return `<div class="print-chord-label${isTarget ? ' target' : ''}">${isTarget ? 'Target' : `Chord ${col + 1}`}</div>`;
-            }).join('')}
+    return `<div class="print-board-layout">
+        <div class="print-board-stage">
+            <div class="print-chord-row">
+                ${Array.from({ length: totalCols }, (_, col) => {
+                    const isTarget = col === cols;
+                    return `<div class="print-chord-label${isTarget ? ' target' : ''}">${isTarget ? 'Target' : `Chord ${col + 1}`}</div>`;
+                }).join('')}
+            </div>
+            <div class="print-grid">
+                ${Array.from({ length: totalCols }, (_, col) => {
+                    const isTarget = col === cols;
+                    return `<div class="print-grid-col${isTarget ? ' target' : ''}">
+                        ${Array.from({ length: 3 }, () => '<div class="print-grid-cell"></div>').join('')}
+                    </div>`;
+                }).join('')}
+            </div>
         </div>
-        <div class="print-grid">
-            ${Array.from({ length: totalCols }, (_, col) => {
-                const isTarget = col === cols;
-                return `<div class="print-grid-col${isTarget ? ' target' : ''}">
-                    ${Array.from({ length: 3 }, () => '<div class="print-grid-cell"></div>').join('')}
-                </div>`;
-            }).join('')}
-        </div>
-    </div>
-    ${renderPrintCalibration(layout)}`;
+        ${renderPrintCalibration(layout)}
+    </div>`;
 }
 
 function safePrintColor(color) {

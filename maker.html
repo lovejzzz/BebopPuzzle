@@ -586,6 +586,15 @@ const TOOL_DEFAULTS = { line:{width:8}, dotted:{width:8,segments:4}, dot:{width:
 
 let canvas, ctx, container, handlesLayer, snapLayer, marqueeEl;
 let woodGrain = null;
+let drawRaf = 0;
+
+function requestDraw() {
+    if (drawRaf) return;
+    drawRaf = requestAnimationFrame(() => {
+        drawRaf = 0;
+        draw();
+    });
+}
 
 // ============================================================
 // INIT
@@ -721,7 +730,7 @@ function onPointerMove(e) {
         const el = S.elements[S.selectedIndices[0]];
         const s = snap({x,y}, S.selectedIndices[0]);
         if (el.type==='dot') el.p1 = s; else el.p2 = s;
-        draw();
+        requestDraw();
     } else if (S.isMarquee) {
         const cx = e.clientX, cy = e.clientY;
         const l = Math.min(S.marqueeStart.x, cx), t = Math.min(S.marqueeStart.y, cy);
@@ -946,7 +955,7 @@ function createHandle(pt, key) {
             const s = snap({x,y}, S.selectedIndices[0]);
             pt.x=s.x; pt.y=s.y;
             h.style.left=`${pt.x*100}%`; h.style.top=`${pt.y*100}%`;
-            draw();
+            requestDraw();
         };
         const onUp = () => {
             h.classList.remove('active'); S.snapLines={x:null,y:null};

@@ -77,11 +77,12 @@
         .screen {
             position: absolute; inset: 0; z-index: 2;
             display: flex; flex-direction: column;
-            transition: opacity 0.4s ease, transform 0.4s ease;
+            transition: transform var(--screen-dur, 0.3s) cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: transform;
         }
         .screen.hidden {
             opacity: 0; pointer-events: none;
-            transform: scale(0.97);
+            transform: translate3d(0, 0, 0);
         }
         .screen.active {
             opacity: 1; pointer-events: auto;
@@ -1245,6 +1246,15 @@
             box-shadow: 0 4px 16px rgba(240,168,48,0.2);
             animation: none;
         }
+        .level-node.launching {
+            animation: level-launch 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+            border-color: var(--gold);
+        }
+        @keyframes level-launch {
+            0% { transform: scale(1); box-shadow: 0 0 4px 1px rgba(240,168,48,0.1); }
+            55% { transform: scale(1.06); box-shadow: 0 0 24px 7px rgba(240,168,48,0.28); }
+            100% { transform: scale(0.98); box-shadow: 0 0 10px 2px rgba(240,168,48,0.18); }
+        }
 
         .level-node.completed {
             background: rgba(255,255,255,0.025);
@@ -1317,6 +1327,11 @@
 
         .topbar-center {
             text-align: center;
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .topbar-level-name {
             font-family: 'Barlow Condensed', 'DM Sans', sans-serif;
@@ -1528,12 +1543,13 @@
 
         /* Snap preview */
         .snap-preview {
-            position: absolute; left: 0; right: 0;
+            position: absolute; left: 0; right: 0; top: 0;
             background: rgba(167,139,250,0.1);
             border: 2px dashed var(--purple);
             border-radius: 10px;
             pointer-events: none; z-index: 5;
-            transition: all 0.15s ease;
+            will-change: transform, height, opacity;
+            transition: transform 0.12s ease, height 0.12s ease, opacity 0.12s ease;
         }
         .snap-preview.invalid {
             background: rgba(255,255,255,0.02);
@@ -1543,9 +1559,10 @@
 
         /* Drag preview */
         .drag-preview {
-            position: fixed; pointer-events: none; z-index: 1000;
+            position: fixed; left: 0; top: 0; pointer-events: none; z-index: 1000;
             opacity: 0.92; border-radius: 10px; overflow: hidden;
             box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 0 2px var(--purple);
+            will-change: transform;
         }
         .drag-preview img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -1581,6 +1598,25 @@
         /* Lock bottombar height after first render to prevent layout shift during drag */
         .puzzle-bottombar.height-locked {
             min-height: var(--bottombar-h);
+        }
+        .level-enter-item {
+            opacity: 0;
+            transform: translate3d(0, var(--level-enter-y, 12px), 0) scale(var(--level-enter-scale, 1));
+            animation: level-enter-item 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation-delay: var(--level-enter-delay, 0ms);
+            will-change: opacity, transform;
+        }
+        .level-enter-item.level-enter-from-top { --level-enter-y: -10px; }
+        .level-enter-item.level-enter-pop { --level-enter-y: 8px; --level-enter-scale: 0.98; }
+        @keyframes level-enter-item {
+            0% {
+                opacity: 0;
+                transform: translate3d(0, var(--level-enter-y, 12px), 0) scale(var(--level-enter-scale, 1));
+            }
+            100% {
+                opacity: 1;
+                transform: translate3d(0, 0, 0) scale(1);
+            }
         }
 
         /* The wooden tray surface */
@@ -1937,6 +1973,16 @@
             text-transform: uppercase;
             color: var(--text-muted);
         }
+        .hint-piece-option-variant {
+            max-width: 54px;
+            font-size: 7px;
+            font-weight: 700;
+            line-height: 1.1;
+            text-align: center;
+            text-transform: uppercase;
+            color: var(--purple);
+            opacity: 0.85;
+        }
 
         /* ---- Hint toast ---- */
         .hint-toast {
@@ -2023,16 +2069,27 @@
 
         /* ---- Game toast ---- */
         .game-toast {
-            position: fixed; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 16px 36px;
-            border-radius: 14px;
-            font-size: 16px; font-weight: 800;
+            position: fixed;
+            left: 50%;
+            bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+            transform: translateX(-50%);
+            padding: 10px 14px;
+            border-radius: 10px;
+            max-width: min(420px, calc(100vw - 28px));
+            font-size: 12px; font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0.06em;
+            letter-spacing: 0.04em;
+            line-height: 1.3;
+            text-align: center;
             z-index: 1000;
-            animation: pop-in 0.25s ease-out;
+            animation: toast-slide-up 0.22s cubic-bezier(0.22, 1, 0.36, 1);
             backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            pointer-events: none;
+        }
+        @keyframes toast-slide-up {
+            0% { opacity: 0; transform: translate(-50%, 10px); }
+            100% { opacity: 1; transform: translate(-50%, 0); }
         }
         .game-toast.success {
             background: rgba(52,211,153,0.12);
@@ -2851,23 +2908,36 @@
 
         /* ---- Tutorial overlay ---- */
         .tutorial-bar {
-            position: fixed;
-            bottom: 140px; left: 50%; transform: translateX(-50%);
-            z-index: 30;
-            background: rgba(91,141,239,0.1);
-            border: 1px solid rgba(91,141,239,0.25);
-            border-radius: 14px;
-            padding: 12px 24px;
-            max-width: 340px;
-            text-align: center;
-            backdrop-filter: blur(8px);
-            animation: pop-in 0.3s ease-out;
+            display: none !important;
         }
-        .tutorial-bar.hidden { display: none; }
+        .tutorial-bar.hidden { display: none !important; }
         .tutorial-text {
-            font-size: 13px; font-weight: 600;
-            color: var(--blue);
-            line-height: 1.5;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            max-width: 100%;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-secondary);
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            letter-spacing: 0.02em;
+        }
+        .tutorial-text::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex: 0 0 auto;
+            background: var(--blue);
+            box-shadow: 0 0 10px rgba(91,141,239,0.45);
+        }
+        @keyframes objective-pop {
+            from { opacity: 0; transform: translate3d(0, -4px, 0); }
+            to { opacity: 1; transform: translate3d(0, 0, 0); }
         }
 
         /* ---- Floating tutorial tooltip ---- */
@@ -2892,45 +2962,56 @@
         .tutorial-tooltip {
             position: fixed;
             z-index: 70;
-            background: rgba(91,141,239,0.15);
-            border: 1px solid rgba(91,141,239,0.35);
-            border-radius: 12px;
-            padding: 10px 16px;
-            max-width: 220px;
+            width: min(280px, calc(100vw - 24px));
+            background: rgba(12,18,31,0.95);
+            border: 1px solid rgba(126,95,255,0.36);
+            border-radius: 10px;
+            padding: 10px 12px;
             text-align: center;
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 14px 34px rgba(0,0,0,0.34), 0 0 0 1px rgba(91,141,239,0.08) inset;
             pointer-events: none;
-            animation: tooltip-float 2s ease-in-out infinite, tooltip-pop 0.3s ease-out;
-            font-size: 12px; font-weight: 700;
-            color: var(--blue);
+            animation: tooltip-pop 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-primary);
             line-height: 1.4;
+            --arrow-x: 50%;
+            --arrow-y: 50%;
         }
         .tutorial-tooltip::after {
             content: '';
             position: absolute;
-            width: 10px; height: 10px;
-            background: rgba(91,141,239,0.15);
-            border-right: 1px solid rgba(91,141,239,0.35);
-            border-bottom: 1px solid rgba(91,141,239,0.35);
+            width: 12px; height: 12px;
+            background: rgba(12,18,31,0.95);
+            border-right: 1px solid rgba(126,95,255,0.36);
+            border-bottom: 1px solid rgba(126,95,255,0.36);
             transform: rotate(45deg);
-            bottom: -6px; left: 50%; margin-left: -5px;
         }
-        .tutorial-tooltip.arrow-up::after {
-            top: -6px; bottom: auto;
-            transform: rotate(-135deg);
+        .tutorial-tooltip[data-placement="top"]::after {
+            bottom: -7px;
+            left: var(--arrow-x);
+            transform: translateX(-50%) rotate(45deg);
         }
-        .tutorial-tooltip.arrow-left::after {
-            left: -6px; top: 50%; bottom: auto; margin-left: 0; margin-top: -5px;
+        .tutorial-tooltip[data-placement="bottom"]::after {
+            top: -7px;
+            left: var(--arrow-x);
+            transform: translateX(-50%) rotate(225deg);
+        }
+        .tutorial-tooltip[data-placement="left"]::after {
+            right: -7px;
+            top: var(--arrow-y);
+            transform: translateY(-50%) rotate(-45deg);
+        }
+        .tutorial-tooltip[data-placement="right"]::after {
+            left: -7px;
+            top: var(--arrow-y);
             transform: rotate(135deg);
         }
-        @keyframes tooltip-float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
         @keyframes tooltip-pop {
-            0% { opacity: 0; scale: 0.85; }
-            100% { opacity: 1; scale: 1; }
+            0% { opacity: 0; transform: translate3d(0, 6px, 0) scale(0.96); }
+            100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
         }
 
         /* =============================================
@@ -2956,7 +3037,11 @@
         }
         .craft-inline.visible {
             display: block;
-            animation: craftFadeIn 0.3s ease;
+            opacity: 1;
+        }
+        .craft-inline.visible.level-enter-item {
+            animation: level-enter-item 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation-delay: var(--level-enter-delay, 0ms);
         }
         @keyframes craftFadeIn {
             0% { opacity: 0; transform: translateX(10px); }
@@ -3410,6 +3495,24 @@
             box-shadow: 0 1px 4px rgba(0,0,0,0.4);
             pointer-events: none;
         }
+        .craft-output-ready {
+            position: absolute;
+            left: 50%;
+            bottom: 5px;
+            transform: translateX(-50%);
+            padding: 2px 6px;
+            border-radius: 999px;
+            background: rgba(52,211,153,0.9);
+            color: #07110c;
+            font-size: 8px;
+            font-weight: 900;
+            line-height: 1;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            z-index: 25;
+            pointer-events: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+        }
 
         /* Flying flip ghost — travels from drop zone to output while flipping */
         .craft-flip-ghost {
@@ -3419,11 +3522,8 @@
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 4px 20px rgba(167,139,250,0.4), 0 0 30px rgba(167,139,250,0.2);
-            will-change: transform, left, top;
-            transition: left 0.7s cubic-bezier(0.4, 0, 0.2, 1),
-                        top 0.7s cubic-bezier(0.4, 0, 0.2, 1),
-                        width 0.7s ease,
-                        height 0.7s ease;
+            will-change: transform;
+            transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .craft-flip-ghost img {
             width: 100%; height: 100%;
@@ -3449,11 +3549,8 @@
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 4px 16px rgba(52,211,153,0.4), 0 0 20px rgba(52,211,153,0.2);
-            will-change: left, top, width, height, opacity;
-            transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-                        top 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-                        width 0.5s ease,
-                        height 0.5s ease,
+            will-change: transform, opacity;
+            transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
                         opacity 0.5s ease;
         }
 
@@ -3974,10 +4071,12 @@
         /* =============================================
            SCREEN TRANSITIONS — directional
            ============================================= */
-        .screen.slide-out-left  { opacity: 0; transform: translateX(-40px) scale(0.97); pointer-events: none; }
-        .screen.slide-in-right  { opacity: 0; transform: translateX(40px) scale(0.97); pointer-events: none; }
-        .screen.slide-out-right { opacity: 0; transform: translateX(40px) scale(0.97); pointer-events: none; }
-        .screen.slide-in-left   { opacity: 0; transform: translateX(-40px) scale(0.97); pointer-events: none; }
+        .screen.slide-out-left  { opacity: 1; transform: translate3d(-100%, 0, 0); pointer-events: none; }
+        .screen.slide-in-right  { opacity: 1; transform: translate3d(100%, 0, 0); pointer-events: none; }
+        .screen.slide-out-right { opacity: 1; transform: translate3d(100%, 0, 0); pointer-events: none; }
+        .screen.slide-in-left   { opacity: 1; transform: translate3d(-100%, 0, 0); pointer-events: none; }
+        .screen.level-exit      { opacity: 1; transform: translate3d(0, -100%, 0); pointer-events: none; }
+        .screen.level-enter     { opacity: 1; transform: translate3d(0, 100%, 0); pointer-events: none; }
 
         /* =============================================
            SETTINGS SCREEN
@@ -4081,7 +4180,7 @@
         }
         .changelog-overlay.hidden { display: none; }
         .changelog-card {
-            background: var(--bg-card);
+            background: rgba(18,24,38,0.98);
             border: 1px solid var(--border-medium);
             border-radius: 20px;
             padding: 28px 28px 20px;
@@ -4130,7 +4229,7 @@
             font-size: 11px; font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.06em;
-            color: var(--text-secondary);
+            color: rgba(240,168,48,0.92);
             margin-bottom: 6px;
         }
         .changelog-list {
@@ -4138,7 +4237,7 @@
         }
         .changelog-list li {
             font-size: 12px;
-            color: var(--text-muted);
+            color: rgba(225,228,235,0.84);
             line-height: 1.6;
             padding-left: 14px;
             position: relative;
@@ -4146,7 +4245,7 @@
         .changelog-list li::before {
             content: '·';
             position: absolute; left: 2px;
-            color: var(--text-muted);
+            color: rgba(240,168,48,0.72);
             font-weight: 800;
         }
 
@@ -4335,6 +4434,15 @@
             .print-piece-grid {
                 grid-template-columns: repeat(auto-fill, var(--cell-size)) !important;
                 gap: var(--gap-size) !important;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+                scroll-behavior: auto !important;
             }
         }
 
@@ -6023,6 +6131,8 @@ let currentSnapPos = null;
 let dragRaf = null;
 let pendingDragPoint = null;
 let dragGridMetrics = null;
+let snapPreviewEl = null;
+let snapPreviewKey = '';
 let cellSize = 0;
 let fullMelodyNotes = null;
 let gameProgress = {};
@@ -6126,6 +6236,17 @@ function escapeHtml(str) {
     return String(str ?? '').replace(/[&<>"']/g, ch => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
     }[ch]));
+}
+
+function restartCssAnimation(el, className, onEnd) {
+    if (!el) return;
+    el.classList.remove(className);
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            if (onEnd) el.addEventListener('animationend', onEnd, { once: true });
+            el.classList.add(className);
+        });
+    });
 }
 
 const DAILY_MISSION_DEFS = [
@@ -6238,12 +6359,14 @@ function updateMissionProgress(result) {
     return { updated, completed };
 }
 
-function getNextPlayableLevel() {
-    return LEVELS.find(l => isLevelUnlocked(l) && !getLevelProgress(l.id).completed);
+function getNextPlayableLevel(chapterId) {
+    const pool = chapterId ? LEVELS.filter(l => l.chapter === chapterId) : LEVELS;
+    return pool.find(l => isLevelUnlocked(l) && !getLevelProgress(l.id).completed);
 }
 
-function getFirstUpgradeLevel() {
-    return LEVELS.find(l => {
+function getFirstUpgradeLevel(chapterId) {
+    const pool = chapterId ? LEVELS.filter(l => l.chapter === chapterId) : LEVELS;
+    return pool.find(l => {
         const p = getLevelProgress(l.id);
         return p.completed && (p.stars || 0) < 3;
     });
@@ -6278,8 +6401,8 @@ function getComposerGoal() {
     };
 }
 
-function getNextGoal() {
-    const nextLevel = getNextPlayableLevel();
+function getNextGoal(chapterId) {
+    const nextLevel = getNextPlayableLevel(chapterId);
     if (nextLevel) {
         const chapterLevels = LEVELS.filter(l => l.chapter === nextLevel.chapter);
         const num = chapterLevels.indexOf(nextLevel) + 1;
@@ -6291,7 +6414,7 @@ function getNextGoal() {
         };
     }
 
-    const upgrade = getFirstUpgradeLevel();
+    const upgrade = getFirstUpgradeLevel(chapterId);
     if (upgrade) {
         const p = getLevelProgress(upgrade.id);
         return {
@@ -6304,14 +6427,14 @@ function getNextGoal() {
 
     return {
         label: 'Free Play',
-        title: isComposerUnlocked() ? 'Write a lick in Composer Mode' : 'Replay a favorite level',
-        detail: isComposerUnlocked() ? 'Use the vocabulary you unlocked to build your own line.' : 'Sharpen old levels while Composer Mode is still locked.',
+        title: chapterId ? `Replay ${CHAPTERS.find(c => c.id === chapterId)?.name || 'this chapter'}` : (isComposerUnlocked() ? 'Write a lick in Composer Mode' : 'Replay a favorite level'),
+        detail: chapterId ? 'Replay a completed level or improve your star rating.' : (isComposerUnlocked() ? 'Use the vocabulary you unlocked to build your own line.' : 'Sharpen old levels while Composer Mode is still locked.'),
         progress: 100
     };
 }
 
-function renderPracticePanel() {
-    const goal = getNextGoal();
+function renderPracticePanel(chapterId) {
+    const goal = getNextGoal(chapterId);
     const unlockGoal = getNextChapterUnlockGoal() || getComposerGoal();
     const missionsHtml = areDailyMissionsUnlocked()
         ? (() => {
@@ -6527,7 +6650,7 @@ function renderChapterContent(chapterId) {
                 <div class="chapter-progress-fill" style="width:${pct}%; background:${colors.css};"></div>
             </div>
         </div>
-        ${renderPracticePanel()}
+        ${renderPracticePanel(chapterId)}
         <div class="chapter-levels-header">
             <div class="chapter-levels-title">Levels</div>
             <div class="chapter-levels-count">${completedCount}/${levels.length} complete</div>
@@ -6561,7 +6684,7 @@ function renderLevelNode(level) {
         const starStr = '<span style="color:var(--gold);">★</span>'.repeat(prog.stars)
             + '<span style="color:var(--text-muted);">★</span>'.repeat(3 - prog.stars);
         const perfClass = prog.stars === 3 ? ' perfected' : '';
-        return `<div class="level-node completed${perfClass}" onclick="startLevel('${level.id}')">
+        return `<div class="level-node completed${perfClass}" data-level-id="${level.id}" onclick="startLevel('${level.id}', { transition: 'level-start' })">
             <div class="level-num">${num}</div>
             <div class="level-name">${level.name}</div>
             <div class="level-stars-display">${starStr}</div>
@@ -6574,7 +6697,7 @@ function renderLevelNode(level) {
         return isLevelUnlocked(l) && !p.completed;
     });
     const badge = isNext ? '<span class="level-next-badge">NEXT</span>' : '';
-    return `<div class="level-node playable" onclick="startLevel('${level.id}')">
+    return `<div class="level-node playable" data-level-id="${level.id}" onclick="startLevel('${level.id}', { transition: 'level-start' })">
         ${badge}
         <div class="level-num">${num}</div>
         <div class="level-name">${level.name}</div>
@@ -6585,7 +6708,48 @@ function renderLevelNode(level) {
 // ==================================================================
 // PUZZLE: LOAD LEVEL
 // ==================================================================
-function startLevel(levelId) {
+function markLevelLaunch(levelId) {
+    const node = document.querySelector(`.level-node[data-level-id="${levelId}"]`);
+    if (!node) return;
+    restartCssAnimation(node, 'launching', () => node.classList.remove('launching'));
+}
+
+function clearLevelEntranceClasses() {
+    document.querySelectorAll('.level-enter-item').forEach(el => {
+        el.classList.remove('level-enter-item', 'level-enter-from-top', 'level-enter-pop');
+        el.style.removeProperty('--level-enter-delay');
+    });
+}
+
+function addLevelEntrance(el, delay, variant) {
+    if (!el) return;
+    el.style.setProperty('--level-enter-delay', delay + 'ms');
+    el.classList.add('level-enter-item');
+    if (variant) el.classList.add(variant);
+}
+
+function animateLevelEntrance(kind) {
+    clearLevelEntranceClasses();
+    const baseDelay = kind === 'level-next' ? 20 : kind === 'level-retry' ? 0 : 50;
+    const stagger = kind === 'level-next' ? 34 : 42;
+    const topbar = document.querySelector('#screen-puzzle .puzzle-topbar');
+    const chordLabels = document.querySelectorAll('#chord-row > *');
+    const columns = document.querySelectorAll('#melody-grid .grid-column');
+    const trayPieces = document.querySelectorAll('#piece-tray .tray-piece');
+    const craftTable = document.getElementById('craft-table');
+    const tempoHint = document.getElementById('tempo-hint');
+
+    addLevelEntrance(topbar, baseDelay, 'level-enter-from-top');
+    chordLabels.forEach((el, i) => addLevelEntrance(el, baseDelay + 70 + i * 24, 'level-enter-from-top'));
+    columns.forEach((el, i) => addLevelEntrance(el, baseDelay + 100 + i * stagger, 'level-enter-pop'));
+    trayPieces.forEach((el, i) => addLevelEntrance(el, baseDelay + 180 + i * 40, 'level-enter-pop'));
+    addLevelEntrance(craftTable, baseDelay + 230, 'level-enter-pop');
+    addLevelEntrance(tempoHint, baseDelay + 260, 'level-enter-pop');
+}
+
+function startLevel(levelId, opts = {}) {
+    const transitionKind = opts.transition || 'level-start';
+    markLevelLaunch(levelId);
     // Unlock AudioContext now (synchronous, within user gesture) so auto-play works later
     getAudioCtx();
     clearAutoPlayTimeout();
@@ -6611,7 +6775,7 @@ function startLevel(levelId) {
     if (template.tutorial && template.newPc && !gameProgress['_intro_' + template.newPc]) {
         gameProgress['_intro_' + template.newPc] = true;
         saveProgress();
-        showPieceIntro(template.newPc, () => startLevel(levelId));
+        showPieceIntro(template.newPc, () => startLevel(levelId, opts));
         return;
     }
 
@@ -6619,7 +6783,7 @@ function startLevel(levelId) {
     if (template.ch === 6 && !gameProgress['_jamIntro']) {
         gameProgress['_jamIntro'] = true;
         saveProgress();
-        showJamSessionIntro(() => startLevel(levelId));
+        showJamSessionIntro(() => startLevel(levelId, opts));
         return;
     }
 
@@ -6711,7 +6875,7 @@ function startLevel(levelId) {
     listensRemaining = currentLevelData.listens || 0;
     updateListenCounter();
 
-    showScreen('puzzle');
+    showScreen('puzzle', { transition: transitionKind });
     document.getElementById('puzzle-level-name').textContent = `Ch.${currentLevelData.chapter} — ${currentLevelData.name}`;
     updateStarsDisplay();
     updateHintButton();
@@ -6745,13 +6909,22 @@ function startLevel(levelId) {
 
         // Show persistent tempo slider
         showTempoHint();
+        animateLevelEntrance(transitionKind);
+        const shouldShowLevelObjective = currentLevelData.tutorial && shouldUseObjectiveBannerForTutorial(currentLevelData.tutorial);
+        if (shouldShowLevelObjective) {
+            scheduleLevelSetupTimeout(() => {
+                if (currentLevel === levelId && document.getElementById('screen-puzzle')?.classList.contains('active')) {
+                    showObjectiveBanner(currentLevelData.tutorial, 6000);
+                }
+            }, 500);
+        }
 
-        // Craft table onboarding: step-by-step tutorial on first encounter
-        if (craftMode === 'flip' && shouldShowCraftTutorial('flip')) {
+        // Craft table onboarding: only run when there is no simpler level cue already active.
+        if (!shouldShowLevelObjective && craftMode === 'flip' && shouldShowCraftTutorial('flip')) {
             scheduleLevelSetupTimeout(() => {
                 if (currentLevel === levelId && document.getElementById('screen-puzzle')?.classList.contains('active')) startCraftTutorial('flip');
             }, 800);
-        } else if (craftMode === 'full' && shouldShowCraftTutorial('dupe') && currentLevelData.removeCols.length >= 2) {
+        } else if (!shouldShowLevelObjective && craftMode === 'full' && shouldShowCraftTutorial('dupe') && currentLevelData.removeCols.length >= 2) {
             scheduleLevelSetupTimeout(() => {
                 if (currentLevel === levelId && document.getElementById('screen-puzzle')?.classList.contains('active')) startCraftTutorial('dupe');
             }, 800);
@@ -6777,7 +6950,7 @@ function startLevel(levelId) {
             }, 2500);
         }
 
-        if (currentLevelData.tutorial) {
+        if (currentLevelData.tutorial && !shouldShowLevelObjective) {
             showTutorialStep1();
         }
 
@@ -6895,36 +7068,48 @@ function sizeCells() {
 }
 
 function renderGrid() {
-    document.querySelectorAll('.placed-piece').forEach(p => p.remove());
-    document.querySelectorAll('.grid-cell').forEach(c => c.classList.remove('occupied'));
-
     const cellGap = window.innerWidth <= 480 ? 8 : 12;
 
     for (let col = 0; col <= numCols; col++) {
-        if (!gridState[col]) continue;
-        const { piece, position } = gridState[col];
         const column = document.querySelector(`.grid-column[data-col="${col}"]`);
         if (!column) continue;
+        column.querySelectorAll('.grid-cell').forEach(c => c.classList.remove('occupied'));
+
+        const existing = column.querySelector('.placed-piece');
+        if (!gridState[col]) {
+            if (existing) existing.remove();
+            continue;
+        }
+
+        const { piece, position } = gridState[col];
 
         const firstCell = column.querySelector('.grid-cell');
         const cellHeight = firstCell ? firstCell.offsetHeight : 100;
         const topOffset = position * (cellHeight + cellGap);
+        const renderKey = `${piece.id || piece.name}|${piece.name}|${piece.label}|${position}|${isPuzzleCol(col) ? 1 : 0}|${col === numCols && position < 0 ? 1 : 0}`;
 
-        const el = document.createElement('div');
-        el.className = 'placed-piece';
-        el.dataset.pieceType = piece.name;
-        if (col === numCols && position < 0) el.classList.add('glass');
-        el.style.top = topOffset + 'px';
-        el.style.height = cellHeight + 'px';
-        el.innerHTML = `<img src="${piece.thumbnail}" draggable="false">`;
+        let el = existing;
+        if (!el || el.dataset.renderKey !== renderKey) {
+            if (existing) existing.remove();
+            el = document.createElement('div');
+            el.className = 'placed-piece';
+            el.dataset.pieceType = piece.name;
+            el.dataset.renderKey = renderKey;
+            if (col === numCols && position < 0) el.classList.add('glass');
+            el.innerHTML = `<img src="${piece.thumbnail}" draggable="false">`;
 
-        if (isPuzzleCol(col)) {
-            el.style.cursor = 'grab';
-            el.addEventListener('mousedown', e => { e.stopPropagation(); startDrag(e, piece, {col, position}); });
-            el.addEventListener('touchstart', e => { e.stopPropagation(); startDragTouch(e, piece, {col, position}); }, {passive:false});
+            if (isPuzzleCol(col)) {
+                el.style.cursor = 'grab';
+                el.addEventListener('mousedown', e => { e.stopPropagation(); startDrag(e, piece, {col, position}); });
+                el.addEventListener('touchstart', e => { e.stopPropagation(); startDragTouch(e, piece, {col, position}); }, {passive:false});
+            }
+
+            column.appendChild(el);
         }
 
-        column.appendChild(el);
+        el.style.top = topOffset + 'px';
+        el.style.height = cellHeight + 'px';
+
         const sr = Math.floor(position), er = Math.ceil(position);
         for (let r = sr; r <= Math.min(er,2); r++) {
             const c = column.querySelector(`.grid-cell[data-row="${r}"]`); if (c) c.classList.add('occupied');
@@ -7461,7 +7646,7 @@ function showOutputPieces(pieces, mode) {
     // Build stacked visual — show up to 3 layers as offset thumbnails
     const visible = pieces.slice(-3);
     const stackEl = document.createElement('div');
-    stackEl.className = 'craft-dz-stack';
+    stackEl.className = 'craft-output-stack';
 
     visible.forEach((p, i) => {
         const map = FLIP_MAP[p.baseName];
@@ -7469,9 +7654,11 @@ function showOutputPieces(pieces, mode) {
         const piece = findPiece(p.baseName, map.defaultLabel);
         if (!piece) return;
         const layer = document.createElement('div');
-        layer.className = 'craft-dz-layer';
+        layer.className = 'stack-card ' + (i === visible.length - 1 ? 'stack-front' : 'stack-back');
         const offset = (visible.length - 1 - i) * 4;
-        layer.style.transform = `translate(${-offset}px, ${-offset}px)`;
+        if (visible.length > 2 && i < visible.length - 1) {
+            layer.style.transform = `translate(-50%, -50%) translate(${8 + offset}px, ${-8 - offset}px) rotate(${6 + i * 4}deg)`;
+        }
         layer.style.zIndex = i + 1;
         const img = document.createElement('img');
         img.src = piece.thumbnail;
@@ -7489,6 +7676,10 @@ function showOutputPieces(pieces, mode) {
         badge.className = 'craft-dz-count';
         badge.textContent = count;
         output.appendChild(badge);
+        const ready = document.createElement('div');
+        ready.className = 'craft-output-ready';
+        ready.textContent = 'ready';
+        output.appendChild(ready);
     }
 
     output.classList.add('has-piece', 'popping-in');
@@ -7612,12 +7803,18 @@ function claimOutputPiece() {
         const map = FLIP_MAP[p.baseName];
         const defaultPiece = map ? findPiece(p.baseName, map.defaultLabel) : null;
         const targetRect = card.getBoundingClientRect();
+        const dx = targetRect.left - outRect.left;
+        const dy = targetRect.top - outRect.top;
+        const sx = targetRect.width / outRect.width;
+        const sy = targetRect.height / outRect.height;
         const ghost = document.createElement('div');
         ghost.className = 'craft-claim-ghost';
         ghost.style.left = outRect.left + 'px';
         ghost.style.top = outRect.top + 'px';
         ghost.style.width = outRect.width + 'px';
         ghost.style.height = outRect.height + 'px';
+        ghost.style.transformOrigin = 'top left';
+        ghost.style.transform = 'translate3d(0, 0, 0) scale(1)';
         if (defaultPiece) {
             const img = document.createElement('img');
             img.src = defaultPiece.thumbnail;
@@ -7634,10 +7831,7 @@ function claimOutputPiece() {
         const delay = i * 80;
         setTimeout(() => {
             requestAnimationFrame(() => {
-                ghost.style.left = targetRect.left + 'px';
-                ghost.style.top = targetRect.top + 'px';
-                ghost.style.width = targetRect.width + 'px';
-                ghost.style.height = targetRect.height + 'px';
+                ghost.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(${sx}, ${sy})`;
             });
             setTimeout(() => {
                 card.style.opacity = '';
@@ -7707,6 +7901,7 @@ function craftToggleFlip() {
         ghost.style.width  = dzRect.width  + 'px';
         ghost.style.height = dzRect.height + 'px';
         ghost.style.zIndex = 100 + i;   // higher = on top (top card renders last)
+        ghost.style.transform = 'translate3d(0, 0, 0)';
 
         const inner = document.createElement('div');
         // Use animation-delay so spin starts exactly when this card launches
@@ -7730,10 +7925,11 @@ function craftToggleFlip() {
             const outStackOffset = (preFlipStack.length - 1 - i) * 4;
             const destLeft = outRect.left + (outRect.width  - dzRect.width)  / 2 - outStackOffset;
             const destTop  = outRect.top  + (outRect.height - dzRect.height) / 2 - outStackOffset;
+            const dx = destLeft - startLeft;
+            const dy = destTop - startTop;
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
-                    ghost.style.left = destLeft + 'px';
-                    ghost.style.top  = destTop  + 'px';
+                    ghost.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
                 });
             });
         }, launchDelay);
@@ -7780,9 +7976,7 @@ function craftDuplicate() {
 
     // Step 1: Shake + glow on the input (it stays!)
     const dz = document.getElementById('craft-drop-zone');
-    dz.classList.remove('duplicating');
-    void dz.offsetWidth;
-    dz.classList.add('duplicating');
+    restartCssAnimation(dz, 'duplicating');
     spawnSparkles(dz, 6);
 
     // Step 2: After shake, dissolve original + show duplicates in output
@@ -7791,9 +7985,7 @@ function craftDuplicate() {
         spawnSparkles(dz, 3);
 
         // Dissolve the original in the drop zone
-        dz.classList.remove('consuming');
-        void dz.offsetWidth;
-        dz.classList.add('consuming');
+        restartCssAnimation(dz, 'consuming');
 
         // After dissolve, clear input and show result — user clicks to claim
         setTimeout(() => {
@@ -7866,6 +8058,31 @@ function prepareDragMetrics() {
     dragGridMetrics = collectDragGridMetrics();
 }
 
+function clearSnapPreview() {
+    if (snapPreviewEl && snapPreviewEl.parentNode) {
+        snapPreviewEl.remove();
+    }
+    snapPreviewEl = null;
+    snapPreviewKey = '';
+}
+
+function updateSnapPreview(col, top, height, valid) {
+    const key = `${col.dataset.col}|${top}|${height}|${valid ? 1 : 0}`;
+    if (!snapPreviewEl) {
+        snapPreviewEl = document.createElement('div');
+        snapPreviewEl.className = 'snap-preview';
+    }
+    if (snapPreviewEl.parentNode !== col) {
+        col.appendChild(snapPreviewEl);
+        snapPreviewKey = '';
+    }
+    if (snapPreviewKey === key) return;
+    snapPreviewEl.className = 'snap-preview' + (valid ? '' : ' invalid');
+    snapPreviewEl.style.height = height + 'px';
+    snapPreviewEl.style.transform = `translate3d(0, ${top}px, 0)`;
+    snapPreviewKey = key;
+}
+
 function scheduleDragProcess(x, y) {
     pendingDragPoint = { x, y };
     if (dragRaf) return;
@@ -7886,7 +8103,7 @@ function finalizeDragProcessing(clientX, clientY) {
     if (typeof clientX === 'number' && typeof clientY === 'number' && draggedPiece) {
         processDragAt(clientX, clientY);
     }
-    document.querySelector('.snap-preview')?.remove();
+    clearSnapPreview();
     document.getElementById('craft-drop-zone')?.classList.remove('drag-hover');
     dragGridMetrics = null;
 }
@@ -7902,7 +8119,7 @@ function cancelDragProcessing() {
     document.removeEventListener('mouseup', onDragEnd);
     document.removeEventListener('touchmove', onTouchMove);
     document.removeEventListener('touchend', onTouchEnd);
-    document.querySelector('.snap-preview')?.remove();
+    clearSnapPreview();
     document.getElementById('craft-drop-zone')?.classList.remove('drag-hover');
     document.querySelectorAll('.tray-piece').forEach(t => t.classList.remove('dragging'));
     if (dragPreview) { dragPreview.remove(); dragPreview = null; }
@@ -8004,15 +8221,13 @@ function updateDragPreview(x, y, isTouchEvent) {
     if (dragPreview) {
         // On touch, lift the preview above the finger so it stays visible
         const offsetY = isTouchEvent ? cellSize * 1.1 : cellSize / 2;
-        dragPreview.style.left = (x - cellSize / 2) + 'px';
-        dragPreview.style.top = (y - offsetY) + 'px';
+        dragPreview.style.transform = `translate3d(${x - cellSize / 2}px, ${y - offsetY}px, 0)`;
     }
 }
 
 function processDragAt(x, y) {
-    document.querySelector('.snap-preview')?.remove();
-
     let foundSnap = false;
+    let previewTarget = null;
     const columns = dragGridMetrics || collectDragGridMetrics();
 
     columns.forEach(({ col, colIndex, rect, cellH, cellGap }) => {
@@ -8034,17 +8249,20 @@ function processDragAt(x, y) {
         });
 
         if (closest !== null) {
-            const preview = document.createElement('div');
-            preview.className = 'snap-preview' + (closestValid ? '' : ' invalid');
-            preview.style.top = (closest * (cellH + cellGap)) + 'px';
-            preview.style.height = cellH + 'px';
-            col.appendChild(preview);
+            previewTarget = {
+                col,
+                top: closest * (cellH + cellGap),
+                height: cellH,
+                valid: closestValid
+            };
             if (closestValid) { currentSnapCol = colIndex; currentSnapPos = closest; foundSnap = true; }
             else { currentSnapCol = null; currentSnapPos = null; }
         }
     });
 
     if (!foundSnap) { currentSnapCol = null; currentSnapPos = null; }
+    if (previewTarget) updateSnapPreview(previewTarget.col, previewTarget.top, previewTarget.height, previewTarget.valid);
+    else clearSnapPreview();
 
     // Craft table drop zone hover
     const craftDZ = document.getElementById('craft-drop-zone');
@@ -8281,10 +8499,7 @@ function flashConnectedNeighbors(col) {
         allCols.forEach(c => {
             const el = document.querySelector(`.grid-column[data-col="${c}"] .placed-piece`);
             if (el) {
-                el.classList.remove('connected-flash');
-                void el.offsetWidth; // force reflow to restart animation
-                el.classList.add('connected-flash');
-                el.addEventListener('animationend', () => el.classList.remove('connected-flash'), { once: true });
+                restartCssAnimation(el, 'connected-flash', () => el.classList.remove('connected-flash'));
             }
         });
     }
@@ -8472,9 +8687,7 @@ function triggerResolutionJuice() {
 
     const targetCol = document.querySelector(`.grid-column[data-col="${numCols}"]`);
     if (targetCol) {
-        targetCol.classList.remove('resolution-ring');
-        void targetCol.offsetWidth;
-        targetCol.classList.add('resolution-ring');
+        restartCssAnimation(targetCol, 'resolution-ring');
         setTimeout(() => targetCol.classList.remove('resolution-ring'), 950);
     }
     spawnResolutionParticles();
@@ -8534,10 +8747,7 @@ function playCelebrationMelody(callback) {
         const pieceEl = document.querySelector(`.grid-column[data-col="${col}"] .placed-piece`);
         if (pieceEl) {
             const tid = setTimeout(() => {
-                // Re-trigger animation by removing and re-adding the class
-                pieceEl.classList.remove('celebrate-pulse');
-                void pieceEl.offsetWidth; // force reflow
-                pieceEl.classList.add('celebrate-pulse');
+                restartCssAnimation(pieceEl, 'celebrate-pulse');
                 setTimeout(() => pieceEl.classList.remove('celebrate-pulse'), 500);
             }, Math.max(0, pulseDelayMs));
             celebrationTimeouts.push(tid);
@@ -8565,9 +8775,7 @@ function playCelebrationMelody(callback) {
     const targetPieceEl = document.querySelector(`.grid-column[data-col="${numCols}"] .placed-piece`);
     if (targetPieceEl) {
         const tid = setTimeout(() => {
-            targetPieceEl.classList.remove('celebrate-pulse');
-            void targetPieceEl.offsetWidth;
-            targetPieceEl.classList.add('celebrate-pulse');
+            restartCssAnimation(targetPieceEl, 'celebrate-pulse');
             setTimeout(() => targetPieceEl.classList.remove('celebrate-pulse'), 500);
         }, Math.max(0, targetDelayMs));
         celebrationTimeouts.push(tid);
@@ -8780,7 +8988,8 @@ function tryCraftHint(unsolved) {
         trayFlipState.push(needsFlip);
         available[key] = have + 1; // update count
         renderTray();
-        showSideNudge(`Here's the ${answer.pieceName} you need`);
+        clearHintVisuals();
+        showSideNudge(`Added ${answer.pieceName} ${answer.pieceLabel}`);
         return true;
     }
     return false;
@@ -8789,6 +8998,7 @@ function tryCraftHint(unsolved) {
 function clearHintVisuals() {
     document.querySelectorAll('.hint-ghost,.hint-options-popup').forEach(el => el.remove());
     document.getElementById('hint-toast').classList.add('hidden');
+    dismissSideNudge();
 }
 
 function showTempoHint() {
@@ -8885,7 +9095,8 @@ function showOptionsHint(answer) {
         const opt = document.createElement('div');
         opt.className = 'hint-piece-option';
         opt.innerHTML = `<img src="${piece.thumbnail}" style="width:44px;height:44px;border-radius:6px;" draggable="false">
-            <div class="hint-piece-option-label">${piece.name}</div>`;
+            <div class="hint-piece-option-label">${piece.name}</div>
+            <div class="hint-piece-option-variant">${piece.label || ''}</div>`;
         opt.addEventListener('click', () => {
             if (piece.name === correctPiece.name && piece.label === correctPiece.label) {
                 popup.remove();
@@ -8895,10 +9106,12 @@ function showOptionsHint(answer) {
                 setTimeout(() => flashConnectedNeighbors(answer.col), 250);
                 checkAnswer(answer.col);
             } else {
-                opt.style.animation = 'none'; opt.offsetHeight;
+                opt.style.animation = 'none';
                 opt.style.borderColor = 'var(--red)';
                 opt.style.background = 'rgba(248,113,113,0.1)';
-                opt.style.animation = 'shake 0.4s ease';
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                    opt.style.animation = 'shake 0.4s ease';
+                }));
                 setTimeout(() => opt.remove(), 400);
             }
         });
@@ -8963,40 +9176,32 @@ function checkStuckAfterWrong(col) {
 }
 
 const singingNudges = [
-    'Try singing the melody — your voice knows the answer',
-    'Hum it out loud, feel where each note lands',
-    'Sing along with the playback — trust your ear',
-    'Let your voice trace the melody line',
-    'Sing the missing part — what does your ear expect?',
-    'Whistle it — the shape of the line will click',
+    'Sing the melody once, then place the piece',
+    'Hum it out loud and notice the direction',
+    'Sing along with playback, then match the shape',
+    'Listen for the missing column',
+    'Sing the missing part before choosing',
+    'Whistle it and follow the contour',
     'Sing each piece before you place it',
-    'Your voice is the best ear training tool',
+    'Use your voice to check the answer',
     'Hum the target note, then sing toward it',
-    'Close your eyes, sing it, then look for the match',
-    'Scat-sing the line — doo ba dee bop',
-    'Sing the rhythm too — it helps you hear the shape',
+    'Sing it first, then look for the match',
+    'Sing the rhythm too',
     'Hum from the last placed piece forward',
-    "Can you sing the gap? That's your answer",
-    'Let your inner voice audiate the line',
+    'Sing the gap between the pieces',
+    'Hear the line in your head first',
     'Sing it slow — speed comes later',
-    'Try la-la-la through the whole phrase',
     'Match your voice to the playback, note by note',
-    'Bop du bah — sing like a horn player',
     'Sing the interval — is it a step or a leap?',
-    'Your ear already knows — let your voice confirm it',
+    'Let your voice confirm what you hear',
     'Hum the connection between two pieces',
-    'Sing up, sing down — which way does it go?',
-    'Voice it out — even quietly helps',
-    'Tap your foot and sing — feel the pulse',
-    'Bebop is a vocal tradition — sing first, solve second',
-    'Doo-wee-doo-bah — find the melody in your voice',
+    'Does it move up, down, or stay close?',
+    'Sing quietly if you need to',
+    'Tap the pulse and sing the line',
     'Sing the line back from memory',
     'If you can sing it, you can solve it',
-    'Let the melody live in your throat, not just your ears',
     'Hum the whole phrase, then zoom into the gap',
-    'Vocalize the contour — up, down, or staying close?',
-    'Bird sang everything before he played it — try that',
-    'Snap your fingers and scat through it',
+    'Track the contour: up, down, or close',
 ];
 let lastNudgeIdx = -1;
 
@@ -9047,8 +9252,10 @@ function showGuideMe() {
         if (topbar) topbar.appendChild(btn);
     }
     btn.classList.remove('hidden');
-    btn.style.animation = 'none'; btn.offsetWidth;
-    btn.style.animation = 'hint-pulse-anim 1.5s ease 2';
+    btn.style.animation = 'none';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+        btn.style.animation = 'hint-pulse-anim 1.5s ease 2';
+    }));
 }
 
 function hideGuideMe() {
@@ -9090,7 +9297,7 @@ function guidedStep(stepIdx) {
         // must use their ears, not just replay what they watched from memory
         isGuidedMode = false;
         showToast('Now try a fresh one on your own!', 'success');
-        guidedStepTimeouts.push(setTimeout(() => startLevel(currentLevel), 1200));
+        guidedStepTimeouts.push(setTimeout(() => startLevel(currentLevel, { transition: 'level-retry' }), 1200));
         return;
     }
 
@@ -9172,7 +9379,9 @@ function spawnNoteParticles(col) {
 
 function playMelody() {
     clearAutoPlayTimeout();
-    removeTutorialTooltip(); // dismiss step-1 tooltip when user presses play
+    if (activeTooltipOptions?.role !== 'objective') {
+        removeTutorialTooltip({ keepObjective: true }); // dismiss anchored step-1 tooltip when user presses play
+    }
     onPlayerAction();
     const playBtn = document.getElementById('play-btn');
     if (playBtn) playBtn.classList.remove('attract');
@@ -9402,65 +9611,214 @@ function dismissSideNudge() {
 }
 
 function showTutorial(text) {
+    showObjectiveBanner(text);
+}
+
+function showObjectiveBanner(text, duration = 5000) {
+    hideTutorialObjective();
+    const target = getObjectiveTooltipTarget(text);
+    showTooltipAt(target, simplifyTutorialText(text), {
+        preferred: ['top', 'right', 'left', 'bottom'],
+        duration,
+        role: 'objective'
+    });
+}
+
+function hideTutorialObjective() {
     const bar = document.getElementById('tutorial-bar');
-    document.getElementById('tutorial-text').textContent = text;
-    bar.classList.remove('hidden');
-    setTimeout(() => bar.classList.add('hidden'), 5000);
+    if (tutorialBarTimeout) {
+        clearTimeout(tutorialBarTimeout);
+        tutorialBarTimeout = null;
+    }
+    if (bar) bar.classList.add('hidden');
 }
 
 // ---- Floating tutorial tooltip system ----
 let activeTutorialTooltip = null;
 let activeTooltipTarget = null;
-let activeTooltipArrow = null;
+let activeTooltipOptions = null;
+let activeTooltipTimeout = null;
+let tutorialBarTimeout = null;
 let tutorialListenDone = false;
 
-function positionTooltip(tip, targetEl, arrowDir) {
-    const rect = targetEl.getBoundingClientRect();
-    const tipRect = tip.getBoundingClientRect();
+function clampNumber(value, min, max) {
+    return Math.min(Math.max(value, min), Math.max(min, max));
+}
 
-    // Always try above the target first
-    let top = rect.top - tipRect.height - 10;
-    let actualArrow = '';
+function getElementRect(el) {
+    if (!el || !el.isConnected) return null;
+    const rect = el.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return null;
+    return rect;
+}
 
-    // If it would go off the top, place below instead
-    if (top < 8) {
-        top = rect.bottom + 10;
-        actualArrow = 'arrow-up';
+function isRectVisible(rect) {
+    return rect && rect.bottom > 0 && rect.right > 0 && rect.left < window.innerWidth && rect.top < window.innerHeight;
+}
+
+function getTooltipBounds(targetEl) {
+    const topbar = getElementRect(document.querySelector('#screen-puzzle.active .puzzle-topbar'));
+    const bottombar = getElementRect(document.querySelector('#screen-puzzle.active .puzzle-bottombar'));
+    const safeTop = topbar && isRectVisible(topbar) ? topbar.bottom + 10 : 12;
+    const safeBottom = bottombar && isRectVisible(bottombar) ? bottombar.top - 10 : window.innerHeight - 12;
+    const targetIsBottom = Boolean(targetEl?.closest?.('.puzzle-bottombar, .tray-surface, .piece-tray, .craft-inline'));
+    return {
+        topbar,
+        bottombar,
+        targetIsBottom,
+        safeTop,
+        safeBottom: targetIsBottom ? window.innerHeight - 12 : Math.max(safeTop + 80, safeBottom)
+    };
+}
+
+function normalizeTooltipOptions(opts) {
+    if (typeof opts === 'string') {
+        const legacy = opts === 'arrow-left' ? ['right', 'left', 'top', 'bottom']
+            : opts === 'arrow-up' ? ['bottom', 'top', 'right', 'left']
+            : opts === 'arrow-down' ? ['top', 'bottom', 'right', 'left']
+            : ['top', 'bottom', 'right', 'left'];
+        return { preferred: legacy };
+    }
+    return opts || {};
+}
+
+function getPreferredPlacements(targetEl, options, bounds) {
+    if (bounds.targetIsBottom) return ['top', 'right', 'left', 'bottom'];
+    if (Array.isArray(options.preferred) && options.preferred.length) return options.preferred;
+    if (targetEl?.closest?.('.puzzle-topbar')) return ['bottom', 'top', 'right', 'left'];
+    return ['top', 'bottom', 'right', 'left'];
+}
+
+function getPlacementCandidate(placement, targetRect, tipRect, bounds) {
+    const gap = 12;
+    const margin = 12;
+    const targetCenterX = targetRect.left + targetRect.width / 2;
+    const targetCenterY = targetRect.top + targetRect.height / 2;
+    const horizontalMin = margin;
+    const horizontalMax = window.innerWidth - tipRect.width - margin;
+    const verticalMin = bounds.safeTop;
+    const verticalMax = bounds.safeBottom - tipRect.height;
+    let left;
+    let top;
+
+    if (placement === 'top') {
+        left = clampNumber(targetCenterX - tipRect.width / 2, horizontalMin, horizontalMax);
+        const preferredTop = targetRect.top - tipRect.height - gap;
+        const bottomTrayTop = bounds.targetIsBottom && bounds.bottombar ? bounds.bottombar.top - tipRect.height - gap : preferredTop;
+        top = clampNumber(Math.min(preferredTop, bottomTrayTop), verticalMin, verticalMax);
+    } else if (placement === 'bottom') {
+        left = clampNumber(targetCenterX - tipRect.width / 2, horizontalMin, horizontalMax);
+        top = clampNumber(targetRect.bottom + gap, verticalMin, verticalMax);
+    } else if (placement === 'right') {
+        left = clampNumber(targetRect.right + gap, horizontalMin, horizontalMax);
+        top = clampNumber(targetCenterY - tipRect.height / 2, verticalMin, verticalMax);
+    } else {
+        left = clampNumber(targetRect.left - tipRect.width - gap, horizontalMin, horizontalMax);
+        top = clampNumber(targetCenterY - tipRect.height / 2, verticalMin, verticalMax);
     }
 
-    tip.style.left = (rect.left + rect.width / 2 - tipRect.width / 2) + 'px';
-    tip.style.top = top + 'px';
+    const overflow = Math.max(0, margin - left)
+        + Math.max(0, left + tipRect.width + margin - window.innerWidth)
+        + Math.max(0, verticalMin - top)
+        + Math.max(0, top + tipRect.height - bounds.safeBottom);
+    const distancePenalty = Math.abs((left + tipRect.width / 2) - targetCenterX) * 0.04
+        + Math.abs((top + tipRect.height / 2) - targetCenterY) * 0.02;
+    const blockedPenalty = bounds.bottombar && !bounds.targetIsBottom && top + tipRect.height > bounds.bottombar.top ? 500 : 0;
+    return { placement, left, top, score: overflow * 100 + distancePenalty + blockedPenalty };
+}
 
-    // Update arrow class
-    tip.classList.remove('arrow-up');
-    if (actualArrow) tip.classList.add('arrow-up');
+function positionTooltip(tip, targetEl, options = {}) {
+    const targetRect = getElementRect(targetEl);
+    if (!targetRect || !isRectVisible(targetRect)) {
+        return false;
+    }
 
-    // Clamp horizontally
-    const finalRect = tip.getBoundingClientRect();
-    if (finalRect.left < 8) tip.style.left = '8px';
-    if (finalRect.right > window.innerWidth - 8) tip.style.left = (window.innerWidth - 8 - tipRect.width) + 'px';
+    const tipRect = tip.getBoundingClientRect();
+    const bounds = getTooltipBounds(targetEl);
+    const placements = getPreferredPlacements(targetEl, options, bounds);
+    const chosen = placements
+        .map((placement, index) => {
+            const candidate = getPlacementCandidate(placement, targetRect, tipRect, bounds);
+            candidate.score += index * 80;
+            return candidate;
+        })
+        .sort((a, b) => a.score - b.score)[0];
+    if (!chosen) return false;
+
+    tip.dataset.placement = chosen.placement;
+    tip.style.left = `${Math.round(chosen.left)}px`;
+    tip.style.top = `${Math.round(chosen.top)}px`;
+
+    if (chosen.placement === 'top' || chosen.placement === 'bottom') {
+        const arrowX = clampNumber(targetRect.left + targetRect.width / 2 - chosen.left, 16, tipRect.width - 16);
+        tip.style.setProperty('--arrow-x', `${Math.round(arrowX)}px`);
+    } else {
+        const arrowY = clampNumber(targetRect.top + targetRect.height / 2 - chosen.top, 16, tipRect.height - 16);
+        tip.style.setProperty('--arrow-y', `${Math.round(arrowY)}px`);
+    }
+    return true;
 }
 
 function onTooltipResize() {
     if (activeTutorialTooltip && activeTooltipTarget) {
-        positionTooltip(activeTutorialTooltip, activeTooltipTarget, activeTooltipArrow);
+        positionTooltip(activeTutorialTooltip, activeTooltipTarget, activeTooltipOptions || {});
     }
 }
 window.addEventListener('resize', onTooltipResize);
 
-function removeTutorialTooltip() {
+function removeTutorialTooltip(options = {}) {
+    if (activeTooltipTimeout) {
+        clearTimeout(activeTooltipTimeout);
+        activeTooltipTimeout = null;
+    }
     if (activeTutorialTooltip && activeTutorialTooltip.parentNode) {
         activeTutorialTooltip.remove();
     }
     activeTutorialTooltip = null;
     activeTooltipTarget = null;
-    activeTooltipArrow = null;
+    activeTooltipOptions = null;
+    if (!options.keepObjective) hideTutorialObjective();
 }
 
-function showTooltipAt(targetEl, text, arrowDir) {
+function simplifyTutorialText(text) {
+    if (!text) return 'Try this next.';
+    if (/two pieces|only have one/i.test(text)) return 'Duplicate this piece here.';
+    if (/other way|wrong direction|flip/i.test(text)) return 'Flip the piece here.';
+    if (/limited number|jam session/i.test(text)) return 'Limited listens. Use them carefully.';
+    if (/unlocked.*Neighbor|stays close/i.test(text)) return 'New piece: listen for close motion.';
+    if (/Approach|chromatically|leading in/i.test(text)) return 'New piece: hear the steps into the target.';
+    if (/Enclosure|surround|circles/i.test(text)) return 'New piece: hear it circle the target.';
+    if (/all four/i.test(text)) return 'Listen, then match each shape.';
+    if (/Tap any filled column/i.test(text)) return 'Tap filled columns to hear them.';
+    if (/Listen to the melody/i.test(text)) return 'Listen first, then place the piece.';
+    return text.length > 58 ? text.slice(0, 55).trim() + '...' : text;
+}
+
+function getObjectiveTooltipTarget(text) {
+    if (/two pieces|duplicate|only have one/i.test(text) || currentLevelData?.craft === 'full') {
+        const dz = document.getElementById('craft-drop-zone');
+        if (getElementRect(dz)) return dz;
+    }
+    if (/other way|wrong direction|flip/i.test(text) || currentLevelData?.craft === 'flip') {
+        const dz = document.getElementById('craft-drop-zone');
+        if (getElementRect(dz)) return dz;
+    }
+    const playBtn = document.getElementById('play-btn');
+    if (getElementRect(playBtn)) return playBtn;
+    const firstPiece = document.querySelector('#piece-tray .tray-piece');
+    if (getElementRect(firstPiece)) return firstPiece;
+    return document.getElementById('melody-grid') || document.querySelector('.puzzle-area');
+}
+
+function showTooltipAt(targetEl, text, options) {
+    const normalizedOptions = normalizeTooltipOptions(options);
+    if (!getElementRect(targetEl)) {
+        targetEl = getObjectiveTooltipTarget(text);
+        if (!getElementRect(targetEl)) return;
+    }
     removeTutorialTooltip();
     const tip = document.createElement('div');
-    tip.className = 'tutorial-tooltip' + (arrowDir ? ' ' + arrowDir : '');
+    tip.className = 'tutorial-tooltip';
     tip.textContent = text;
     // Hide offscreen to measure, then position correctly before showing
     tip.style.visibility = 'hidden';
@@ -9468,17 +9826,29 @@ function showTooltipAt(targetEl, text, arrowDir) {
     document.body.appendChild(tip);
     activeTutorialTooltip = tip;
     activeTooltipTarget = targetEl;
-    activeTooltipArrow = arrowDir;
+    activeTooltipOptions = normalizedOptions;
 
     // Double-rAF to ensure layout is fully computed before positioning
     requestAnimationFrame(() => { requestAnimationFrame(() => {
         if (!activeTutorialTooltip || activeTutorialTooltip !== tip) return;
-        positionTooltip(tip, targetEl, arrowDir);
+        if (!positionTooltip(tip, targetEl, normalizedOptions)) return;
 
         // Now reveal with animation
         tip.style.visibility = '';
         tip.style.animation = '';
+        if (normalizedOptions.duration) {
+            activeTooltipTimeout = setTimeout(() => {
+                if (activeTutorialTooltip === tip) removeTutorialTooltip();
+            }, normalizedOptions.duration);
+        }
     }); });
+}
+
+function shouldUseObjectiveBannerForTutorial(text) {
+    if (!text) return false;
+    if (currentLevelData?.craft === 'full') return true;
+    if (currentLevelData?.newPiece || currentLevelData?.newPc) return true;
+    return /two pieces|unlocked|all four|jam session|limited number|sing the melody|hum it back/i.test(text);
 }
 
 function showTutorialStep1() {
@@ -9544,14 +9914,18 @@ function showTutorialStep2WithSpotlight() {
     removeTutorialTooltip();
     const firstPiece = document.querySelector('#piece-tray .tray-piece');
     const emptyCol = document.querySelector('.grid-column.col-empty');
+    const text = currentLevelData.tutorial || 'Drag the piece into the highlighted column.';
+    if (shouldUseObjectiveBannerForTutorial(text)) {
+        showObjectiveBanner(text, 6000);
+        return;
+    }
     if (firstPiece) {
         // Spotlight both the tray piece and the empty column
         showSpotlight(firstPiece, emptyCol);
-        const text = currentLevelData.tutorial || 'Drag the piece into the highlighted column.';
         const levelId = currentLevel;
         scheduleLevelSetupTimeout(() => {
             if (currentLevel === levelId && document.getElementById('screen-puzzle')?.classList.contains('active')) {
-                showTooltipAt(firstPiece, text, '');
+                showTooltipAt(firstPiece, text, { preferred: ['top', 'right', 'left', 'bottom'] });
             }
         }, 300);
     }
@@ -9631,12 +10005,16 @@ function showTutorialStep2() {
     // Step 2: point at the first tray piece
     removeTutorialTooltip();
     const firstPiece = document.querySelector('#piece-tray .tray-piece');
+    const text = currentLevelData.tutorial || 'Drag the piece into the highlighted column.';
+    if (shouldUseObjectiveBannerForTutorial(text)) {
+        showObjectiveBanner(text, 6000);
+        return;
+    }
     if (firstPiece) {
-        const text = currentLevelData.tutorial || 'Drag the piece into the highlighted column.';
         const levelId = currentLevel;
         scheduleLevelSetupTimeout(() => {
             if (currentLevel === levelId && document.getElementById('screen-puzzle')?.classList.contains('active')) {
-                showTooltipAt(firstPiece, text, '');
+                showTooltipAt(firstPiece, text, { preferred: ['top', 'right', 'left', 'bottom'] });
             }
         }, 300);
     }
@@ -9802,7 +10180,7 @@ function retryLevel() {
             // Track retry count for invisible scaffolding
             const key = '_retry_' + currentLevel;
             gameProgress[key] = (gameProgress[key] || 0) + 1;
-            startLevel(currentLevel);
+            startLevel(currentLevel, { transition: 'level-retry' });
         }
     });
 }
@@ -9846,7 +10224,7 @@ function nextLevel() {
             const navTo = (getChapterStars(currentChapter) >= nextCh.unlockStars) ? nextCh.id : undefined;
             goToMap(navTo);
         } else {
-            startLevel(chapterLevels[idx + 1].id);
+            startLevel(chapterLevels[idx + 1].id, { transition: 'level-next' });
         }
     });
 }
@@ -10170,7 +10548,7 @@ function showPieceIntro(pieceName, callback) {
     // Tooltip hint for Part 1
     setTimeout(() => {
         const varA = document.getElementById('piece-intro-var-a');
-        showTooltipAt(varA, '👆 Tap to hear each piece', 'arrow-up');
+        showTooltipAt(varA, 'Tap a piece to hear it.', 'arrow-down');
     }, 400);
 }
 
@@ -10579,7 +10957,7 @@ function showGameComplete() {
 function gameCompleteReplay() {
     document.getElementById('game-complete-overlay').classList.add('hidden');
     // Restart from the very first level
-    startLevel('ch1_01');
+    startLevel('ch1_01', { transition: 'level-start' });
 }
 
 function gameCompleteMap() {
@@ -11875,7 +12253,7 @@ let screenTransitionToken = 0;
 let screenTransitionTimeouts = [];
 
 const _origShowScreen = showScreen;
-showScreen = function(name) {
+showScreen = function(name, opts = {}) {
     const prev = lastScreen;
     lastScreen = name;
     const token = ++screenTransitionToken;
@@ -11898,20 +12276,34 @@ showScreen = function(name) {
     const allScreens = document.querySelectorAll('.screen');
     const target = document.getElementById('screen-' + name);
     if (!target) return;
-    allScreens.forEach(s => s.classList.remove('slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right'));
+    const transition = opts.transition || 'auto';
+    const isLevelTransition = transition === 'level-start' || transition === 'level-next' || transition === 'level-retry';
+    allScreens.forEach(s => s.classList.remove('slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right', 'level-enter', 'level-exit'));
     const outgoing = [...allScreens].find(s => s.classList.contains('active')) || document.getElementById('screen-' + prev);
+
+    if (outgoing === target) {
+        target.classList.remove('hidden', 'slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right', 'level-enter', 'level-exit');
+        target.classList.add('active');
+        if (name === 'map') renderMap();
+        if (name === 'settings') applySettingsUI();
+        return;
+    }
+
+    const outClass = isLevelTransition ? 'level-exit' : (forward ? 'slide-out-left' : 'slide-out-right');
+    const inClass = isLevelTransition ? 'level-enter' : (forward ? 'slide-in-right' : 'slide-in-left');
+    const transitionMs = isLevelTransition ? 280 : 320;
 
     // Slide out current
     allScreens.forEach(s => {
         if (s === outgoing && s !== target) {
             s.classList.remove('active');
-            s.classList.add(forward ? 'slide-out-left' : 'slide-out-right');
+            s.classList.add(outClass);
             const tid = setTimeout(() => {
                 screenTransitionTimeouts = screenTransitionTimeouts.filter(t => t !== tid);
                 if (token !== screenTransitionToken) return;
-                s.classList.remove('slide-out-left', 'slide-out-right');
+                s.classList.remove('slide-out-left', 'slide-out-right', 'level-exit');
                 s.classList.add('hidden');
-            }, 400);
+            }, transitionMs);
             screenTransitionTimeouts.push(tid);
         } else if (s !== target && !s.classList.contains('hidden')) {
             s.classList.add('hidden');
@@ -11919,12 +12311,12 @@ showScreen = function(name) {
     });
 
     // Slide in target
-    target.classList.remove('hidden', 'slide-out-left', 'slide-out-right');
-    target.classList.add(forward ? 'slide-in-right' : 'slide-in-left');
+    target.classList.remove('hidden', 'slide-out-left', 'slide-out-right', 'level-exit');
+    target.classList.add(inClass);
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
             if (token !== screenTransitionToken) return;
-            target.classList.remove('slide-in-right', 'slide-in-left');
+            target.classList.remove('slide-in-right', 'slide-in-left', 'level-enter');
             target.classList.add('active');
         });
     });
@@ -12017,6 +12409,18 @@ let isDailyMode = false;
 function onDailyPressed() {
     sfx('click');
     isDailyMode = true;
+    clearAutoPlayTimeout();
+    clearLevelSetupTimeouts();
+    cancelDragProcessing();
+    stopPlayback();
+    clearHintVisuals();
+    dismissSideNudge();
+    hideComposerToolbar();
+    hideCraftTable();
+    hideTempoHint();
+    composerMode = false;
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    if (stuckIdleTimer) { clearInterval(stuckIdleTimer); stuckIdleTimer = null; }
 
     // Seed RNG from today's date
     const dateStr = getDailyDateString();
@@ -12075,17 +12479,45 @@ function onDailyPressed() {
     currentHintCol = null;
     currentHintLevel = 0;
     levelStartTime = Date.now();
+    listensRemaining = levelData.listens || 0;
+    currentBPM = 90;
+    updateLastPlayedTimestamp();
+    updateListenCounter();
+    hideGuideMe();
+    stuckLastAction = Date.now();
+    stuckColWrong = {};
+    guideMeOffered = false;
+    isGuidedMode = false;
+    stuckIdleTimer = setInterval(checkIdleStuck, 15000);
 
-    showScreen('puzzle');
-    buildGrid();
-    renderGrid();
-    renderTray();
-    applyHighlights();
-    showCraftTable();
-
-    // Override topbar display
+    showScreen('puzzle', { transition: 'level-start' });
     const levelNameEl = document.getElementById('puzzle-level-name');
     if (levelNameEl) levelNameEl.textContent = 'DAILY CHALLENGE';
+    document.getElementById('hint-btn').style.display = '';
+    document.getElementById('timer-display').style.display = '';
+    document.getElementById('puzzle-stars').style.display = '';
+    updateStarsDisplay();
+    updateHintButton();
+
+    requestAnimationFrame(() => {
+        buildGrid();
+        renderGrid();
+        renderTray();
+        applyHighlights();
+        showCraftTable();
+        startTimer();
+        const bottombar = document.querySelector('.puzzle-bottombar');
+        if (bottombar) {
+            bottombar.classList.remove('height-locked');
+            requestAnimationFrame(() => {
+                bottombar.style.setProperty('--bottombar-h', bottombar.offsetHeight + 'px');
+                bottombar.classList.add('height-locked');
+            });
+        }
+        showTempoHint();
+        animateLevelEntrance('level-start');
+        scheduleAutoPlay(currentLevel);
+    });
 }
 
 // Hook into completeLevel for daily mode
@@ -12165,7 +12597,7 @@ function startComposerMode(len) {
     listensRemaining = 0;
     updateListenCounter();
 
-    showScreen('puzzle');
+    showScreen('puzzle', { transition: 'level-start' });
 
     // Topbar: show composer UI
     document.getElementById('puzzle-level-name').innerHTML = '<span style="color:var(--purple);">Composer Mode</span>';
@@ -12183,6 +12615,7 @@ function startComposerMode(len) {
         renderTray();
         showCraftTable();
         showTempoHint();
+        animateLevelEntrance('level-start');
     });
 }
 

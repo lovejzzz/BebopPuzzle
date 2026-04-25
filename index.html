@@ -1668,53 +1668,196 @@
             gap: 12px;
         }
 
+        .play-control {
+            position: relative;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            flex-shrink: 0;
+            --play-progress: 0deg;
+        }
+
         .play-btn {
             width: 72px; height: 72px;
             border-radius: 50%;
-            border: 3px solid rgba(212,175,55,0.3);
-            background: radial-gradient(circle at 35% 35%,
-                #d4af37 0%,
-                #b8941e 40%,
-                #8b6914 100%
-            );
+            border: 0;
+            position: relative;
+            isolation: isolate;
+            background:
+                radial-gradient(circle at 34% 30%, rgba(255,255,255,0.62) 0 8%, transparent 28%),
+                linear-gradient(145deg, #f2c84a 0%, #d4a51d 44%, #8f6814 100%);
             color: #1a0800;
-            font-size: 28px;
             display: flex; align-items: center; justify-content: center;
-            padding-left: 3px;
+            padding: 0;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
             flex-shrink: 0;
             box-shadow:
-                0 3px 12px rgba(0,0,0,0.4),
-                0 0 20px rgba(212,175,55,0.2),
-                inset 0 1px 2px rgba(255,255,255,0.3);
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+                0 9px 20px rgba(0,0,0,0.42),
+                0 0 20px rgba(212,175,55,0.20),
+                inset 0 1px 2px rgba(255,255,255,0.34),
+                inset 0 -6px 10px rgba(72,39,0,0.16);
+        }
+        .play-btn::before {
+            content: "";
+            position: absolute;
+            inset: -7px;
+            border-radius: 50%;
+            background:
+                conic-gradient(from -90deg,
+                    var(--blue) 0deg,
+                    var(--gold) var(--play-progress),
+                    rgba(212,175,55,0.16) var(--play-progress),
+                    rgba(212,175,55,0.16) 360deg);
+            z-index: -2;
+            opacity: 0.9;
+            transition: opacity 0.18s ease, filter 0.18s ease;
+        }
+        .play-btn::after {
+            content: "";
+            position: absolute;
+            inset: -2px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,236,179,0.34);
+            box-shadow: inset 0 0 0 5px rgba(12,14,22,0.86);
+            z-index: -1;
+            pointer-events: none;
+        }
+        .play-btn-icon {
+            width: 24px;
+            height: 28px;
+            position: relative;
+            transform: translateX(2px);
+            transition: transform 0.18s ease, opacity 0.18s ease;
+        }
+        .play-btn-icon::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            width: 0;
+            height: 0;
+            border-top: 14px solid transparent;
+            border-bottom: 14px solid transparent;
+            border-left: 22px solid #170a00;
+            filter: drop-shadow(0 1px 1px rgba(255,255,255,0.22));
         }
         .play-btn:hover {
             transform: translateY(-1px);
+            filter: brightness(1.05);
             box-shadow:
-                0 4px 12px rgba(0,0,0,0.4),
-                0 0 24px rgba(212,175,55,0.25),
-                inset 0 1px 2px rgba(255,255,255,0.3);
+                0 11px 22px rgba(0,0,0,0.44),
+                0 0 28px rgba(212,175,55,0.28),
+                inset 0 1px 2px rgba(255,255,255,0.34),
+                inset 0 -6px 10px rgba(72,39,0,0.16);
         }
         .play-btn:active { transform: scale(0.95); }
+        .play-btn.loading .play-btn-icon {
+            opacity: 0;
+            transform: scale(0.7);
+        }
+        .play-btn.loading::before {
+            animation: playRingSpin 0.7s linear infinite;
+            filter: brightness(1.18);
+        }
+        @keyframes playRingSpin {
+            to { transform: rotate(360deg); }
+        }
+        .play-btn.playing {
+            background:
+                radial-gradient(circle at 34% 30%, rgba(255,255,255,0.46) 0 8%, transparent 28%),
+                linear-gradient(145deg, #f6d267 0%, #d9a62a 42%, #7e5a12 100%);
+            box-shadow:
+                0 8px 18px rgba(0,0,0,0.42),
+                0 0 28px rgba(91,141,239,0.25),
+                inset 0 1px 2px rgba(255,255,255,0.28),
+                inset 0 -6px 10px rgba(72,39,0,0.18);
+        }
+        .play-btn.playing .play-btn-icon {
+            width: 24px;
+            height: 28px;
+            transform: translateX(0);
+        }
+        .play-btn.playing .play-btn-icon::before,
+        .play-btn.playing .play-btn-icon::after {
+            content: "";
+            position: absolute;
+            inset: auto;
+            top: 1px;
+            width: 8px;
+            height: 26px;
+            border: 0;
+            border-radius: 2px;
+            background: #170a00;
+            filter: drop-shadow(0 1px 1px rgba(255,255,255,0.22));
+        }
+        .play-btn.playing .play-btn-icon::before { left: 2px; }
+        .play-btn.playing .play-btn-icon::after { right: 2px; }
         .play-btn.skippable {
-            font-size: 22px;
-            background: radial-gradient(circle at 35% 35%, #5b8def 0%, #4a6fc7 40%, #3a5299 100%);
-            border-color: rgba(91,141,239,0.4);
-            box-shadow: 0 3px 12px rgba(0,0,0,0.4), 0 0 16px rgba(91,141,239,0.25), inset 0 1px 2px rgba(255,255,255,0.2);
+            background: linear-gradient(145deg, #78a5ff 0%, #4e75cf 48%, #263c8a 100%);
+            box-shadow: 0 8px 18px rgba(0,0,0,0.42), 0 0 18px rgba(91,141,239,0.28), inset 0 1px 2px rgba(255,255,255,0.26);
+        }
+        .play-btn.skippable .play-btn-icon {
+            width: 28px;
+            height: 24px;
+            transform: translateX(1px);
+        }
+        .play-btn.skippable .play-btn-icon::before,
+        .play-btn.skippable .play-btn-icon::after {
+            content: "";
+            position: absolute;
+            inset: auto;
+            top: 0;
+            width: 0;
+            height: 0;
+            border-top: 12px solid transparent;
+            border-bottom: 12px solid transparent;
+            border-left: 14px solid #090d1a;
+            filter: drop-shadow(0 1px 1px rgba(255,255,255,0.20));
+        }
+        .play-btn.skippable .play-btn-icon::before { left: 1px; }
+        .play-btn.skippable .play-btn-icon::after { left: 13px; }
+        .play-btn.listen-disabled:not(.playing):not(.skippable) {
+            opacity: 0.46;
+            filter: saturate(0.58);
+            cursor: not-allowed;
+            box-shadow:
+                0 4px 12px rgba(0,0,0,0.38),
+                inset 0 1px 2px rgba(255,255,255,0.18);
+        }
+        .play-btn.listen-disabled:not(.playing):not(.skippable)::before {
+            opacity: 0.22;
         }
         .play-btn.attract {
             animation: playBtnAttract 1.5s ease-in-out infinite;
         }
         @keyframes playBtnAttract {
-            0%, 100% { box-shadow: 0 3px 12px rgba(0,0,0,0.4), 0 0 20px rgba(212,175,55,0.2), inset 0 1px 2px rgba(255,255,255,0.3); }
-            50% { box-shadow: 0 3px 12px rgba(0,0,0,0.4), 0 0 36px rgba(212,175,55,0.5), inset 0 1px 2px rgba(255,255,255,0.3); }
+            0%, 100% { box-shadow: 0 9px 20px rgba(0,0,0,0.42), 0 0 20px rgba(212,175,55,0.20), inset 0 1px 2px rgba(255,255,255,0.34), inset 0 -6px 10px rgba(72,39,0,0.16); }
+            50% { box-shadow: 0 9px 20px rgba(0,0,0,0.42), 0 0 36px rgba(212,175,55,0.48), inset 0 1px 2px rgba(255,255,255,0.34), inset 0 -6px 10px rgba(72,39,0,0.16); }
+        }
+        .play-status-label {
+            min-width: 64px;
+            height: 13px;
+            color: var(--text-muted);
+            font-family: var(--font-ui);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0;
+            line-height: 13px;
+            text-align: center;
+            text-transform: uppercase;
+            pointer-events: none;
+        }
+        .play-control.is-playing .play-status-label {
+            color: var(--blue);
+        }
+        .play-control.is-skippable .play-status-label {
+            color: var(--blue);
         }
 
         .listen-counter {
             position: absolute;
-            top: -4px; right: -4px;
+            top: -7px; right: -7px;
             min-width: 20px; height: 20px;
             background: var(--gold);
             color: #1a1c24;
@@ -1731,19 +1874,6 @@
             background: var(--red);
             color: #fff;
         }
-        .play-btn.playing {
-            background: radial-gradient(circle at 35% 35%,
-                #e25555 0%,
-                #c44040 40%,
-                #8b2020 100%
-            );
-            border-color: rgba(248,113,113,0.3);
-            box-shadow:
-                0 2px 8px rgba(0,0,0,0.4),
-                0 0 16px rgba(248,113,113,0.2),
-                inset 0 1px 2px rgba(255,255,255,0.2);
-        }
-
         /* Piece tray — cocktail napkin coaster style */
         .piece-tray {
             display: flex;
@@ -4033,7 +4163,10 @@
             .tray-piece-thumb img { width: 50px; height: 50px; }
             .piece-tray { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
             .craft-table { max-height: 200px; overflow-y: auto; }
-            .play-btn { width: 56px; height: 56px; font-size: 22px; }
+            .play-btn { width: 56px; height: 56px; }
+            .play-btn::before { inset: -6px; }
+            .play-btn-icon { transform: translateX(1px) scale(0.86); }
+            .play-status-label { min-width: 56px; font-size: 9px; }
             .hint-btn { min-width: 44px; min-height: 44px; }
             .craft-btn { min-width: 44px; min-height: 44px; }
             .star-info-btn { display: none; }
@@ -4921,8 +5054,11 @@
             <div class="tray-surface">
                 <div class="bottombar-inner">
                     <div class="piece-tray" id="piece-tray"></div>
-                    <div style="position:relative;display:inline-flex;flex-shrink:0;">
-                        <button class="play-btn" id="play-btn" onclick="togglePlay()">▶</button>
+                    <div class="play-control" id="play-control">
+                        <button class="play-btn" id="play-btn" onclick="togglePlay()" aria-label="Listen to melody" style="--play-progress:0deg;">
+                            <span class="play-btn-icon" aria-hidden="true"></span>
+                        </button>
+                        <div class="play-status-label" id="play-status-label">Listen</div>
                         <div class="listen-counter hidden" id="listen-counter"></div>
                     </div>
                     <div class="craft-tray-divider" id="craft-tray-divider"></div>
@@ -5543,11 +5679,87 @@ function setPlayheadColumn(col, includeChord = true) {
     }
 }
 
+let playProgressRaf = null;
+
+function setPlayButtonProgress(progress) {
+    const btn = document.getElementById('play-btn');
+    if (!btn) return;
+    const clamped = Math.max(0, Math.min(1, progress || 0));
+    btn.style.setProperty('--play-progress', (clamped * 360).toFixed(1) + 'deg');
+}
+
+function stopPlayButtonProgress(reset = true) {
+    if (playProgressRaf) {
+        cancelAnimationFrame(playProgressRaf);
+        playProgressRaf = null;
+    }
+    if (reset) setPlayButtonProgress(0);
+}
+
+function startPlayButtonProgress(durationMs) {
+    stopPlayButtonProgress(false);
+    const startedAt = performance.now();
+    const duration = Math.max(120, durationMs || 120);
+    const tick = (now) => {
+        const progress = Math.min(1, (now - startedAt) / duration);
+        setPlayButtonProgress(progress);
+        if (progress < 1 && isPlaying) {
+            playProgressRaf = requestAnimationFrame(tick);
+        } else {
+            playProgressRaf = null;
+        }
+    };
+    setPlayButtonProgress(0);
+    playProgressRaf = requestAnimationFrame(tick);
+}
+
+function updateListenButtonAvailability() {
+    const btn = document.getElementById('play-btn');
+    if (!btn) return;
+    const exhausted = !!(currentLevelData && currentLevelData.listens > 0 && listensRemaining <= 0);
+    btn.classList.toggle('listen-disabled', exhausted);
+    btn.setAttribute('aria-disabled', exhausted && !isPlaying && btn.dataset.state !== 'skippable' ? 'true' : 'false');
+}
+
+function setPlayButtonState(state) {
+    const btn = document.getElementById('play-btn');
+    if (!btn) return;
+    const control = document.getElementById('play-control');
+    const label = document.getElementById('play-status-label');
+    const copy = {
+        idle: 'Listen',
+        loading: 'Loading',
+        playing: 'Playing',
+        skippable: 'Skip'
+    };
+
+    btn.classList.remove('loading', 'playing', 'skippable');
+    if (control) control.classList.remove('is-loading', 'is-playing', 'is-skippable');
+    btn.dataset.state = state;
+
+    if (state === 'loading') {
+        btn.classList.add('loading');
+        if (control) control.classList.add('is-loading');
+    } else if (state === 'playing') {
+        btn.classList.add('playing');
+        if (control) control.classList.add('is-playing');
+    } else if (state === 'skippable') {
+        btn.classList.add('skippable');
+        if (control) control.classList.add('is-skippable');
+    }
+
+    if (label) label.textContent = copy[state] || copy.idle;
+    btn.setAttribute('aria-label', state === 'skippable' ? 'Skip celebration' : (state === 'playing' ? 'Pause melody' : 'Listen to melody'));
+    if (state === 'idle' || state === 'loading') setPlayButtonProgress(0);
+    updateListenButtonAvailability();
+}
+
 function stopPlayback() {
     // Cancel all pending playhead/stop timeouts without closing the shared context
     playbackTimeouts.forEach(t => clearTimeout(t));
     playbackTimeouts = [];
     isPlaying = false;
+    stopPlayButtonProgress(true);
     // Instantly silence all melody oscillators routed through the master gain
     if (masterGain && audioCtx) {
         masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
@@ -5557,12 +5769,13 @@ function stopPlayback() {
         masterGain = null;
     }
     clearPlayhead();
-    const btn = document.getElementById('play-btn');
-    if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); }
+    setPlayButtonState('idle');
 }
 
 function togglePlay() {
     clearAutoPlayTimeout();
+    const btn = document.getElementById('play-btn');
+    if (btn && btn.dataset.skipMode === '1') return;
     if (isPlaying) { stopPlayback(); return; }
     playMelody();
 }
@@ -5796,8 +6009,8 @@ const PIECE_RULES = {
     'Neighbor|Up-Down':  { entry:0.5, exit:0.5 },
     'Approach|Ascending':   { entry:1.0, exit:0.0 },
     'Approach|Descending':  { entry:0.0, exit:1.0 },
-    'Enclosure|From Below': { entry:0.0, exit:0.5 },
-    'Enclosure|From Above': { entry:1.0, exit:0.5 },
+    'Enclosure|From Below': { entry:1.0, exit:0.5 },
+    'Enclosure|From Above': { entry:0.0, exit:0.5 },
 };
 
 // ==================================================================
@@ -8817,10 +9030,10 @@ function playCelebrationMelody(callback) {
         // Restore play button
         const btn = document.getElementById('play-btn');
         if (btn) {
-            btn.textContent = '▶';
-            btn.classList.remove('skippable');
+            btn.dataset.skipMode = '';
             btn.removeEventListener('click', skipHandler);
         }
+        setPlayButtonState('idle');
         callback();
     }
 
@@ -8834,8 +9047,8 @@ function playCelebrationMelody(callback) {
         if (pa) pa.addEventListener('click', skipHandler);
         const btn = document.getElementById('play-btn');
         if (btn) {
-            btn.textContent = '⏭';
-            btn.classList.add('skippable');
+            btn.dataset.skipMode = '1';
+            setPlayButtonState('skippable');
             btn.addEventListener('click', skipHandler);
         }
     }, 400); // small delay so the final placement click doesn't immediately skip
@@ -9132,14 +9345,15 @@ function updateListenCounter() {
     // Only show for Jam Session levels with listen limits
     if (!currentLevelData || !currentLevelData.listens || currentLevelData.listens <= 0) {
         el.classList.add('hidden');
+        const playBtn = document.getElementById('play-btn');
+        if (playBtn) playBtn.classList.remove('listen-disabled');
+        updateListenButtonAvailability();
         return;
     }
     el.classList.remove('hidden');
     el.textContent = listensRemaining;
     el.classList.toggle('exhausted', listensRemaining <= 0);
-    // Dim play button when no listens left
-    const playBtn = document.getElementById('play-btn');
-    if (playBtn) playBtn.style.opacity = listensRemaining <= 0 ? '0.4' : '';
+    updateListenButtonAvailability();
 }
 
 // ==================================================================
@@ -9385,14 +9599,19 @@ function playMelody() {
     onPlayerAction();
     const playBtn = document.getElementById('play-btn');
     if (playBtn) playBtn.classList.remove('attract');
+    setPlayButtonState('loading');
     getAudioCtx(); // ensure context is alive
 
     const notes = fullMelodyNotes;
-    if (!notes || !notes.targetNote) return;
+    if (!notes || !notes.targetNote) {
+        setPlayButtonState('idle');
+        return;
+    }
 
     // Jam Session: enforce listen limit
     if (currentLevelData && currentLevelData.listens > 0) {
         if (listensRemaining <= 0) {
+            setPlayButtonState('idle');
             showToast('No listens remaining!', 'info');
             return;
         }
@@ -9402,9 +9621,7 @@ function playMelody() {
 
     isPlaying = true;
     if (!composerMode) totalListens++;
-    const btn = document.getElementById('play-btn');
-    btn.textContent = '■';
-    btn.classList.add('playing');
+    setPlayButtonState('playing');
 
     const eighth = getEighth();
     // Swing ratio: 0.5 = straight, 0.67 ≈ triplet swing (2:1), 0.6 = light swing
@@ -9445,6 +9662,7 @@ function playMelody() {
     currentTime += eighth * 2;
 
     const totalMs = (currentTime - audioCtx.currentTime) * 1000 + 200;
+    startPlayButtonProgress(totalMs);
     playbackTimeouts.push(setTimeout(() => { stopPlayback(); onTutorialMelodyPlayed(); showSingBackPrompt(); }, totalMs));
 }
 

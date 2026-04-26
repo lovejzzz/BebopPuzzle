@@ -1606,6 +1606,8 @@
             position: absolute; left: 0; right: 0;
             border-radius: 10px; overflow: hidden;
             transition: transform 0.15s ease;
+            touch-action: none;
+            user-select: none; -webkit-user-select: none;
         }
         .placed-piece img {
             width: 100%; height: 100%; object-fit: cover;
@@ -1636,6 +1638,7 @@
             opacity: 0.92; border-radius: 10px; overflow: hidden;
             box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 0 2px var(--purple);
             will-change: transform;
+            touch-action: none;
         }
         .drag-preview img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -2016,6 +2019,7 @@
             cursor: grab;
             transition: all 0.25s ease;
             user-select: none; -webkit-user-select: none;
+            touch-action: none;
             box-shadow:
                 0 2px 6px rgba(0,0,0,0.35),
                 0 1px 2px rgba(0,0,0,0.2),
@@ -8609,7 +8613,8 @@ function startDragTouch(e, piece, fromGrid) {
     document.body.appendChild(dragPreview);
     updateDragPreview(touch.clientX, touch.clientY, true);
     prepareDragMetrics();
-    scheduleDragProcess(touch.clientX, touch.clientY);
+    const snapPoint = getTouchSnapPoint(touch);
+    scheduleDragProcess(snapPoint.x, snapPoint.y);
 
     document.addEventListener('touchmove', onTouchMove, {passive:false});
     document.addEventListener('touchend', onTouchEnd);
@@ -8621,6 +8626,14 @@ function updateDragPreview(x, y, isTouchEvent) {
         const offsetY = isTouchEvent ? cellSize * 1.1 : cellSize / 2;
         dragPreview.style.transform = `translate3d(${x - cellSize / 2}px, ${y - offsetY}px, 0)`;
     }
+}
+
+function getTouchSnapPoint(touch) {
+    const offsetY = cellSize * 1.1;
+    return {
+        x: touch.clientX,
+        y: touch.clientY - offsetY + cellSize / 2
+    };
 }
 
 function processDragAt(x, y) {
@@ -8678,12 +8691,12 @@ function onTouchMove(e) {
     e.preventDefault();
     const touch = e.touches[0];
     updateDragPreview(touch.clientX, touch.clientY, true);
-    // Use the actual finger position for snap detection (not the lifted preview)
-    scheduleDragProcess(touch.clientX, touch.clientY);
+    const snapPoint = getTouchSnapPoint(touch);
+    scheduleDragProcess(snapPoint.x, snapPoint.y);
 }
 
-function finishDrag(clientX, clientY) {
-    finalizeDragProcessing(clientX, clientY);
+function finishDrag(clientX, clientY, snapPoint = null) {
+    finalizeDragProcessing(snapPoint?.x ?? clientX, snapPoint?.y ?? clientY);
     document.querySelectorAll('.tray-piece').forEach(t => t.classList.remove('dragging'));
     document.getElementById('craft-drop-zone')?.classList.remove('drag-hover');
 
@@ -8852,7 +8865,8 @@ function onTouchEnd(e) {
     document.removeEventListener('touchmove', onTouchMove);
     document.removeEventListener('touchend', onTouchEnd);
     const touch = e.changedTouches?.[0];
-    finishDrag(touch?.clientX, touch?.clientY);
+    const snapPoint = touch ? getTouchSnapPoint(touch) : null;
+    finishDrag(touch?.clientX, touch?.clientY, snapPoint);
 }
 
 // ==================================================================

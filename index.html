@@ -1757,6 +1757,7 @@
             border: 0;
             position: relative;
             isolation: isolate;
+            overflow: visible;
             background:
                 radial-gradient(circle at 34% 30%, rgba(255,255,255,0.62) 0 8%, transparent 28%),
                 linear-gradient(145deg, #f2c84a 0%, #d4a51d 44%, #8f6814 100%);
@@ -1837,6 +1838,7 @@
             to { transform: rotate(360deg); }
         }
         .play-btn.playing {
+            overflow: hidden;
             background:
                 radial-gradient(circle at 34% 30%, rgba(255,255,255,0.46) 0 8%, transparent 28%),
                 linear-gradient(145deg, #f6d267 0%, #d9a62a 42%, #7e5a12 100%);
@@ -1846,10 +1848,34 @@
                 inset 0 1px 2px rgba(255,255,255,0.28),
                 inset 0 -6px 10px rgba(72,39,0,0.18);
         }
+        .play-btn.playing::before {
+            inset: 0;
+            border-radius: inherit;
+            z-index: 0;
+            opacity: 0.96;
+            background:
+                conic-gradient(from -90deg,
+                    rgba(91,141,239,0.92) 0deg,
+                    rgba(91,141,239,0.92) var(--play-progress),
+                    rgba(255,236,179,0.22) var(--play-progress),
+                    rgba(255,236,179,0.22) 360deg);
+            -webkit-mask: radial-gradient(circle, transparent 0 62%, #000 63% 100%);
+            mask: radial-gradient(circle, transparent 0 62%, #000 63% 100%);
+            filter: none;
+        }
+        .play-btn.playing::after {
+            inset: 0;
+            border-color: rgba(255,245,205,0.42);
+            box-shadow:
+                inset 0 0 0 6px rgba(12,14,22,0.16),
+                inset 0 -8px 12px rgba(72,39,0,0.12);
+            z-index: 1;
+        }
         .play-btn.playing .play-btn-icon {
             width: 24px;
             height: 28px;
             transform: translateX(0);
+            z-index: 2;
         }
         .play-btn.playing .play-btn-icon::before,
         .play-btn.playing .play-btn-icon::after {
@@ -12620,6 +12646,9 @@ function doResetProgress(btn) {
     document.getElementById('reset-overlay')?.remove();
     showToast('Progress reset', 'info');
     renderMap();
+    updateComposerButton();
+    updateDailyButton();
+    showScreen('landing');
 }
 
 // ==================================================================

@@ -7343,6 +7343,13 @@ function findPiece(name, label) {
     return library.find(p => p.name === name && p.label === label);
 }
 
+function findPieceVariant(baseName, flipH) {
+    const map = FLIP_MAP[baseName];
+    if (!map) return null;
+    const label = getFlippedLabel(baseName, !!flipH);
+    return findPiece(baseName, label) || findPiece(baseName, map.defaultLabel);
+}
+
 function getSolutionIntervals(col) {
     if (!currentLevelData) return null;
     const s = currentLevelData.solution.find(s => s.col === col);
@@ -7597,20 +7604,19 @@ function renderTray() {
     trayAvailable.forEach((baseName, idx) => {
         const map = FLIP_MAP[baseName];
         if (!map) return;
-        const piece = findPiece(baseName, map.defaultLabel);
-        if (!piece) return;
 
         const isFlipped = !!trayFlipState[idx];
         const label = getFlippedLabel(baseName, isFlipped);
+        const piece = findPieceVariant(baseName, isFlipped);
+        if (!piece) return;
 
         const card = document.createElement('div');
         card.className = 'tray-piece';
         card.dataset.baseName = baseName;
 
-        const flipStyle = isFlipped ? ' style="transform:scaleX(-1)"' : '';
         card.innerHTML = `
             <div class="tray-piece-thumb">
-                <img src="${piece.thumbnail}" draggable="false"${flipStyle}>
+                <img src="${piece.thumbnail}" draggable="false">
             </div>
             <div class="tray-piece-label">${baseName}</div>
             <div class="tray-piece-variant">${label}</div>
@@ -7931,9 +7937,7 @@ function updateCraftDrop() {
     const stackEl = dz.querySelector('.craft-dz-stack');
 
     visible.forEach((entry, i) => {
-        const map = FLIP_MAP[entry.baseName];
-        if (!map) return;
-        const piece = findPiece(entry.baseName, map.defaultLabel);
+        const piece = findPieceVariant(entry.baseName, entry.flipH);
         if (!piece) return;
         const layer = document.createElement('div');
         layer.className = 'craft-dz-layer';
@@ -7944,7 +7948,6 @@ function updateCraftDrop() {
         const img = document.createElement('img');
         img.src = piece.thumbnail;
         img.draggable = false;
-        if (entry.flipH) img.style.transform = 'scaleX(-1)';
         layer.appendChild(img);
         stackEl.appendChild(layer);
     });
@@ -8025,9 +8028,7 @@ function showOutputPieces(pieces, mode) {
     stackEl.className = 'craft-output-stack';
 
     visible.forEach((p, i) => {
-        const map = FLIP_MAP[p.baseName];
-        if (!map) return;
-        const piece = findPiece(p.baseName, map.defaultLabel);
+        const piece = findPieceVariant(p.baseName, p.flipH);
         if (!piece) return;
         const layer = document.createElement('div');
         layer.className = 'stack-card ' + (i === visible.length - 1 ? 'stack-front' : 'stack-back');
@@ -8039,7 +8040,6 @@ function showOutputPieces(pieces, mode) {
         const img = document.createElement('img');
         img.src = piece.thumbnail;
         img.draggable = false;
-        if (p.flipH) img.style.transform = 'scaleX(-1)';
         layer.appendChild(img);
         stackEl.appendChild(layer);
     });
@@ -8176,8 +8176,7 @@ function claimOutputPiece() {
     spawnSparkles(output, 4);
 
     newCards.forEach(({ card, piece: p }, i) => {
-        const map = FLIP_MAP[p.baseName];
-        const defaultPiece = map ? findPiece(p.baseName, map.defaultLabel) : null;
+        const displayPiece = findPieceVariant(p.baseName, p.flipH);
         const targetRect = card.getBoundingClientRect();
         const dx = targetRect.left - outRect.left;
         const dy = targetRect.top - outRect.top;
@@ -8191,11 +8190,10 @@ function claimOutputPiece() {
         ghost.style.height = outRect.height + 'px';
         ghost.style.transformOrigin = 'top left';
         ghost.style.transform = 'translate3d(0, 0, 0) scale(1)';
-        if (defaultPiece) {
+        if (displayPiece) {
             const img = document.createElement('img');
-            img.src = defaultPiece.thumbnail;
+            img.src = displayPiece.thumbnail;
             img.draggable = false;
-            if (p.flipH) img.style.transform = 'scaleX(-1)';
             img.style.width = '100%';
             img.style.height = '100%';
             img.style.objectFit = 'cover';
@@ -8262,8 +8260,7 @@ function craftToggleFlip() {
 
     // Launch one ghost per card, bottom-to-top (index 0 = bottom, goes first)
     preFlipStack.forEach((entry, i) => {
-        const map = FLIP_MAP[entry.baseName];
-        const piece = map ? findPiece(entry.baseName, map.defaultLabel) : null;
+        const piece = findPieceVariant(entry.baseName, entry.flipH);
 
         // Small visual offset so cards appear to peel off the stack
         const stackOffset = (preFlipStack.length - 1 - i) * 4; // matches layer offset in updateCraftDrop
@@ -8289,7 +8286,6 @@ function craftToggleFlip() {
             const img = document.createElement('img');
             img.src = piece.thumbnail;
             img.draggable = false;
-            if (entry.flipH) img.style.transform = 'scaleX(-1)';
             inner.appendChild(img);
         }
         ghost.appendChild(inner);

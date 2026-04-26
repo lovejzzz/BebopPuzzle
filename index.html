@@ -77,8 +77,6 @@
         .screen {
             position: absolute; inset: 0; z-index: 2;
             display: flex; flex-direction: column;
-            transition: transform var(--screen-dur, 0.3s) cubic-bezier(0.22, 1, 0.36, 1);
-            will-change: transform;
         }
         .screen.hidden {
             opacity: 0; pointer-events: none;
@@ -4315,14 +4313,66 @@
         }
 
         /* =============================================
-           SCREEN TRANSITIONS — directional
+           SCREEN TRANSITIONS — brass beat wipe
            ============================================= */
-        .screen.slide-out-left  { opacity: 1; transform: translate3d(-100%, 0, 0); pointer-events: none; }
-        .screen.slide-in-right  { opacity: 1; transform: translate3d(100%, 0, 0); pointer-events: none; }
-        .screen.slide-out-right { opacity: 1; transform: translate3d(100%, 0, 0); pointer-events: none; }
-        .screen.slide-in-left   { opacity: 1; transform: translate3d(-100%, 0, 0); pointer-events: none; }
-        .screen.level-exit      { opacity: 1; transform: translate3d(0, -100%, 0); pointer-events: none; }
-        .screen.level-enter     { opacity: 1; transform: translate3d(0, 100%, 0); pointer-events: none; }
+        .screen-transition-wipe {
+            position: fixed;
+            inset: 0;
+            z-index: 9000;
+            pointer-events: none;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .screen-transition-wipe.active {
+            opacity: 1;
+        }
+        .brass-wipe-panel {
+            position: absolute;
+            inset: 0;
+            transform: translate3d(-105%, 0, 0);
+            background:
+                linear-gradient(90deg,
+                    rgba(7,9,15,0.98) 0%,
+                    rgba(13,12,9,0.99) 42%,
+                    rgba(42,25,7,0.99) 74%,
+                    rgba(7,9,15,0.98) 100%);
+            box-shadow: 18px 0 42px rgba(0,0,0,0.42);
+            will-change: transform;
+        }
+        .brass-wipe-panel::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(115deg, transparent 0 42%, rgba(253,230,138,0.08) 48%, transparent 55%),
+                repeating-linear-gradient(90deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 9px);
+            opacity: 0.7;
+        }
+        .brass-wipe-line {
+            position: absolute;
+            top: 0;
+            right: -2px;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, transparent, #fde68a 20%, var(--gold) 50%, #fde68a 80%, transparent);
+            box-shadow:
+                0 0 18px rgba(240,168,48,0.62),
+                0 0 42px rgba(240,168,48,0.28);
+        }
+        .screen-transition-wipe.brass-covering .brass-wipe-panel {
+            animation: brass-wipe-cover 230ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
+        }
+        .screen-transition-wipe.brass-revealing .brass-wipe-panel {
+            animation: brass-wipe-reveal 310ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        @keyframes brass-wipe-cover {
+            from { transform: translate3d(-105%, 0, 0); }
+            to   { transform: translate3d(0, 0, 0); }
+        }
+        @keyframes brass-wipe-reveal {
+            from { transform: translate3d(0, 0, 0); }
+            to   { transform: translate3d(105%, 0, 0); }
+        }
 
         /* =============================================
            SETTINGS SCREEN
@@ -12577,83 +12627,109 @@ function doResetProgress(btn) {
 }
 
 // ==================================================================
-// SCREEN TRANSITIONS — directional slides
+// SCREEN TRANSITIONS — brass beat wipe
 // ==================================================================
 let lastScreen = null;
 let screenTransitionToken = 0;
 let screenTransitionTimeouts = [];
-
-const _origShowScreen = showScreen;
-showScreen = function(name, opts = {}) {
-    const prev = lastScreen;
-    lastScreen = name;
-    const token = ++screenTransitionToken;
+function clearScreenTransitionTimers() {
     screenTransitionTimeouts.forEach(t => clearTimeout(t));
     screenTransitionTimeouts = [];
+}
 
-    // First call (init) — use simple instant show
-    if (!prev) {
-        _origShowScreen(name);
-        if (name === 'settings') applySettingsUI();
-        return;
+function getScreenTransitionWipe() {
+    let wipe = document.getElementById('screen-transition-wipe');
+    if (!wipe) {
+        wipe = document.createElement('div');
+        wipe.id = 'screen-transition-wipe';
+        wipe.className = 'screen-transition-wipe';
+        wipe.setAttribute('aria-hidden', 'true');
+        wipe.innerHTML = `
+            <div class="brass-wipe-panel">
+                <div class="brass-wipe-line"></div>
+            </div>`;
+        document.body.appendChild(wipe);
     }
+    return wipe;
+}
 
-    // Direction logic: landing→map→puzzle (forward), reverse is back
-    const order = ['landing', 'boardgame', 'settings', 'map', 'puzzle'];
-    const prevIdx = order.indexOf(prev);
-    const nextIdx = order.indexOf(name);
-    const forward = nextIdx >= prevIdx;
-
+function setScreenActive(name) {
     const allScreens = document.querySelectorAll('.screen');
     const target = document.getElementById('screen-' + name);
-    if (!target) return;
-    const transition = opts.transition || 'auto';
-    const isLevelTransition = transition === 'level-start' || transition === 'level-next' || transition === 'level-retry';
-    allScreens.forEach(s => s.classList.remove('slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right', 'level-enter', 'level-exit'));
-    const outgoing = [...allScreens].find(s => s.classList.contains('active')) || document.getElementById('screen-' + prev);
+    if (!target) return null;
 
-    if (outgoing === target) {
-        target.classList.remove('hidden', 'slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right', 'level-enter', 'level-exit');
-        target.classList.add('active');
-        if (name === 'map') renderMap();
-        if (name === 'settings') applySettingsUI();
-        return;
-    }
-
-    const outClass = isLevelTransition ? 'level-exit' : (forward ? 'slide-out-left' : 'slide-out-right');
-    const inClass = isLevelTransition ? 'level-enter' : (forward ? 'slide-in-right' : 'slide-in-left');
-    const transitionMs = isLevelTransition ? 280 : 320;
-
-    // Slide out current
     allScreens.forEach(s => {
-        if (s === outgoing && s !== target) {
-            s.classList.remove('active');
-            s.classList.add(outClass);
-            const tid = setTimeout(() => {
-                screenTransitionTimeouts = screenTransitionTimeouts.filter(t => t !== tid);
-                if (token !== screenTransitionToken) return;
-                s.classList.remove('slide-out-left', 'slide-out-right', 'level-exit');
-                s.classList.add('hidden');
-            }, transitionMs);
-            screenTransitionTimeouts.push(tid);
-        } else if (s !== target && !s.classList.contains('hidden')) {
+        s.classList.remove('active', 'slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right', 'level-enter', 'level-exit');
+        if (s === target) {
+            s.classList.remove('hidden');
+            s.classList.add('active');
+        } else {
             s.classList.add('hidden');
         }
     });
 
-    // Slide in target
-    target.classList.remove('hidden', 'slide-out-left', 'slide-out-right', 'level-exit');
-    target.classList.add(inClass);
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            if (token !== screenTransitionToken) return;
-            target.classList.remove('slide-in-right', 'slide-in-left', 'level-enter');
-            target.classList.add('active');
-        });
-    });
-
     if (name === 'map') renderMap();
     if (name === 'settings') applySettingsUI();
+    if (name === 'landing') { updateComposerButton(); updateDailyButton(); }
+    return target;
+}
+
+showScreen = function(name, opts = {}) {
+    const prev = lastScreen;
+    lastScreen = name;
+    const token = ++screenTransitionToken;
+    clearScreenTransitionTimers();
+
+    const target = document.getElementById('screen-' + name);
+    if (!target) return;
+    const outgoing = document.querySelector('.screen.active') || document.getElementById('screen-' + prev);
+    const isSameScreen = outgoing === target;
+    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+    if (!prev || isSameScreen || reducedMotion) {
+        setScreenActive(name);
+        return;
+    }
+
+    const transition = opts.transition || 'auto';
+    const isLevelTransition = transition === 'level-start' || transition === 'level-next' || transition === 'level-retry';
+    const launchDelay = isLevelTransition && prev === 'map' && name === 'puzzle' ? 140 : 0;
+    const coverMs = 230;
+    const revealMs = 310;
+    const holdMs = isLevelTransition ? 58 : 36;
+    const wipe = getScreenTransitionWipe();
+
+    const startWipe = () => {
+        if (token !== screenTransitionToken) return;
+        wipe.className = 'screen-transition-wipe';
+        // Restart the CSS animation even if the previous transition ended recently.
+        void wipe.offsetWidth;
+        wipe.classList.add('active', 'brass-covering');
+
+        const coverTimer = setTimeout(() => {
+            if (token !== screenTransitionToken) return;
+            setScreenActive(name);
+            const revealTimer = setTimeout(() => {
+                if (token !== screenTransitionToken) return;
+                wipe.classList.remove('brass-covering');
+                wipe.classList.add('brass-revealing');
+                const cleanupTimer = setTimeout(() => {
+                    if (token !== screenTransitionToken) return;
+                    wipe.className = 'screen-transition-wipe';
+                }, revealMs);
+                screenTransitionTimeouts.push(cleanupTimer);
+            }, holdMs);
+            screenTransitionTimeouts.push(revealTimer);
+        }, coverMs);
+        screenTransitionTimeouts.push(coverTimer);
+    };
+
+    if (launchDelay > 0) {
+        const launchTimer = setTimeout(startWipe, launchDelay);
+        screenTransitionTimeouts.push(launchTimer);
+    } else {
+        startWipe();
+    }
 };
 
 // ==================================================================

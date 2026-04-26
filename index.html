@@ -146,85 +146,103 @@
 
         .landing-btn {
             display: block;
-            width: 240px;
-            padding: 16px 0;
-            border: none;
-            border-radius: 14px;
+            width: 248px;
+            padding: 15px 18px;
+            border: 1px solid rgba(255,255,255,0.09);
+            border-radius: 10px;
             font-family: 'DM Sans', sans-serif;
             font-weight: 800;
             font-size: 15px;
-            letter-spacing: 0.06em;
+            letter-spacing: 0.07em;
             text-transform: uppercase;
             cursor: pointer;
             transition: all 0.25s ease;
             position: relative;
             overflow: hidden;
+            background: linear-gradient(135deg, rgba(28,35,51,0.88), rgba(13,17,23,0.95));
+            color: var(--text-secondary);
+            box-shadow:
+                0 12px 30px rgba(0,0,0,0.18),
+                inset 0 1px 0 rgba(255,255,255,0.06);
+        }
+        .landing-btn::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 4px;
+            background: var(--menu-accent, transparent);
+            opacity: 0.86;
+            transition: width 0.25s ease, opacity 0.25s ease;
+        }
+        .landing-btn:hover {
+            color: var(--text-primary);
+            border-color: var(--menu-border-hover, rgba(255,255,255,0.16));
+            transform: translateY(-1px);
+            box-shadow:
+                0 14px 34px var(--menu-glow, rgba(0,0,0,0.22)),
+                inset 0 1px 0 rgba(255,255,255,0.08);
+        }
+        .landing-btn:hover::before {
+            width: 6px;
+            opacity: 1;
         }
 
         .landing-btn-primary {
-            background: linear-gradient(135deg, var(--gold) 0%, #d97706 100%);
+            border-color: rgba(253,230,138,0.36);
+            background: linear-gradient(135deg, #f4b84b 0%, #e09a22 52%, #b7650f 100%);
             color: #1a0800;
-            box-shadow: 0 4px 24px var(--gold-glow), inset 0 1px 0 rgba(255,255,255,0.2);
+            box-shadow:
+                0 10px 34px rgba(240,168,48,0.26),
+                inset 0 1px 0 rgba(255,255,255,0.25);
+        }
+        .landing-btn-primary::before {
+            display: none;
         }
         .landing-btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 40px var(--gold-glow), inset 0 1px 0 rgba(255,255,255,0.2);
+            color: #140700;
+            border-color: rgba(253,230,138,0.54);
+            box-shadow:
+                0 14px 44px rgba(240,168,48,0.32),
+                inset 0 1px 0 rgba(255,255,255,0.28);
         }
 
         .landing-btn-secondary {
-            background: var(--bg-card);
-            color: var(--text-secondary);
-            border: 1px solid var(--border-medium);
-        }
-        .landing-btn-secondary:hover {
-            background: var(--bg-elevated);
-            color: var(--text-primary);
-            transform: translateY(-1px);
+            --menu-accent: rgba(139,148,158,0.72);
+            --menu-border-hover: rgba(139,148,158,0.3);
+            --menu-glow: rgba(139,148,158,0.1);
         }
 
         .landing-btn-daily {
-            background: linear-gradient(135deg, #5b8def 0%, #3b6fd4 100%);
-            color: #fff;
-            box-shadow: 0 4px 24px rgba(91,141,239,0.25), inset 0 1px 0 rgba(255,255,255,0.15);
-        }
-        .landing-btn-daily:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 40px rgba(91,141,239,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+            --menu-accent: #5b8def;
+            --menu-border-hover: rgba(91,141,239,0.35);
+            --menu-glow: rgba(91,141,239,0.13);
         }
         .landing-btn-daily .daily-check { color: #34d399; margin-left: 6px; }
 
         .landing-btn-composer {
-            background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
-            color: #fff;
-            box-shadow: 0 4px 24px rgba(167,139,250,0.25), inset 0 1px 0 rgba(255,255,255,0.15);
-        }
-        .landing-btn-composer:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 40px rgba(167,139,250,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+            --menu-accent: #a78bfa;
+            --menu-border-hover: rgba(167,139,250,0.34);
+            --menu-glow: rgba(167,139,250,0.12);
         }
         .landing-btn-composer.locked {
-            background: var(--bg-card);
+            --menu-accent: rgba(139,148,158,0.42);
+            --menu-border-hover: rgba(255,255,255,0.09);
+            --menu-glow: rgba(0,0,0,0.18);
+            background: linear-gradient(135deg, rgba(22,27,34,0.82), rgba(13,17,23,0.94));
             color: var(--text-muted);
-            border: 1px solid var(--border-medium);
-            box-shadow: none;
             cursor: default;
-            opacity: 0.5;
+            opacity: 0.68;
         }
         .landing-btn-composer.locked:hover {
             transform: none;
-            box-shadow: none;
+            color: var(--text-muted);
         }
 
         .landing-btn-boardgame {
-            background: linear-gradient(135deg, rgba(52,211,153,0.18), rgba(91,141,239,0.12));
-            color: var(--text-primary);
-            border: 1px solid rgba(52,211,153,0.28);
-            box-shadow: 0 4px 22px rgba(52,211,153,0.12), inset 0 1px 0 rgba(255,255,255,0.08);
-        }
-        .landing-btn-boardgame:hover {
-            transform: translateY(-2px);
-            border-color: rgba(52,211,153,0.48);
-            box-shadow: 0 8px 34px rgba(52,211,153,0.18), inset 0 1px 0 rgba(255,255,255,0.1);
+            --menu-accent: #34d399;
+            --menu-border-hover: rgba(52,211,153,0.34);
+            --menu-glow: rgba(52,211,153,0.12);
         }
 
         /* Composer mode chord inputs */
@@ -370,7 +388,25 @@
         .map-tab.locked { opacity: 0.35; }
         .map-tab.locked:hover { opacity: 0.5; }
         .map-tab .tab-icon { font-size: 14px; }
-        .map-tab .tab-lock { font-size: 9px; margin-left: 2px; }
+        .map-tab .chapter-icon-text {
+            display: inline-flex;
+            min-width: 24px;
+            height: 14px;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid currentColor;
+            border-radius: 4px;
+            font-size: 8px;
+            font-weight: 900;
+            line-height: 1;
+        }
+        .map-tab .tab-lock {
+            margin-left: 2px;
+            font-size: 8px;
+            font-weight: 900;
+            letter-spacing: 0;
+            opacity: 0.9;
+        }
 
         /* --- Chapter Content Area --- */
         .map-chapter-content {
@@ -441,7 +477,20 @@
             padding: 48px 20px;
             color: var(--text-muted);
         }
-        .chapter-lock-banner .lock-icon { font-size: 36px; margin-bottom: 12px; }
+        .chapter-lock-banner .lock-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            padding: 5px 10px;
+            border: 1px solid rgba(240,168,48,0.22);
+            border-radius: 999px;
+            color: var(--gold);
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
         .chapter-lock-banner .lock-text {
             font-size: 14px; font-weight: 600; line-height: 1.6;
         }
@@ -1407,6 +1456,32 @@
         }
         .hint-btn:hover { background: rgba(240,168,48,0.14); }
         .hint-btn.disabled { opacity: 0.3; pointer-events: none; }
+        .hint-icon-bulb {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: var(--gold);
+            box-shadow: 0 0 10px rgba(240,168,48,0.45);
+            position: relative;
+            flex: 0 0 auto;
+        }
+        .hint-icon-bulb::after {
+            content: "";
+            position: absolute;
+            left: 3px;
+            right: 3px;
+            bottom: -4px;
+            height: 4px;
+            border-radius: 2px;
+            background: currentColor;
+        }
+        .sound-btn-mark {
+            min-width: 22px;
+            text-align: center;
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+        }
         .hint-btn.hint-pulse {
             animation: hint-pulse-anim 1.5s ease 2;
         }
@@ -2476,6 +2551,33 @@
             position: relative;
             z-index: 1;
         }
+        .achievement-icon-text,
+        .piece-intro-text-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid currentColor;
+            border-radius: 6px;
+            font-size: 9px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            line-height: 1;
+            text-transform: uppercase;
+        }
+        .achievement-icon-text {
+            min-width: 32px;
+            min-height: 20px;
+            padding: 4px 5px;
+            color: var(--gold);
+            position: relative;
+            z-index: 1;
+        }
+        .piece-intro-text-icon {
+            width: 76px;
+            height: 76px;
+            color: var(--gold);
+            background: rgba(240,168,48,0.08);
+        }
         .achievement-toast-body {
             display: flex;
             flex-direction: column;
@@ -2646,7 +2748,18 @@
         .piece-intro-var-label { font-size: 13px; font-weight: 600; }
         #piece-intro-part2.hidden { display: none; }
         #piece-intro-part3.hidden { display: none; }
-        .piece-intro-congrats-icon { font-size: 48px; margin-bottom: 12px; }
+        .piece-intro-congrats-kicker {
+            display: inline-flex;
+            margin-bottom: 12px;
+            padding: 5px 10px;
+            border: 1px solid rgba(52,211,153,0.34);
+            border-radius: 999px;
+            color: #34d399;
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
         .piece-intro-congrats-msg { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 24px; }
         .piece-intro-congrats-actions { display: flex; gap: 12px; justify-content: center; margin-bottom: 16px; }
         .piece-intro-congrats-btn { min-width: 110px; }
@@ -4597,7 +4710,7 @@
         <div style="display: flex; flex-direction: column; gap: 12px; align-items: center;">
             <button class="landing-btn landing-btn-primary" onclick="onPlayPressed()">Play</button>
             <button class="landing-btn landing-btn-daily" id="daily-btn" onclick="onDailyPressed()">Daily Challenge</button>
-            <button class="landing-btn landing-btn-composer" id="composer-btn" onclick="onComposerPressed()">\ud83c\udfb9 Composer Mode</button>
+            <button class="landing-btn landing-btn-composer" id="composer-btn" onclick="onComposerPressed()">Composer Mode</button>
             <button class="landing-btn landing-btn-boardgame" onclick="onBoardgamePressed()">Boardgame Kit</button>
             <button class="landing-btn landing-btn-secondary" onclick="showScreen('settings')">Settings</button>
         </div>
@@ -5033,11 +5146,11 @@
             </div>
             <div class="topbar-right">
                 <button class="hint-btn" id="hint-btn" onclick="useHint()">
-                    <span style="font-size:14px;">💡</span>
+                    <span class="hint-icon-bulb" aria-hidden="true"></span>
                     <span id="hint-count">3</span>
                 </button>
-                <button class="hint-btn" onclick="openSoundPanel()" title="Sound Design" style="font-size:14px;padding:4px 8px;">
-                    🎛️
+                <button class="hint-btn" onclick="openSoundPanel()" title="Sound Design" style="padding:4px 8px;">
+                    <span class="sound-btn-mark">EQ</span>
                 </button>
                 <div class="timer-display" id="timer-display">0:00</div>
             </div>
@@ -5139,7 +5252,7 @@
             <div class="reward-piece-name" id="reward-piece-name"></div>
             <div class="reward-piece-tagline" id="reward-piece-tagline"></div>
             <div class="reward-piece-desc" id="reward-piece-desc"></div>
-            <button class="reward-replay-btn" id="reward-replay-btn" onclick="replayRewardPiece()">🔊 Tap to hear again</button>
+            <button class="reward-replay-btn" id="reward-replay-btn" onclick="replayRewardPiece()">Tap to hear again</button>
             <button class="reward-continue-btn" onclick="dismissReward()">Continue</button>
         </div>
     </div>
@@ -5207,7 +5320,7 @@
 
             <!-- Part 3: Congrats -->
             <div id="piece-intro-part3" class="hidden">
-                <div class="piece-intro-congrats-icon">🎉</div>
+                <div class="piece-intro-congrats-kicker">Ear Check Complete</div>
                 <div class="piece-intro-congrats-msg">You've got the ear for it!</div>
                 <div class="piece-intro-congrats-actions">
                     <button class="piece-intro-choice piece-intro-congrats-btn" onclick="pieceIntroMoreQuiz()">More Quiz</button>
@@ -5232,7 +5345,7 @@
             <div class="game-complete-actions">
                 <button class="success-btn success-btn-retry" onclick="gameCompleteReplay()">Play Again</button>
                 <button class="success-btn success-btn-next" onclick="gameCompleteMap()">Back to Map</button>
-                <button class="success-btn success-btn-composer" onclick="gameCompleteComposer()">🎹 Composer Mode</button>
+                <button class="success-btn success-btn-composer" onclick="gameCompleteComposer()">Composer Mode</button>
             </div>
         </div>
     </div>
@@ -6277,20 +6390,20 @@ const CHAPTERS = [
       flavorText:"Chromatic approaches are Bird's signature move. Try spotting them in 'Donna Lee.'" },
     { id:4, name:"Enclosures",  icon:"Enclosure",  unlockStars:20, color:"green",  reward:"Enclosure",
       flavorText:"Enclosures surround the target like a cage. Dizzy Gillespie loved these." },
-    { id:5, name:"All Mixed",   icon:"\ud83c\udfb7",         unlockStars:22, color:"red",    reward:null,
+    { id:5, name:"All Mixed",   icon:"MIX",         unlockStars:22, color:"red",    reward:null,
       flavorText:"You can now hear all four shapes mixed together. That's real bebop vocabulary." },
-    { id:6, name:"Jam Session",  icon:"\ud83c\udfa4",         unlockStars:25, color:"orange", reward:null,
+    { id:6, name:"Jam Session",  icon:"JAM",         unlockStars:25, color:"orange", reward:null,
       flavorText:"You've trained your ear to pick voices out of the crowd. Welcome to the bandstand." }
 ];
 
-// Helper: render a chapter icon — piece thumbnail if available, otherwise emoji
+// Helper: render a chapter icon — piece thumbnail if available, otherwise a text badge
 function renderChapterIcon(iconStr, size) {
     size = size || 18;
     const piece = library.find(p => p.name === iconStr);
     if (piece && piece.thumbnail) {
         return `<img src="${piece.thumbnail}" style="width:${size}px;height:${size}px;border-radius:3px;object-fit:cover;vertical-align:middle;" draggable="false">`;
     }
-    return iconStr;
+    return `<span class="chapter-icon-text">${iconStr}</span>`;
 }
 
 // ==================================================================
@@ -6423,7 +6536,7 @@ function updateStreak() {
     const newStreak = gameProgress['_streak'];
     const milestones = [3, 5, 10, 20, 50];
     if (milestones.includes(newStreak)) {
-        setTimeout(() => showAchievement('\ud83d\udd25', newStreak + '-Day Streak!', 'Keep the practice going'), 2000);
+        setTimeout(() => showAchievement('<span class="achievement-icon-text">Streak</span>', newStreak + '-Day Streak!', 'Keep the practice going'), 2000);
     }
 }
 
@@ -6782,7 +6895,7 @@ const COLOR_MAP = {
 
 function renderMap() {
     const streak = gameProgress['_streak'] || 0;
-    const streakStr = streak > 0 ? '  \ud83d\udd25 ' + streak : '';
+    const streakStr = streak > 0 ? ' · Streak ' + streak : '';
     document.getElementById('total-stars-display').textContent = '\u2605 ' + getTotalStars() + streakStr;
 
     // Render tabs
@@ -6794,7 +6907,7 @@ function renderMap() {
         return `<button class="${cls}" onclick="switchChapterTab(${ch.id})" data-chapter="${ch.id}">
             <span class="tab-icon">${renderChapterIcon(ch.icon, 14)}</span>
             ${ch.name}
-            ${unlocked ? '' : '<span class="tab-lock">🔒</span>'}
+            ${unlocked ? '' : '<span class="tab-lock">Locked</span>'}
         </button>`;
     }).join('');
 
@@ -6830,7 +6943,7 @@ function renderChapterContent(chapterId) {
         const colors = COLOR_MAP[ch.color] || COLOR_MAP.gold;
         content.innerHTML = `
             <div class="chapter-lock-banner">
-                <div class="lock-icon">🔒</div>
+                <div class="lock-icon">Locked</div>
                 <div class="lock-text">${ch.name} is locked</div>
                 <div class="lock-req">Earn ${ch.unlockStars} ★ in Ch.${chapterId - 1} to unlock</div>
             </div>`;
@@ -6889,7 +7002,7 @@ function renderLevelNode(level) {
         return `<div class="level-node locked-node" ${hintAttr}>
             <div class="level-num">${num}</div>
             <div class="level-name">${level.name}</div>
-            <div class="level-stars-display" style="color:var(--text-muted);">🔒</div>
+            <div class="level-stars-display" style="color:var(--text-muted);font-size:10px;font-weight:900;text-transform:uppercase;">Locked</div>
         </div>`;
     }
 
@@ -9737,7 +9850,7 @@ function showSingBackPrompt() {
     const msg = SING_BACK_MESSAGES[Math.floor(Math.random() * SING_BACK_MESSAGES.length)];
     el.style.opacity = '0';
     setTimeout(() => {
-        el.textContent = '🎤 ' + msg;
+        el.textContent = 'Sing it back: ' + msg;
         el.classList.add('sing-back');
         el.style.opacity = '';
     }, 400);
@@ -10081,7 +10194,7 @@ function showTutorialStep1() {
         const listenLimit = currentLevelData?.listens;
         if (listenLimit) {
             // Listen-limit levels (ch6) always show the count
-            const msg = `👆 Press ▶ — you have ${listenLimit} listens. Make each one count!`;
+            const msg = `Press Listen. You have ${listenLimit} listens. Make each one count.`;
             const levelId = currentLevel;
             scheduleLevelSetupTimeout(() => {
                 if (currentLevel === levelId && document.getElementById('screen-puzzle')?.classList.contains('active')) {
@@ -10093,7 +10206,7 @@ function showTutorialStep1() {
             const levelId = currentLevel;
             scheduleLevelSetupTimeout(() => {
                 if (currentLevel === levelId && document.getElementById('screen-puzzle')?.classList.contains('active')) {
-                    showTooltipAt(playBtn, '👆 Press ▶ to listen to the melody first!', '');
+                    showTooltipAt(playBtn, 'Press Listen to hear the melody first.', '');
                 }
             }, 400);
         }
@@ -10423,7 +10536,7 @@ function nextLevel() {
             if (currentChapter === 3 && isComposerUnlocked() && !gameProgress['_composerAchievement']) {
                 gameProgress['_composerAchievement'] = true;
                 saveProgress();
-                setTimeout(() => showAchievement('\ud83c\udfb9', 'Composer Mode Unlocked!', 'Create your own melodies in the Practice Room'), 1500);
+                setTimeout(() => showAchievement('<span class="achievement-icon-text">Compose</span>', 'Composer Mode Unlocked!', 'Create your own melodies in the Practice Room'), 1500);
             }
 
             // Show reward screen for next chapter's new piece (once only)
@@ -10627,7 +10740,7 @@ function finishWarmup() {
 
     const moreBtn = document.createElement('button');
     moreBtn.className = 'warmup-choice';
-    moreBtn.innerHTML = '<span>🔄 More quiz</span>';
+    moreBtn.innerHTML = '<span>More quiz</span>';
     moreBtn.style.padding = '12px 20px';
     moreBtn.style.fontSize = '13px';
     moreBtn.onclick = () => {
@@ -10638,7 +10751,7 @@ function finishWarmup() {
 
     const readyBtn = document.createElement('button');
     readyBtn.className = 'warmup-choice';
-    readyBtn.innerHTML = '<span>✅ I\'m ready</span>';
+    readyBtn.innerHTML = '<span>I\'m ready</span>';
     readyBtn.style.padding = '12px 20px';
     readyBtn.style.fontSize = '13px';
     readyBtn.style.borderColor = 'rgba(52,211,153,0.4)';
@@ -10703,7 +10816,7 @@ function showJamSessionIntro(callback) {
     overlay.classList.remove('hidden');
     overlay.innerHTML = `
         <div class="piece-intro-modal" style="text-align:center;">
-            <div style="font-size:48px;margin-bottom:12px;">\ud83c\udfa4</div>
+            <div class="piece-intro-congrats-kicker">Live Ear Test</div>
             <h2 class="piece-intro-title">Jam Session</h2>
             <p style="color:var(--text-secondary);font-size:14px;line-height:1.5;margin:16px 0;">
                 In a real jam, you hear everything at once.<br><br>
@@ -10742,8 +10855,8 @@ function showPieceIntro(pieceName, callback) {
     const pieceB = findPiece(pieceName, labelB);
     const iconA = document.getElementById('piece-intro-icon-a');
     const iconB = document.getElementById('piece-intro-icon-b');
-    iconA.innerHTML = pieceA && pieceA.thumbnail ? '<img src="' + pieceA.thumbnail + '" alt="' + labelA + '">' : '🎧';
-    iconB.innerHTML = pieceB && pieceB.thumbnail ? '<img src="' + pieceB.thumbnail + '" alt="' + labelB + '">' : '🎧';
+    iconA.innerHTML = pieceA && pieceA.thumbnail ? '<img src="' + pieceA.thumbnail + '" alt="' + labelA + '">' : '<span class="piece-intro-text-icon">' + labelA + '</span>';
+    iconB.innerHTML = pieceB && pieceB.thumbnail ? '<img src="' + pieceB.thumbnail + '" alt="' + labelB + '">' : '<span class="piece-intro-text-icon">' + labelB + '</span>';
 
     document.getElementById('piece-intro-label-a').textContent = labelA;
     document.getElementById('piece-intro-label-b').textContent = labelB;
@@ -11096,7 +11209,7 @@ function showRewardScreen(pieceName) {
 
     if (nextCh) {
         showAchievement(
-            nextCh.icon.length <= 2 ? nextCh.icon : (library.find(p => p.name === nextCh.icon)?.thumbnail || '🎵'),
+            library.find(p => p.name === nextCh.icon)?.thumbnail || '<span class="achievement-icon-text">' + nextCh.icon + '</span>',
             `Chapter ${nextCh.id}: ${nextCh.name}`,
             'A new chapter is now available!'
         );
@@ -11165,7 +11278,7 @@ function showGameComplete() {
     // Achievement trophy for completing all chapters
     setTimeout(() => {
         showAchievement(
-            '🎹',
+            '<span class="achievement-icon-text">Compose</span>',
             'Composer Mode Unlocked',
             'You mastered all 6 chapters. The stage is yours!'
         );
@@ -12575,9 +12688,9 @@ function updateComposerButton() {
     const unlocked = isComposerUnlocked();
     btn.classList.toggle('locked', !unlocked);
     if (!unlocked) {
-        btn.textContent = '\ud83d\udd12 Composer Mode';
+        btn.textContent = 'Composer Mode';
     } else {
-        btn.textContent = '\ud83c\udfb9 Composer Mode';
+        btn.textContent = 'Composer Mode';
     }
 }
 
@@ -12852,7 +12965,7 @@ function showComposerToolbar() {
             <span class="composer-length-label" id="composer-len-label">${composerChordLen} chords</span>
             <button class="composer-length-btn" onclick="composerChangeLen(1)">+</button>
         </div>
-        <button class="composer-toolbar-btn" onclick="composerRandomize()">🎲 Randomize</button>
+        <button class="composer-toolbar-btn" onclick="composerRandomize()">Randomize</button>
         <button class="composer-toolbar-btn" onclick="composerClear()">✕ Clear</button>
     `;
     // Insert before the sound panel button (second child) so sound panel stays visible
@@ -13046,7 +13159,7 @@ document.addEventListener('DOMContentLoaded', init);
                 overlay.style.cssText = 'position:fixed;inset:0;background:rgba(7,9,15,0.85);z-index:400;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.3s ease;';
                 overlay.innerHTML = `
                     <div style="background:var(--bg-card);border:2px solid var(--gold);border-radius:20px;padding:32px 28px;max-width:320px;width:90%;text-align:center;animation:modal-pop 0.4s ease;">
-                        <div style="font-size:36px;margin-bottom:12px;">🔓</div>
+                        <div style="display:inline-flex;margin-bottom:12px;padding:5px 10px;border:1px solid rgba(240,168,48,0.34);border-radius:999px;color:var(--gold);font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;">Unlocked</div>
                         <div style="font-size:18px;font-weight:900;color:var(--gold);margin-bottom:8px;">All Levels Unlocked</div>
                         <div style="font-size:12px;color:var(--text-secondary);margin-bottom:20px;">All ${LEVELS.length} levels are now completed with 3 stars. Happy testing!</div>
                         <button style="padding:10px 28px;background:rgba(251,191,36,0.15);color:var(--gold);border:1px solid rgba(251,191,36,0.3);border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;" onclick="this.closest('div[style]').parentElement.remove()">Got it</button>

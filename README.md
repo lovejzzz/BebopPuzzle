@@ -122,7 +122,7 @@ Unlock Composer Mode by completing Chapters 1-3. This is your free-play sandbox:
 
 ## Sound Design
 
-Open the sound panel (🎛️) during any puzzle to customize the Rhodes EP tone:
+Open the sound panel (EQ) during any puzzle to customize the Rhodes EP tone:
 
 - **Tone / Drive / Reverb** — shape your sound with rotary knobs
 - **Tremolo** — adjust depth and speed

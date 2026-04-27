@@ -3370,6 +3370,7 @@
             transition: all 0.3s ease;
             position: relative;
             z-index: 1;
+            touch-action: none;
         }
         .craft-drop-zone.drag-hover {
             border-color: rgba(167,139,250,0.6);
@@ -3519,6 +3520,7 @@
             min-height: 96px;
             position: relative;
             overflow: hidden;
+            touch-action: none;
         }
         .craft-output img {
             width: 100%; height: 100%;
@@ -4324,17 +4326,102 @@
             .piece-tray.tray-compact .tray-piece-label { font-size: 9px; }
             .piece-tray.tray-compact .tray-piece-variant { font-size: 8px; }
         }
-        /* Mobile: wrap tray bar so craft table goes to second row */
+        /* Mobile: compact tray + craft tool strip */
         @media (max-width: 640px) {
-            .bottombar-inner { flex-wrap: wrap; justify-content: center; gap: 8px; }
-            .piece-tray { flex-basis: 0; min-width: 100px; }
+            .bottombar-inner {
+                display: grid;
+                grid-template-columns: minmax(82px, 1fr) auto;
+                grid-template-areas:
+                    "tray play"
+                    "craft craft";
+                align-items: center;
+                gap: 10px 12px;
+            }
+            .piece-tray {
+                grid-area: tray;
+                min-width: 0;
+                width: 100%;
+            }
+            .play-control { grid-area: play; }
             .craft-tray-divider { display: none !important; }
-            .craft-inline.visible { flex-basis: 100%; display: flex; justify-content: center; }
-            .craft-inline-body { gap: 10px; }
-            .craft-drop-zone { width: 52px; height: 52px; min-width: 52px; }
-            .craft-inline-output-wrap { min-width: 52px; }
-            .craft-output { width: 52px; height: 52px; border-radius: 10px; }
-            .craft-output img { width: 44px; height: 44px; }
+            .craft-inline.visible {
+                grid-area: craft;
+                display: block;
+                width: 100%;
+                padding: 10px 12px;
+                border-radius: 12px;
+                background: rgba(7,9,15,0.18);
+                border: 1px solid rgba(255,255,255,0.04);
+            }
+            .craft-inline-body {
+                display: grid;
+                grid-template-columns: 62px minmax(88px, 1fr) 62px;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                max-width: 310px;
+                margin: 0 auto;
+            }
+            .craft-inline-mid {
+                min-width: 0;
+                gap: 4px;
+            }
+            .craft-inline-btns {
+                flex-direction: row;
+                justify-content: center;
+                gap: 8px;
+                width: 100%;
+            }
+            .craft-drop-zone {
+                width: 62px;
+                height: 62px;
+                min-width: 62px;
+                border-radius: 12px;
+            }
+            .craft-drop-hint {
+                font-size: 10px;
+                letter-spacing: 0.06em;
+                line-height: 1.25;
+            }
+            .craft-piece-label,
+            .craft-variant-label {
+                max-width: 100%;
+                font-size: 9px;
+                min-height: 10px;
+            }
+            .craft-btn { min-width: 0; min-height: 0; }
+            .craft-btn.craft-btn-sm {
+                min-width: 76px;
+                max-width: 92px;
+                min-height: 38px;
+                padding: 8px 10px;
+                font-size: 11px;
+                letter-spacing: 0.04em;
+                border-radius: 9px;
+            }
+            .craft-btn.craft-btn-sm .craft-btn-icon { font-size: 13px; }
+            .craft-inline-output-wrap {
+                min-width: 62px;
+                width: 62px;
+            }
+            .craft-output {
+                width: 62px;
+                height: 62px;
+                min-height: 62px;
+                border-radius: 12px;
+            }
+            .craft-output img {
+                width: 54px;
+                height: 54px;
+            }
+            .craft-output-empty-hint {
+                font-size: 13px;
+                line-height: 1;
+            }
+            .craft-claim-hint.visible {
+                margin-top: 2px;
+                font-size: 9px;
+            }
             /* Compact tempo panel on mobile to avoid grid overlap */
             .tempo-hint { width: 120px; padding: 6px 10px; right: 4px; margin-bottom: 4px; }
             .tempo-hint-value { font-size: 14px; margin-bottom: 2px; }
@@ -8696,7 +8783,9 @@ function onTouchMove(e) {
 }
 
 function finishDrag(clientX, clientY, snapPoint = null) {
-    finalizeDragProcessing(snapPoint?.x ?? clientX, snapPoint?.y ?? clientY);
+    const dropX = snapPoint?.x ?? clientX;
+    const dropY = snapPoint?.y ?? clientY;
+    finalizeDragProcessing(dropX, dropY);
     document.querySelectorAll('.tray-piece').forEach(t => t.classList.remove('dragging'));
     document.getElementById('craft-drop-zone')?.classList.remove('drag-hover');
 
@@ -8706,7 +8795,7 @@ function finishDrag(clientX, clientY, snapPoint = null) {
         const outputPieces = craftOutputPiece?.pieces ||
             (craftOutputPiece ? [{ baseName: craftOutputPiece.baseName, flipH: craftOutputPiece.flipH }] : []);
 
-        if (craftOpen && clientX && clientY && isCraftDrop(clientX, clientY)) {
+        if (craftOpen && typeof dropX === 'number' && typeof dropY === 'number' && isCraftDrop(dropX, dropY)) {
             // Dropped back on the craft drop zone — place first piece, send extras to tray
             clearCraftOutput();
             if (outputPieces.length > 0) {
@@ -8759,7 +8848,7 @@ function finishDrag(clientX, clientY, snapPoint = null) {
     }
 
     // Check if dropped on the craft table drop zone
-    if (craftOpen && draggedPiece && clientX && clientY && isCraftDrop(clientX, clientY)) {
+    if (craftOpen && draggedPiece && typeof dropX === 'number' && typeof dropY === 'number' && isCraftDrop(dropX, dropY)) {
         // If there's an unclaimed output piece, silently claim ALL pieces to tray first
         // so nothing is lost when the new piece overwrites the craft table
         if (craftOutputPiece) {

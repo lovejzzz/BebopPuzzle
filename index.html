@@ -6683,14 +6683,23 @@ function saveProgress() {
     try { localStorage.setItem('bebopPuzzleGame', JSON.stringify(gameProgress)); } catch(e) {}
 }
 
+function getLocalDateString(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 // Streak tracking — consecutive days with at least one level completed (no hints)
 function updateStreak() {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = getLocalDateString();
     const lastDate = gameProgress['_lastStreakDate'] || '';
     const streak = gameProgress['_streak'] || 0;
     if (lastDate === today) return; // already counted today
     // Check if yesterday
-    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    const yesterdayDate = new Date();
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    const yesterday = getLocalDateString(yesterdayDate);
     if (lastDate === yesterday) {
         gameProgress['_streak'] = streak + 1;
     } else if (lastDate === '') {
@@ -7001,11 +7010,16 @@ function dismissOverlay(id, callback) {
     }, 250);
 }
 
+function isCurrentDailyChallenge() {
+    return isDailyMode || (typeof currentLevel === 'string' && currentLevel.startsWith('_daily_'));
+}
+
 function goToMap(overrideChapter) {
     if (composerMode) {
         exitComposerMode();
         return;
     }
+    const shouldReturnToLanding = !overrideChapter && isCurrentDailyChallenge();
     clearAutoPlayTimeout();
     clearLevelSetupTimeouts();
     cancelDragProcessing();
@@ -7038,12 +7052,14 @@ function goToMap(overrideChapter) {
     if (levelNameEl) levelNameEl.classList.remove('sing-back');
     // Remember which chapter tab to show — callers can pass overrideChapter
     // to navigate to a specific chapter (e.g. after reward screen unlocks next chapter)
-    if (overrideChapter) {
+    if (shouldReturnToLanding) {
+        showScreen('landing');
+    } else if (overrideChapter) {
         activeChapterTab = overrideChapter;
     } else if (currentLevelData) {
         activeChapterTab = currentLevelData.chapter;
     }
-    showScreen('map');
+    if (!shouldReturnToLanding) showScreen('map');
 }
 
 // ==================================================================
@@ -10695,8 +10711,7 @@ function nextLevel() {
     dismissOverlay('success-overlay', () => {
         // Daily challenge: "Next" returns to landing
         if (currentLevel && currentLevel.startsWith('_daily_')) {
-            isDailyMode = false;
-            showScreen('landing');
+            goToMap();
             return;
         }
         const chapterLevels = LEVELS.filter(l => l.chapter === currentLevelData.chapter);
@@ -12922,7 +12937,7 @@ function hashDateString(str) {
 }
 
 function getDailyDateString() {
-    return new Date().toISOString().slice(0, 10);
+    return getLocalDateString();
 }
 
 function isDailyCompleted() {
@@ -12969,8 +12984,12 @@ function onDailyPressed() {
     // Temporarily replace Math.random with seeded version for puzzle generation
     const origRandom = Math.random;
     Math.random = rng;
-    const levelData = generateRandomPuzzle(template);
-    Math.random = origRandom;
+    let levelData;
+    try {
+        levelData = generateRandomPuzzle(template);
+    } finally {
+        Math.random = origRandom;
+    }
 
     if (!levelData) {
         showToast('Could not generate daily puzzle — try again', 'error');

@@ -1615,6 +1615,7 @@
         }
         .placed-piece.glass { opacity: 0.3; }
         .placed-piece.glass img { opacity: 0.5; filter: brightness(0.8); }
+        .placed-piece.locked-in { cursor: default !important; }
 
         /* Snap preview */
         .snap-preview {
@@ -5103,7 +5104,7 @@
             <div class="changelog-section">
                 <div class="changelog-section-title">Gameplay Flow</div>
                 <ul class="changelog-list">
-                    <li>Melody auto-plays when entering a level (except the very first tutorial)</li>
+                    <li>Melody auto-plays when entering a level, including the first tutorial</li>
                     <li>Play button turns into a skip button during celebration</li>
                     <li>Click anywhere to skip the celebration and jump to results</li>
                     <li>Chapter map navigates to the correct chapter after reward screens</li>
@@ -6609,6 +6610,7 @@ let currentHintLevel = 0;
 let timerInterval = null;
 let autoPlayTimeout = null;
 let levelSetupTimeouts = [];
+let puzzleInteractionLocked = false;
 
 // Per-piece flip state (parallel array to trayAvailable, true = flipped)
 let trayFlipState = [];
@@ -7305,6 +7307,7 @@ function startLevel(levelId, opts = {}) {
     if (!currentLevelData) return;
     currentLevel = levelId;
     numCols = currentLevelData.chords.length;
+    puzzleInteractionLocked = false;
     initGridState();
 
     // Place solution pieces — store selected intervals in the solution so they
@@ -7327,8 +7330,8 @@ function startLevel(levelId, opts = {}) {
         console.warn('startLevel: Target piece missing from library — melody playback will be silent');
     }
 
-    // Compute melody before removing
-    fullMelodyNotes = computeFullMelodyNotes();
+    // Compute the full answer melody from the solution snapshot before hiding puzzle pieces.
+    fullMelodyNotes = computeFullMelodyNotes(buildSolutionMelodyState(currentLevelData));
 
     // Remove pieces for puzzle
     currentLevelData.removeCols.forEach(col => { gridState[col] = null; });
@@ -7463,12 +7466,8 @@ function startLevel(levelId, opts = {}) {
             showTutorialStep1();
         }
 
-        // Auto-play melody after a short delay so the user hears the line immediately.
-        // Skip auto-play on the very first level (ch1_01) so the tutorial tooltip
-        // has time to teach the user about the Play button before anything happens.
-        if (currentLevel !== 'ch1_01') {
-            scheduleAutoPlay(levelId);
-        }
+        // Auto-play melody after a short delay so the user hears the complete line immediately.
+        scheduleAutoPlay(levelId);
     });
 }
 
@@ -7489,14 +7488,14 @@ function getSolutionIntervals(col) {
     return s ? s.selectedIntervals : null;
 }
 
-function computeFullMelodyNotes() {
+function computeFullMelodyNotes(sourceState = gridState) {
     const chords = [];
     const allChords = [...currentLevelData.chords, currentLevelData.targetChord];
     for (let i = 0; i <= numCols; i++) chords.push(parseChord(allChords[i]));
 
     let targetNote = null;
-    if (gridState[numCols] && chords[numCols]) {
-        targetNote = getTargetNote(gridState[numCols].position, chords[numCols]);
+    if (sourceState[numCols] && chords[numCols]) {
+        targetNote = getTargetNote(sourceState[numCols].position, chords[numCols]);
     }
 
     const pieceNotes = [];
@@ -7504,13 +7503,40 @@ function computeFullMelodyNotes() {
     let nextTarget = targetNote;
 
     for (let col = numCols - 1; col >= 0; col--) {
-        if (gridState[col] && gridState[col].piece && gridState[col].piece.name !== 'Target') {
-            const notes = calculatePieceNotes(gridState[col].piece, chords[col], nextTarget, gridState[col].selectedIntervals || {});
+        if (sourceState[col] && sourceState[col].piece && sourceState[col].piece.name !== 'Target') {
+            const notes = calculatePieceNotes(sourceState[col].piece, chords[col], nextTarget, sourceState[col].selectedIntervals || {});
             pieceNotes[col] = notes;
             if (notes.length > 0) nextTarget = notes[0];
         }
     }
     return { pieceNotes, targetNote };
+}
+
+function buildSolutionMelodyState(levelData = currentLevelData) {
+    const state = {};
+    for (let i = 0; i <= numCols; i++) state[i] = null;
+    if (!levelData) return state;
+
+    levelData.solution.forEach(s => {
+        const piece = findPiece(s.pieceName, s.pieceLabel);
+        if (piece) {
+            state[s.col] = {
+                piece,
+                position: s.position,
+                selectedIntervals: s.selectedIntervals || {}
+            };
+        }
+    });
+
+    const targetPiece = library.find(p => p.name === 'Target');
+    if (targetPiece && levelData.targetPiece) {
+        state[numCols] = {
+            piece: targetPiece,
+            position: levelData.targetPiece.position,
+            selectedIntervals: {}
+        };
+    }
+    return state;
 }
 
 // ==================================================================
@@ -7602,7 +7628,7 @@ function renderGrid() {
         const firstCell = column.querySelector('.grid-cell');
         const cellHeight = firstCell ? firstCell.offsetHeight : 100;
         const topOffset = position * (cellHeight + cellGap);
-        const renderKey = `${piece.id || piece.name}|${piece.name}|${piece.label}|${position}|${isPuzzleCol(col) ? 1 : 0}|${col === numCols && position < 0 ? 1 : 0}`;
+        const renderKey = `${piece.id || piece.name}|${piece.name}|${piece.label}|${position}|${isPuzzleCol(col) && !puzzleInteractionLocked ? 1 : 0}|${col === numCols && position < 0 ? 1 : 0}`;
 
         let el = existing;
         if (!el || el.dataset.renderKey !== renderKey) {
@@ -7614,10 +7640,12 @@ function renderGrid() {
             if (col === numCols && position < 0) el.classList.add('glass');
             el.innerHTML = `<img src="${piece.thumbnail}" draggable="false">`;
 
-            if (isPuzzleCol(col)) {
+            if (isPuzzleCol(col) && !puzzleInteractionLocked) {
                 el.style.cursor = 'grab';
                 el.addEventListener('mousedown', e => { e.stopPropagation(); startDrag(e, piece, {col, position}); });
                 el.addEventListener('touchstart', e => { e.stopPropagation(); startDragTouch(e, piece, {col, position}); }, {passive:false});
+            } else {
+                el.style.cursor = '';
             }
 
             column.appendChild(el);
@@ -8673,6 +8701,13 @@ function getValidSnapPositions(piece, colIndex) {
 
 function startDrag(e, piece, fromGrid) {
     e.preventDefault();
+    if (puzzleInteractionLocked) {
+        draggedTrayIndex = -1;
+        draggedFromCraft = false;
+        draggedFromGrid = null;
+        draggedPiece = null;
+        return;
+    }
     removeTutorialTooltip();
     draggedPiece = piece;
     draggedFromGrid = fromGrid;
@@ -8698,6 +8733,13 @@ function startDrag(e, piece, fromGrid) {
 
 function startDragTouch(e, piece, fromGrid) {
     e.preventDefault();
+    if (puzzleInteractionLocked) {
+        draggedTrayIndex = -1;
+        draggedFromCraft = false;
+        draggedFromGrid = null;
+        draggedPiece = null;
+        return;
+    }
     removeTutorialTooltip();
     const touch = e.touches[0];
     draggedPiece = piece;
@@ -8740,6 +8782,7 @@ function getTouchSnapPoint(touch) {
 }
 
 function processDragAt(x, y) {
+    if (puzzleInteractionLocked) return;
     let foundSnap = false;
     let previewTarget = null;
     const columns = dragGridMetrics || collectDragGridMetrics();
@@ -9025,6 +9068,27 @@ function flashConnectedNeighbors(col) {
 // ==================================================================
 // ANSWER CHECKING
 // ==================================================================
+function clearCompletionGuidance() {
+    clearLevelSetupTimeouts();
+    clearHintVisuals();
+    dismissSideNudge();
+    hideGuideMe();
+    removeSpotlight();
+    removeTutorialTooltip();
+    if (craftProactiveTimeout) { clearTimeout(craftProactiveTimeout); craftProactiveTimeout = null; }
+    if (dupeProactiveTimeout) { clearTimeout(dupeProactiveTimeout); dupeProactiveTimeout = null; }
+    if (singBackTimeout) { clearTimeout(singBackTimeout); singBackTimeout = null; }
+}
+
+function lockSolvedPuzzlePieces() {
+    puzzleInteractionLocked = true;
+    clearSnapPreview();
+    document.querySelectorAll('.placed-piece').forEach(el => {
+        el.classList.add('locked-in');
+        el.style.cursor = '';
+    });
+}
+
 function checkAnswer(col) {
     removeSpotlight(); // clear tutorial spotlight on any placement
     if (composerMode) {
@@ -9051,6 +9115,8 @@ function checkAnswer(col) {
 
         if (allSolved) {
             // Final piece — stop any ongoing melody to avoid echo, then celebrate
+            lockSolvedPuzzlePieces();
+            clearCompletionGuidance();
             stopPlayback();
             if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
             sfx('correct');
@@ -9362,6 +9428,7 @@ function completeLevel() {
     // Timer was already stopped in checkAnswer at the moment of solve; guard for safety
     if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
     if (stuckIdleTimer) { clearInterval(stuckIdleTimer); stuckIdleTimer = null; }
+    clearCompletionGuidance();
     hideGuideMe();
     const elapsed = Math.floor((Date.now() - levelStartTime) / 1000);
     const stars = calculateStars();
@@ -13005,6 +13072,7 @@ function onDailyPressed() {
     currentLevelData = levelData;
     currentLevel = '_daily_' + dateStr;
     numCols = levelData.chords.length;
+    puzzleInteractionLocked = false;
     initGridState();
 
     levelData.solution.forEach(s => {
@@ -13017,7 +13085,7 @@ function onDailyPressed() {
     const targetPiece = library.find(p => p.name === 'Target');
     if (targetPiece) gridState[numCols] = { piece: targetPiece, position: levelData.targetPiece.position, selectedIntervals: {} };
 
-    fullMelodyNotes = computeFullMelodyNotes();
+    fullMelodyNotes = computeFullMelodyNotes(buildSolutionMelodyState(levelData));
     levelData.removeCols.forEach(col => { gridState[col] = null; });
 
     trayAvailable = [...(levelData.trayBasePieces || [])];
@@ -13105,6 +13173,7 @@ function startComposerMode(len) {
     clearHintVisuals();
     if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
     composerMode = true;
+    puzzleInteractionLocked = false;
     composerChordLen = len || 4;
 
     // Generate random chords

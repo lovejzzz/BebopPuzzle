@@ -1418,10 +1418,41 @@
             text-shadow: 0 0 8px var(--gold-glow);
         }
 
+        /* ---- Accessibility helpers ---- */
+        .sr-only {
+            position: absolute; width: 1px; height: 1px;
+            padding: 0; margin: -1px; overflow: hidden;
+            clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+        }
+        /* Visible keyboard focus. The game is drag-first, so without this a keyboard
+           user has no idea where they are. */
+        .tray-piece:focus-visible,
+        .grid-column:focus-visible,
+        .star-info-btn:focus-visible,
+        .landing-btn:focus-visible,
+        .hint-btn:focus-visible {
+            outline: 2px solid var(--gold);
+            outline-offset: 3px;
+            border-radius: 8px;
+        }
+        /* The piece currently "picked up" via the keyboard. */
+        .tray-piece.kb-held {
+            outline: 2px solid var(--gold);
+            outline-offset: 3px;
+            box-shadow: 0 0 18px var(--gold-glow);
+        }
+
+        /* Sits inline beside the star row. It used to be position:absolute with
+           right:-16px against .topbar-center, which is flex:1 and spans the whole
+           topbar — so it landed on top of the hint button and stole its clicks. */
+        .topbar-star-row {
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
         .star-info-btn {
             font-size: 11px; color: var(--text-muted); cursor: pointer;
             opacity: 0.5; transition: opacity 0.2s;
-            position: absolute; right: -16px; top: 0;
+            background: none; border: none; padding: 0; line-height: 1;
+            font-family: inherit;
         }
         .star-info-btn:hover { opacity: 1; }
         .topbar-center { position: relative; }
@@ -1523,6 +1554,14 @@
             padding: 16px;
             min-height: 0;
             overflow: hidden;
+        }
+        /* Short viewports (landscape phones): centred flex overflow clips at BOTH ends,
+           hiding the chord row behind the topbar and slicing the bottom cell row off.
+           Fall back to top-aligned scrolling so every row stays reachable. */
+        .puzzle-area.puzzle-area-scroll {
+            justify-content: flex-start;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         /* Chord row */
@@ -2747,6 +2786,17 @@
             color: var(--text);
             margin-bottom: 24px;
         }
+        /* In-modal "tap a piece" prompt — replaces a floating tooltip that collided
+           with the modal title. Reserves its height so the layout doesn't jump. */
+        .piece-intro-nudge {
+            font-size: 12px; font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+            min-height: 1.2em;
+            transition: opacity 0.25s ease;
+        }
+        .piece-intro-nudge.is-dismissed { opacity: 0; }
+
         .piece-intro-variants {
             display: flex; gap: 40px; justify-content: center; margin-bottom: 24px;
         }
@@ -4031,6 +4081,11 @@
             width: 92%;
             box-shadow: 0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
             animation: modal-pop 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+            /* Without these the panel is 462px tall on a 375px-tall viewport, pushing the
+               close button and the Preview button off-screen with no way to scroll. */
+            max-height: calc(100vh - 24px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .sound-panel-header {
@@ -4297,6 +4352,32 @@
                 max-width: 320px;
             }
         }
+
+        /* Every full-screen modal shares the same overflow hazard as the sound panel:
+           taller than a short viewport, with no scroll affordance. Cap and scroll them. */
+        /* (.changelog-card already caps and scrolls itself, further down.) */
+        .success-modal, .piece-intro-modal, .warmup-modal,
+        .reward-modal, .game-complete-modal {
+            max-height: calc(100vh - 24px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Short viewports (landscape phones ~375px tall). The chrome above and below
+           the grid ate ~60% of the screen, leaving the puzzle clipped. Trim it back. */
+        @media (max-height: 480px) {
+            .puzzle-topbar { padding: 6px 12px; }
+            .topbar-back { width: 36px; height: 36px; }
+            .hint-btn { min-height: 36px; }
+            .puzzle-bottombar { padding: 6px 12px 8px; }
+            .tray-piece-thumb { width: 44px; height: 44px; min-width: 44px; min-height: 44px; }
+            .tray-piece-thumb img { width: 44px; height: 44px; }
+            .tray-piece-label { font-size: 8px; }
+            .tempo-hint { padding: 6px 10px; width: 132px; }
+            .tempo-hint-value { font-size: 13px; }
+            .play-btn { width: 48px; height: 48px; }
+            .play-status-label { font-size: 8px; }
+        }
         @media (max-width: 480px) {
             .puzzle-topbar { padding: 10px 12px; }
             .puzzle-area { padding: 8px; overflow-x: auto; }
@@ -4506,6 +4587,11 @@
             padding: 32px;
             max-width: 380px;
             width: 100%;
+            /* On short viewports the card overflowed the screen with no scroll, putting
+               the footer — and the v1.5 span that opens the changelog — out of reach. */
+            max-height: calc(100vh - 48px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
         .settings-title {
             font-family: 'Playfair Display', serif;
@@ -4867,6 +4953,9 @@
     <div class="ambient-bg"></div>
     <div class="noise-overlay"></div>
 
+    <!-- Announces keyboard placement feedback to screen readers -->
+    <div id="a11y-live" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+
     <!-- =============================================
          SCREEN: LANDING
          ============================================= -->
@@ -4889,7 +4978,7 @@
          ============================================= -->
     <div id="screen-boardgame" class="screen hidden">
         <div class="boardgame-header">
-            <button class="map-back" onclick="showScreen('landing')">←</button>
+            <button class="map-back" onclick="showScreen('landing')" aria-label="Back to main menu">←</button>
             <div class="boardgame-title">Boardgame Kit</div>
             <div class="boardgame-actions">
                 <button class="boardgame-small-btn" onclick="renderBoardgameKit()">Refresh</button>
@@ -5287,7 +5376,7 @@
          ============================================= -->
     <div id="screen-map" class="screen hidden">
         <div class="map-header">
-            <button class="map-back" onclick="showScreen('landing')">←</button>
+            <button class="map-back" onclick="showScreen('landing')" aria-label="Back to main menu">←</button>
             <div class="map-title" id="map-title">Chapter 1</div>
             <div class="map-stars-total" id="total-stars-display">★ 0</div>
         </div>
@@ -5300,11 +5389,13 @@
          ============================================= -->
     <div id="screen-puzzle" class="screen hidden">
         <div class="puzzle-topbar">
-            <button class="topbar-back" onclick="goToMap()">←</button>
+            <button class="topbar-back" onclick="goToMap()" aria-label="Back to level map">←</button>
             <div class="topbar-center">
                 <div class="topbar-level-name" id="puzzle-level-name"></div>
-                <div class="topbar-stars" id="puzzle-stars"></div>
-                <div class="star-info-btn" id="star-info-btn" onclick="toggleStarInfo()" title="Star rating info">ⓘ</div>
+                <div class="topbar-star-row">
+                    <div class="topbar-stars" id="puzzle-stars"></div>
+                    <button class="star-info-btn" id="star-info-btn" onclick="toggleStarInfo()" title="Star rating info" aria-label="Star rating info">ⓘ</button>
+                </div>
                 <div class="star-info-popup hidden" id="star-info-popup">
                     <div style="font-weight:700;margin-bottom:4px;">Star Rating</div>
                     <div>★★★ ≤2 listens, no hints, no mistakes</div>
@@ -5313,7 +5404,7 @@
                 </div>
             </div>
             <div class="topbar-right">
-                <button class="hint-btn" id="hint-btn" onclick="useHint()">
+                <button class="hint-btn" id="hint-btn" onclick="useHint()" aria-label="Use a hint">
                     <span class="hint-icon-bulb" aria-hidden="true"></span>
                     <span id="hint-count">3</span>
                 </button>
@@ -5454,6 +5545,7 @@
 
             <!-- Part 1: Reveal -->
             <div id="piece-intro-part1">
+                <div class="piece-intro-nudge" id="piece-intro-nudge">Tap a piece to hear it.</div>
                 <div class="piece-intro-variants">
                     <button class="piece-intro-variant" id="piece-intro-var-a" onclick="playPieceIntroVariant('a')">
                         <div class="piece-intro-var-icon" id="piece-intro-icon-a"></div>
@@ -6355,9 +6447,53 @@ function pickRandomChords(count) {
 // ==================================================================
 // PUZZLE GENERATOR — builds random valid puzzle from template
 // ==================================================================
+
+// Playable register for a generated line. The Rhodes sampler covers MIDI 48-84 and
+// findClosestSample() refuses anything more than 12 semitones from a loaded sample,
+// so 96 is a hard ceiling before playback falls back to the synth. We keep a few
+// semitones of margin and stay inside a register that still reads as bebop.
+const MELODY_MIN_MIDI = 48;  // C3
+const MELODY_MAX_MIDI = 93;  // A6
+
+// Melody span for a candidate solution, without touching the live puzzle globals.
+// Mirrors computeFullMelodyNotes(): the chain resolves right-to-left, each piece's
+// first note becoming the target for the piece to its left.
+function melodyRangeForSolution(chordNames, targetChordName, solution, targetPos) {
+    const allChords = [...chordNames, targetChordName].map(parseChord);
+    const n = chordNames.length;
+    const targetChord = allChords[n];
+    if (!targetChord) return null;
+    let nextTarget = getTargetNote(targetPos, targetChord);
+    if (!nextTarget || !isFinite(nextTarget)) return null;
+
+    let min = nextTarget, max = nextTarget;
+    for (let col = n - 1; col >= 0; col--) {
+        const s = solution[col];
+        const piece = s && findPiece(s.pieceName, s.pieceLabel);
+        if (!piece || !allChords[col]) return null;
+        const notes = calculatePieceNotes(piece, allChords[col], nextTarget, s.selectedIntervals || {});
+        if (!notes || notes.length === 0) return null;
+        for (const note of notes) {
+            if (!isFinite(note)) return null;
+            if (note < min) min = note;
+            if (note > max) max = note;
+        }
+        nextTarget = notes[0];
+    }
+    return { min, max };
+}
+
 function generateRandomPuzzle(template) {
     const VALID_POS = [0, 0.5, 1.0, 1.5];
     const MAX_ATTEMPTS = 300;
+
+    // The craft table is what lets a player turn tray cards into the pieces a solution
+    // needs. Levels that expose only Flip (or hide the table entirely) cannot duplicate,
+    // so the generator must not ask for two pieces of the same type there.
+    // Label variants are handled differently — see the tray seeding in startLevel(),
+    // which hands out the needed variant directly when Flip isn't available.
+    const craftMode = template.craft || 'full';
+    const canDuplicate = craftMode === 'full';
 
     for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
         // 1. Pick random pieces for each chain slot
@@ -6456,6 +6592,14 @@ function generateRandomPuzzle(template) {
 
             if (removeCols.length < template.rem) { positions = null; continue; }
 
+            // The tray holds one card per DISTINCT base name. Without the Dupe button a
+            // level asking for two pieces of the same type would be unwinnable, so only
+            // let that happen where the player can actually duplicate.
+            if (!canDuplicate) {
+                const bases = removeCols.map(c => pieces[c].baseName);
+                if (new Set(bases).size !== bases.length) { positions = null; continue; }
+            }
+
             // requireFlip: ensure at least one removed col uses the non-default label
             if (template.requireFlip) {
                 const hasFlipped = removeCols.some(c => {
@@ -6475,13 +6619,32 @@ function generateRandomPuzzle(template) {
             // 7. Pick random chords
             const { chords, targetChord } = pickRandomChords(template.len);
 
-            // 8. Build solution array
-            const solution = pieces.map((p, i) => ({
-                col: i,
-                pieceName: p.baseName,
-                pieceLabel: p.label,
-                position: positions[i]
-            }));
+            // 8. Build solution array.
+            // Intervals are chosen here rather than at placement time so the melody is
+            // fully determined now — that lets us range-check it below, and keeps the
+            // puzzle's sound identical every time it is loaded.
+            const solution = pieces.map((p, i) => {
+                const lib = findPiece(p.baseName, p.label);
+                return {
+                    col: i,
+                    pieceName: p.baseName,
+                    pieceLabel: p.label,
+                    position: positions[i],
+                    selectedIntervals: lib ? selectRandomIntervals(lib) : {}
+                };
+            });
+
+            // 9. Reject chains that climb out of the playable register.
+            // Notes are derived right-to-left, and a Descending piece places its notes
+            // ABOVE its target — so a run of them ratchets the line up by an octave per
+            // column, reaching MIDI 100+. Past MIDI 96 the sampler has no usable sample
+            // and playNote silently drops to the synth, so the phrase changes timbre
+            // mid-line. Retry instead of shipping the puzzle.
+            const range = melodyRangeForSolution(chords, targetChord, solution, targetPos);
+            if (!range || range.min < MELODY_MIN_MIDI || range.max > MELODY_MAX_MIDI) {
+                positions = null;
+                continue;
+            }
 
             // Build base tray from removed cols
             const baseTray = [...traySet];
@@ -6569,7 +6732,7 @@ function renderChapterIcon(iconStr, size) {
     size = size || 18;
     const piece = library.find(p => p.name === iconStr);
     if (piece && piece.thumbnail) {
-        return `<img src="${piece.thumbnail}" style="width:${size}px;height:${size}px;border-radius:3px;object-fit:cover;vertical-align:middle;" draggable="false">`;
+        return `<img src="${piece.thumbnail}" alt="" style="width:${size}px;height:${size}px;border-radius:3px;object-fit:cover;vertical-align:middle;" draggable="false">`;
     }
     return `<span class="chapter-icon-text">${iconStr}</span>`;
 }
@@ -6622,6 +6785,9 @@ let draggedFromGrid = null;
 let draggedFromCraft = false;
 let dragPreview = null;
 let currentSnapCol = null;
+// Column the player released over when the dragged piece had no valid position there.
+// Used to explain the bounce-back instead of rejecting the drop in silence.
+let dragRejectedCol = null;
 let currentSnapPos = null;
 let dragRaf = null;
 let pendingDragPoint = null;
@@ -6629,6 +6795,10 @@ let dragGridMetrics = null;
 let snapPreviewEl = null;
 let snapPreviewKey = '';
 let cellSize = 0;
+// Vertical gap actually applied between grid rows. sizeCells() may shrink it below the
+// CSS default on short viewports, and piece positioning must use the same number.
+let cellRowGap = window.innerWidth <= 480 ? 8 : 12;
+function getCellRowGap() { return cellRowGap; }
 let fullMelodyNotes = null;
 let gameProgress = {};
 let listensRemaining = 0;
@@ -6657,10 +6827,14 @@ function clearAutoPlayTimeout() {
 
 function scheduleAutoPlay(levelId) {
     clearAutoPlayTimeout();
+    // Jam Session levels budget every listen, and their tutorial tells the player to
+    // press Listen themselves. Auto-playing here would silently spend one of those
+    // listens before the player has done anything (on ch6_12 that is the only one).
+    if (currentLevelData && currentLevelData.listens > 0) return;
     autoPlayTimeout = setTimeout(() => {
         autoPlayTimeout = null;
         const puzzleActive = document.getElementById('screen-puzzle')?.classList.contains('active');
-        if (currentLevel === levelId && puzzleActive && !isPlaying) playMelody();
+        if (currentLevel === levelId && puzzleActive && !isPlaying) playMelody({ auto: true });
     }, 1000);
 }
 
@@ -6973,7 +7147,11 @@ function renderPracticePanel(chapterId) {
 function isChapterUnlocked(chapterId) {
     if (chapterId === 1) return true;
     const prev = chapterId - 1;
-    return getChapterStars(prev) >= CHAPTERS.find(c => c.id === chapterId).unlockStars;
+    // Composer mode uses a synthetic chapter 0, so this can be called with an id that
+    // has no CHAPTERS entry. Treat unknown chapters as locked rather than throwing.
+    const chapter = CHAPTERS.find(c => c.id === chapterId);
+    if (!chapter) return false;
+    return getChapterStars(prev) >= chapter.unlockStars;
 }
 
 function isLevelUnlocked(level) {
@@ -7058,7 +7236,9 @@ function goToMap(overrideChapter) {
         showScreen('landing');
     } else if (overrideChapter) {
         activeChapterTab = overrideChapter;
-    } else if (currentLevelData) {
+    } else if (currentLevelData && CHAPTERS.some(c => c.id === currentLevelData.chapter)) {
+        // Guard against synthetic chapters (composer mode uses 0), which would leave
+        // activeChapterTab pointing at a chapter that does not exist.
         activeChapterTab = currentLevelData.chapter;
     }
     if (!shouldReturnToLanding) showScreen('map');
@@ -7270,7 +7450,7 @@ function startLevel(levelId, opts = {}) {
     hideComposerToolbar();
     document.getElementById('hint-btn').style.display = '';
     document.getElementById('timer-display').style.display = '';
-    document.getElementById('puzzle-stars').style.display = '';
+    document.querySelector('.topbar-star-row').style.display = '';
     stopPlayback(); // ensure any ongoing playback is halted before loading new level
     celebrationTimeouts.forEach(t => clearTimeout(t));
     celebrationTimeouts = [];
@@ -7278,6 +7458,11 @@ function startLevel(levelId, opts = {}) {
     guidedStepTimeouts = [];
     clearHintVisuals();
     dismissSideNudge();
+    // A tutorial tooltip / objective banner from the level we are leaving would otherwise
+    // stay on screen and mislabel the new one (e.g. ch1_03's "this piece needs to go the
+    // other way!" hanging over a Chapter 2 board).
+    removeTutorialTooltip();
+    removeSpotlight();
     if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
     const template = LEVEL_TEMPLATES.find(t => t.id === levelId);
     if (!template) return;
@@ -7297,6 +7482,8 @@ function startLevel(levelId, opts = {}) {
         showJamSessionIntro(() => startLevel(levelId, opts));
         return;
     }
+
+    if (typeof kbCancel === 'function') kbCancel(true);
 
     // Tutorial levels use hardcoded puzzles; others are generated fresh
     if (TUTORIAL_LEVELS[levelId]) {
@@ -7339,7 +7526,7 @@ function startLevel(levelId, opts = {}) {
     // Reset tray & craft
     hideCraftTable();
     trayAvailable = [...(currentLevelData.trayBasePieces || [])];
-    trayFlipState = new Array(trayAvailable.length).fill(false);
+    trayFlipState = seedTrayFlipState(trayAvailable, currentLevelData, template);
     maxTraySize = 4;
     // Set compact mode once based on max possible tray size (prevents size toggling mid-gameplay)
     const trayEl = document.getElementById('piece-tray');
@@ -7349,7 +7536,7 @@ function startLevel(levelId, opts = {}) {
     hintsUsed = 0;
     wrongPlacements = 0;
     totalListens = 0;
-    hintsRemaining = currentLevelData.hints || 3;
+    hintsRemaining = getLevelHintBudget(currentLevelData);
     currentHintCol = null;
     currentHintLevel = 0;
     levelStartTime = Date.now();
@@ -7369,7 +7556,7 @@ function startLevel(levelId, opts = {}) {
     // Invisible retry scaffolding — subtle difficulty reduction on repeated attempts
     currentBPM = 90; // reset before retry scaffolding (prevents compounding across levels)
     const retryCount = gameProgress['_retry_' + currentLevel] || 0;
-    if (retryCount >= 2) hintsRemaining = Math.max(hintsRemaining, (currentLevelData.hints || 3) + 1); // bonus hint
+    if (retryCount >= 2) hintsRemaining = Math.max(hintsRemaining, getLevelHintBudget(currentLevelData) + 1); // bonus hint
     if (retryCount >= 3) currentBPM = Math.round(currentBPM * 0.85); // 15% slower
     if (retryCount >= 4 && currentLevelData.removeCols.length >= 2) {
         // Pre-fill one correct column (the first one)
@@ -7469,6 +7656,35 @@ function startLevel(levelId, opts = {}) {
         // Auto-play melody after a short delay so the user hears the complete line immediately.
         scheduleAutoPlay(levelId);
     });
+}
+
+// Starting flip state for each tray card.
+// Cards normally start on their default label and the player uses the craft table's
+// Flip button to get the other variant. On levels that hide the craft table there is
+// no Flip button, so a solution needing the mirrored variant would be unwinnable —
+// there, hand the player the variant the solution actually calls for.
+function seedTrayFlipState(tray, levelData, template) {
+    const flip = new Array(tray.length).fill(false);
+    const craftMode = (template && template.craft) || (levelData && levelData.craft) || 'full';
+    if (craftMode !== 'hidden' || !levelData || !levelData.solution) return flip;
+
+    const needed = {};
+    (levelData.removeCols || []).forEach(col => {
+        const s = levelData.solution.find(x => x.col === col);
+        if (!s) return;
+        const fm = FLIP_MAP[s.pieceName];
+        if (fm && s.pieceLabel === fm.flipH) needed[s.pieceName] = true;
+    });
+    tray.forEach((baseName, i) => { if (needed[baseName]) flip[i] = true; });
+    return flip;
+}
+
+// Human-readable name for a piece, used for alt text and aria labels. The piece
+// thumbnails are the game's primary content, so they need to be announceable.
+function pieceAltText(piece) {
+    if (!piece) return '';
+    if (piece.name === 'Target') return 'Target note';
+    return piece.label ? piece.name + ' ' + piece.label : piece.name;
 }
 
 function findPiece(name, label) {
@@ -7594,10 +7810,24 @@ function sizeCells() {
     const gridW = puzzleArea.clientWidth - 32;
     const cellFromW = Math.floor((gridW - (totalCols - 1) * cellGap) / totalCols);
 
-    const size = Math.max(44, Math.min(cellFromH, cellFromW, 140));
+    // The 44px floor keeps cells tappable, but on short viewports (landscape phones)
+    // 3 rows at 44px overflow .puzzle-area, which centres its content and clips with
+    // overflow:hidden — hiding the chord row behind the topbar and slicing the bottom
+    // row off. When that happens, shrink the gap first and only then let the grid
+    // scroll, so every row stays reachable.
+    const idealSize = Math.min(cellFromH, cellFromW, 140);
+    const size = Math.max(44, idealSize);
+    const tightGap = size > cellFromH ? Math.max(4, Math.floor((availH - size * 3) / 2)) : cellGap;
+    const rowGap = Math.min(cellGap, Math.max(4, tightGap));
 
-    document.querySelectorAll('.grid-cell').forEach(c => {
-        c.style.height = size + 'px';
+    cellRowGap = rowGap;
+    // Rows are spaced by `.grid-cell + .grid-cell { margin-top }`, not by the grid's
+    // gap (which is the column gap), so the tightened row spacing goes on the cells.
+    document.querySelectorAll('.grid-column').forEach(col => {
+        col.querySelectorAll('.grid-cell').forEach((c, i) => {
+            c.style.height = size + 'px';
+            c.style.marginTop = i === 0 ? '0px' : rowGap + 'px';
+        });
     });
 
     const totalW = size * totalCols + (totalCols - 1) * cellGap;
@@ -7606,11 +7836,15 @@ function sizeCells() {
     document.getElementById('chord-row').style.maxWidth = totalW + 'px';
     document.getElementById('chord-row').style.margin = '0 auto';
 
+    // If the grid still cannot fit, let the puzzle area scroll instead of clipping.
+    const neededH = chordH + size * 3 + rowGap * 2 + 16;
+    puzzleArea.classList.toggle('puzzle-area-scroll', neededH > areaH);
+
     updateCellSize();
 }
 
 function renderGrid() {
-    const cellGap = window.innerWidth <= 480 ? 8 : 12;
+    const cellGap = getCellRowGap();
 
     for (let col = 0; col <= numCols; col++) {
         const column = document.querySelector(`.grid-column[data-col="${col}"]`);
@@ -7638,7 +7872,7 @@ function renderGrid() {
             el.dataset.pieceType = piece.name;
             el.dataset.renderKey = renderKey;
             if (col === numCols && position < 0) el.classList.add('glass');
-            el.innerHTML = `<img src="${piece.thumbnail}" draggable="false">`;
+            el.innerHTML = `<img src="${piece.thumbnail}" alt="${escapeHtml(pieceAltText(piece))}" draggable="false">`;
 
             if (isPuzzleCol(col) && !puzzleInteractionLocked) {
                 el.style.cursor = 'grab';
@@ -7673,13 +7907,14 @@ function applyHighlights() {
         if (!colEl) continue;
         if (emptyCols.has(c)) {
             colEl.classList.add('col-empty');
-            // Tap empty column to hear what belongs there
+            // Tap empty column to hear what belongs there.
+            // This reveals solution audio, so it is scored exactly like pressing Listen.
             colEl.style.cursor = 'pointer';
             colEl.dataset.previewCol = c;
             colEl.onclick = function(e) {
                 // Don't fire during drag
                 if (draggedPiece) return;
-                playColumnPreview(parseInt(this.dataset.previewCol));
+                playColumnPreview(parseInt(this.dataset.previewCol), { countsAsListen: true });
             };
         }
         else if (gridState[c] && !isPuzzleCol(c)) colEl.classList.add('col-locked');
@@ -7694,6 +7929,8 @@ function applyHighlights() {
             };
         }
     }
+    // Keep the keyboard tab targets in sync with which columns are now placeable.
+    if (typeof updateKeyboardAffordances === 'function') updateKeyboardAffordances();
 }
 
 function isEmptyCol(col) {
@@ -7774,10 +8011,15 @@ function renderTray() {
         const card = document.createElement('div');
         card.className = 'tray-piece';
         card.dataset.baseName = baseName;
+        // Focusable so the game can be played without a drag (see KEYBOARD PLACEMENT).
+        card.dataset.trayIndex = idx;
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('role', 'button');
+        card.setAttribute('aria-label', `${baseName} ${label}. Press Enter to pick up.`);
 
         card.innerHTML = `
             <div class="tray-piece-thumb">
-                <img src="${piece.thumbnail}" draggable="false">
+                <img src="${piece.thumbnail}" alt="" draggable="false">
             </div>
             <div class="tray-piece-label">${baseName}</div>
             <div class="tray-piece-variant">${label}</div>
@@ -8573,7 +8815,7 @@ function isCraftDrop(clientX, clientY) {
 // DRAG & DROP
 // ==================================================================
 function collectDragGridMetrics() {
-    const cellGap = window.innerWidth <= 480 ? 8 : 12;
+    const cellGap = getCellRowGap();
     return Array.from(document.querySelectorAll('.grid-column')).map(col => {
         const firstCell = col.querySelector('.grid-cell');
         if (!firstCell) return null;
@@ -8721,7 +8963,7 @@ function startDrag(e, piece, fromGrid) {
     dragPreview.className = 'drag-preview';
     dragPreview.style.width = cellSize + 'px';
     dragPreview.style.height = cellSize + 'px';
-    dragPreview.innerHTML = `<img src="${piece.thumbnail}" draggable="false">`;
+    dragPreview.innerHTML = `<img src="${piece.thumbnail}" alt="" draggable="false">`;
     document.body.appendChild(dragPreview);
     updateDragPreview(e.clientX, e.clientY, false);
     prepareDragMetrics();
@@ -8754,7 +8996,7 @@ function startDragTouch(e, piece, fromGrid) {
     dragPreview.className = 'drag-preview';
     dragPreview.style.width = cellSize + 'px';
     dragPreview.style.height = cellSize + 'px';
-    dragPreview.innerHTML = `<img src="${piece.thumbnail}" draggable="false">`;
+    dragPreview.innerHTML = `<img src="${piece.thumbnail}" alt="" draggable="false">`;
     document.body.appendChild(dragPreview);
     updateDragPreview(touch.clientX, touch.clientY, true);
     prepareDragMetrics();
@@ -8814,9 +9056,13 @@ function processDragAt(x, y) {
             };
             if (closestValid) { currentSnapCol = colIndex; currentSnapPos = closest; foundSnap = true; }
             else { currentSnapCol = null; currentSnapPos = null; }
+            // Remember that the pointer was over a real column but nothing there
+            // connects, so the drop can explain itself instead of silently bouncing.
+            dragRejectedCol = closestValid ? null : colIndex;
         }
     });
 
+    if (!previewTarget) dragRejectedCol = null;
     if (!foundSnap) { currentSnapCol = null; currentSnapPos = null; }
     if (previewTarget) updateSnapPreview(previewTarget.col, previewTarget.top, previewTarget.height, previewTarget.valid);
     else clearSnapPreview();
@@ -8997,10 +9243,42 @@ function finishDrag(clientX, clientY, snapPoint = null) {
         applyHighlights();
     }
 
+    // Released over a column where this piece cannot connect at any height. Without
+    // this the piece just springs back with no sound and no message, which reads as
+    // the game ignoring the player rather than as "that shape doesn't fit here".
+    if (currentSnapCol === null && dragRejectedCol !== null && draggedPiece) {
+        explainRejectedDrop(draggedPiece);
+    }
 
     if (dragPreview) { dragPreview.remove(); dragPreview = null; }
     draggedPiece = null; draggedFromGrid = null; draggedFromCraft = false;
     currentSnapCol = null; currentSnapPos = null; draggedTrayIndex = -1;
+    dragRejectedCol = null;
+}
+
+// Tell the player why a drop bounced. Three cases worth distinguishing: the piece is
+// right but was released at the wrong height, flipping it would make it fit (the whole
+// lesson of the Flip levels), or it simply is not the right shape.
+function explainRejectedDrop(piece) {
+    sfx('error');
+    onPlayerAction();
+    const col = dragRejectedCol;
+
+    const sameFits = getValidSnapPositions(piece, col).some(s => s.valid);
+    if (sameFits) {
+        showToast('Right piece — try a different height in that column.', 'info', 2600);
+        return;
+    }
+
+    const map = FLIP_MAP[piece.name];
+    if (map && map.flipH) {
+        const other = findPieceVariant(piece.name, piece.label === map.defaultLabel);
+        if (other && getValidSnapPositions(other, col).some(s => s.valid)) {
+            showToast('That shape does not connect here — try flipping it.', 'info', 2600);
+            return;
+        }
+    }
+    showToast('That piece does not connect here. Listen again for the shape.', 'info', 2600);
 }
 
 function onDragEnd(e) {
@@ -9016,6 +9294,172 @@ function onTouchEnd(e) {
     const snapPoint = touch ? getTouchSnapPoint(touch) : null;
     finishDrag(touch?.clientX, touch?.clientY, snapPoint);
 }
+
+// ==================================================================
+// KEYBOARD PLACEMENT — non-drag path to play the game
+// Placing pieces was mouse/touch-drag only, which left the game unplayable for
+// keyboard-only users. Flow: Tab to a tray piece, Enter to pick it up, Tab to a
+// column, Up/Down to choose the height, Enter to place, Escape to cancel.
+// ==================================================================
+let kbHeldTrayIndex = -1;   // index into trayAvailable of the picked-up piece
+let kbHeldPiece = null;
+let kbTargetCol = null;
+let kbCandidates = [];      // valid positions in the focused column
+let kbCandidateIdx = 0;
+
+function announce(msg) {
+    const live = document.getElementById('a11y-live');
+    if (live) live.textContent = msg;
+}
+
+function kbIsActive() {
+    return kbHeldPiece !== null;
+}
+
+function kbCancel(quiet) {
+    kbHeldTrayIndex = -1;
+    kbHeldPiece = null;
+    kbTargetCol = null;
+    kbCandidates = [];
+    kbCandidateIdx = 0;
+    clearSnapPreview();
+    document.querySelectorAll('.tray-piece.kb-held').forEach(el => el.classList.remove('kb-held'));
+    updateKeyboardAffordances();
+    if (!quiet) announce('Cancelled.');
+}
+
+function kbPickUpTray(idx) {
+    if (puzzleInteractionLocked) return;
+    const baseName = trayAvailable[idx];
+    if (!baseName) return;
+    const piece = findPieceVariant(baseName, !!trayFlipState[idx]);
+    if (!piece) return;
+    kbCancel(true);
+    kbHeldTrayIndex = idx;
+    kbHeldPiece = piece;
+    const card = document.querySelector(`.tray-piece[data-tray-index="${idx}"]`);
+    if (card) card.classList.add('kb-held');
+    updateKeyboardAffordances();
+    announce(`${pieceAltText(piece)} picked up. Tab to a column, then use up and down arrows to choose a height and press Enter to place.`);
+}
+
+function kbFocusColumn(col) {
+    if (!kbIsActive()) return;
+    kbTargetCol = col;
+    kbCandidates = getValidSnapPositions(kbHeldPiece, col).filter(c => c.valid).map(c => c.pos);
+    if (kbCandidates.length === 0) {
+        // No connection-valid height here; still allow placement so the player gets the
+        // same "wrong spot" feedback a drag would give.
+        kbCandidates = [0, 0.5, 1, 1.5];
+    }
+    kbCandidateIdx = 0;
+    kbShowCandidate();
+}
+
+function kbShowCandidate() {
+    if (!kbIsActive() || kbTargetCol === null) return;
+    const colEl = document.querySelector(`.grid-column[data-col="${kbTargetCol}"]`);
+    const firstCell = colEl?.querySelector('.grid-cell');
+    if (!colEl || !firstCell) return;
+    const cellH = firstCell.offsetHeight;
+    const pos = kbCandidates[kbCandidateIdx];
+    updateSnapPreview(colEl, pos * (cellH + getCellRowGap()), cellH, true);
+    announce(`Column ${kbTargetCol + 1}, height ${pos}. Option ${kbCandidateIdx + 1} of ${kbCandidates.length}. Press Enter to place.`);
+}
+
+function kbCycleCandidate(delta) {
+    if (!kbIsActive() || kbTargetCol === null || kbCandidates.length === 0) return;
+    kbCandidateIdx = (kbCandidateIdx + delta + kbCandidates.length) % kbCandidates.length;
+    kbShowCandidate();
+}
+
+function kbCommit() {
+    if (!kbIsActive() || kbTargetCol === null) return;
+    const col = kbTargetCol;
+    const pos = kbCandidates[kbCandidateIdx];
+    if (!isPuzzleCol(col) || gridState[col]) {
+        announce('That column is not available.');
+        return;
+    }
+    const piece = kbHeldPiece;
+    const trayIdx = kbHeldTrayIndex;
+    clearSnapPreview();
+    const sel = getSolutionIntervals(col) || selectRandomIntervals(piece);
+    gridState[col] = { piece, position: pos, selectedIntervals: sel };
+    sfx('place');
+    kbHeldTrayIndex = -1;
+    kbHeldPiece = null;
+    kbTargetCol = null;
+    kbCandidates = [];
+    document.querySelectorAll('.tray-piece.kb-held').forEach(el => el.classList.remove('kb-held'));
+    if (trayIdx >= 0) collapseTrayPiece(trayIdx); else renderTray();
+    renderGrid();
+    applyHighlights();
+    updateKeyboardAffordances();
+    announce(`${pieceAltText(piece)} placed in column ${col + 1}.`);
+    setTimeout(() => flashConnectedNeighbors(col), 250);
+    checkAnswer(col);
+}
+
+// Columns are only reachable by Tab while a piece is held, so Tab order stays short.
+function updateKeyboardAffordances() {
+    const held = kbIsActive();
+    document.querySelectorAll('#melody-grid .grid-column').forEach(colEl => {
+        const col = parseInt(colEl.dataset.col);
+        const placeable = held && isPuzzleCol(col) && !gridState[col];
+        if (placeable) {
+            colEl.setAttribute('tabindex', '0');
+            colEl.setAttribute('role', 'button');
+            colEl.setAttribute('aria-label', `Place in column ${col + 1}, chord ${currentLevelData?.chords?.[col] ?? ''}`);
+        } else {
+            colEl.removeAttribute('tabindex');
+            colEl.removeAttribute('role');
+            colEl.removeAttribute('aria-label');
+        }
+    });
+}
+
+document.addEventListener('keydown', e => {
+    if (!document.getElementById('screen-puzzle')?.classList.contains('active')) return;
+    const tray = e.target.closest?.('.tray-piece');
+    const colEl = e.target.closest?.('#melody-grid .grid-column');
+
+    // stopPropagation keeps Space from also reaching the global play/pause shortcut.
+    if (tray && (e.code === 'Enter' || e.code === 'Space')) {
+        e.preventDefault();
+        e.stopPropagation();
+        const idx = parseInt(tray.dataset.trayIndex);
+        if (kbHeldTrayIndex === idx) kbCancel();
+        else kbPickUpTray(idx);
+        return;
+    }
+    if (colEl && kbIsActive()) {
+        if (e.code === 'ArrowUp' || e.code === 'ArrowDown') {
+            e.preventDefault();
+            e.stopPropagation();
+            if (kbTargetCol !== parseInt(colEl.dataset.col)) kbFocusColumn(parseInt(colEl.dataset.col));
+            else kbCycleCandidate(e.code === 'ArrowUp' ? -1 : 1);
+            return;
+        }
+        if (e.code === 'Enter' || e.code === 'Space') {
+            e.preventDefault();
+            e.stopPropagation();
+            if (kbTargetCol !== parseInt(colEl.dataset.col)) kbFocusColumn(parseInt(colEl.dataset.col));
+            else kbCommit();
+            return;
+        }
+    }
+    if (e.code === 'Escape' && kbIsActive()) {
+        e.preventDefault();
+        e.stopPropagation();
+        kbCancel();
+    }
+}, true);
+
+document.addEventListener('focusin', e => {
+    const colEl = e.target.closest?.('#melody-grid .grid-column');
+    if (colEl && kbIsActive()) kbFocusColumn(parseInt(colEl.dataset.col));
+});
 
 // ==================================================================
 // CONNECTION FLASH — visual feedback when pieces connect
@@ -9484,6 +9928,13 @@ function calculateStars() {
 // ==================================================================
 // HINTS
 // ==================================================================
+
+// Hint budget for a level. Uses ?? rather than || so that templates which
+// deliberately set hints:0 (the Mastery capstones and ch6_08-ch6_12) actually
+// get zero hints instead of silently falling through to the default of 3.
+function getLevelHintBudget(levelData) {
+    return levelData && typeof levelData.hints === 'number' ? levelData.hints : 3;
+}
 const HINT_DESCRIPTIONS = {
     'Arpeggio Ascending': 'The melody moves upward through the chord tones.',
     'Arpeggio Descending': 'The melody moves downward through the chord tones.',
@@ -9619,7 +10070,7 @@ function showPositionHint(answer) {
     const firstCell = colEl.querySelector('.grid-cell');
     if (!firstCell) return;
     const cellH = firstCell.offsetHeight;
-    const cellGap = window.innerWidth <= 480 ? 8 : 12;
+    const cellGap = getCellRowGap();
     const ghost = document.createElement('div');
     ghost.className = 'hint-ghost';
     ghost.style.top = (answer.position * (cellH + cellGap)) + 'px';
@@ -9633,7 +10084,7 @@ function showOptionsHint(answer) {
     const firstCell = colEl.querySelector('.grid-cell');
     if (!firstCell) return;
     const cellH = firstCell.offsetHeight;
-    const cellGap = window.innerWidth <= 480 ? 8 : 12;
+    const cellGap = getCellRowGap();
     const ghostTop = answer.position * (cellH + cellGap);
 
     const correctPiece = findPiece(answer.pieceName, answer.pieceLabel);
@@ -9678,7 +10129,7 @@ function showOptionsHint(answer) {
         if (!piece) return; // guard: skip any null entries
         const opt = document.createElement('div');
         opt.className = 'hint-piece-option';
-        opt.innerHTML = `<img src="${piece.thumbnail}" style="width:44px;height:44px;border-radius:6px;" draggable="false">
+        opt.innerHTML = `<img src="${piece.thumbnail}" alt="" style="width:44px;height:44px;border-radius:6px;" draggable="false">
             <div class="hint-piece-option-label">${piece.name}</div>
             <div class="hint-piece-option-variant">${piece.label || ''}</div>`;
         opt.addEventListener('click', () => {
@@ -9708,6 +10159,9 @@ function updateHintButton() {
     document.getElementById('hint-count').textContent = hintsRemaining;
     const btn = document.getElementById('hint-btn');
     btn.classList.toggle('disabled', hintsRemaining <= 0);
+    // Levels that grant no hints at all shouldn't show a permanently dead button.
+    // Once a hint has been spent we keep it visible so the 0 reads as "used up".
+    btn.style.display = (hintsRemaining <= 0 && hintsUsed === 0) ? 'none' : '';
 }
 
 function updateListenCounter() {
@@ -9754,7 +10208,7 @@ function checkStuckAfterWrong(col) {
     }
 
     // All hints used + 2 more wrong → offer Guide Me
-    if (hintsRemaining <= 0 && wrongPlacements >= (currentLevelData.hints || 3) + 2 && !guideMeOffered && !isGuidedMode) {
+    if (hintsRemaining <= 0 && wrongPlacements >= getLevelHintBudget(currentLevelData) + 2 && !guideMeOffered && !isGuidedMode) {
         guideMeOffered = true;
         showGuideMe();
     }
@@ -9962,7 +10416,10 @@ function spawnNoteParticles(col) {
     }
 }
 
-function playMelody() {
+// opts.auto: this playback was started by the game (the intro play-through on level
+// load), not by the player pressing Listen. It must not spend the star budget — the
+// star popup promises "≤2 listens" and a player reads that as their own presses.
+function playMelody(opts = {}) {
     clearAutoPlayTimeout();
     if (activeTooltipOptions?.role !== 'objective') {
         removeTutorialTooltip({ keepObjective: true }); // dismiss anchored step-1 tooltip when user presses play
@@ -9991,7 +10448,7 @@ function playMelody() {
     }
 
     isPlaying = true;
-    if (!composerMode) totalListens++;
+    if (!composerMode && !opts.auto) totalListens++;
     setPlayButtonState('playing');
 
     const eighth = getEighth();
@@ -10063,6 +10520,10 @@ function toggleStarInfo() {
 function startTimer() {
     if (timerInterval) clearInterval(timerInterval);
     const display = document.getElementById('timer-display');
+    // .timer-display is display:none (scoring moved to listen count), so ticking it every
+    // second for the whole level was pure waste. Elapsed time for bestTime is derived
+    // from levelStartTime at completion and does not depend on this interval.
+    if (!display || !display.offsetParent) return;
     timerInterval = setInterval(() => {
         const elapsed = Math.floor((Date.now() - levelStartTime) / 1000);
         const m = Math.floor(elapsed / 60);
@@ -10251,13 +10712,28 @@ function getTooltipBounds(targetEl) {
     const safeTop = topbar && isRectVisible(topbar) ? topbar.bottom + 10 : 12;
     const safeBottom = bottombar && isRectVisible(bottombar) ? bottombar.top - 10 : window.innerHeight - 12;
     const targetIsBottom = Boolean(targetEl?.closest?.('.puzzle-bottombar, .tray-surface, .piece-tray, .craft-inline'));
+    // Floating panels that sit over the board. They are not part of the topbar/bottombar
+    // chrome, so nothing else here keeps tooltips off them — without this the craft
+    // tooltips land on top of the tempo slider.
+    const floating = [];
+    const tempo = document.querySelector('#screen-puzzle.active .tempo-hint:not(.hidden)');
+    const tempoRect = getElementRect(tempo);
+    if (tempoRect && isRectVisible(tempoRect)) floating.push(tempoRect);
     return {
         topbar,
         bottombar,
+        floating,
         targetIsBottom,
         safeTop,
         safeBottom: targetIsBottom ? window.innerHeight - 12 : Math.max(safeTop + 80, safeBottom)
     };
+}
+
+// Area shared by two rects — used to score how badly a tooltip placement collides.
+function rectOverlapArea(a, b) {
+    const w = Math.min(a.right, b.right) - Math.max(a.left, b.left);
+    const h = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+    return (w > 0 && h > 0) ? w * h : 0;
 }
 
 function normalizeTooltipOptions(opts) {
@@ -10313,7 +10789,15 @@ function getPlacementCandidate(placement, targetRect, tipRect, bounds) {
     const distancePenalty = Math.abs((left + tipRect.width / 2) - targetCenterX) * 0.04
         + Math.abs((top + tipRect.height / 2) - targetCenterY) * 0.02;
     const blockedPenalty = bounds.bottombar && !bounds.targetIsBottom && top + tipRect.height > bounds.bottombar.top ? 500 : 0;
-    return { placement, left, top, score: overflow * 100 + distancePenalty + blockedPenalty };
+    // Penalise covering a floating panel (the tempo slider) proportionally to how much
+    // of it we would hide, so a placement that clears it wins when one exists.
+    const candidateRect = { left, top, right: left + tipRect.width, bottom: top + tipRect.height };
+    let floatingPenalty = 0;
+    (bounds.floating || []).forEach(rect => {
+        const area = rectOverlapArea(candidateRect, rect);
+        if (area > 0) floatingPenalty += 200 + area / 40;
+    });
+    return { placement, left, top, score: overflow * 100 + distancePenalty + blockedPenalty + floatingPenalty };
 }
 
 function positionTooltip(tip, targetEl, options = {}) {
@@ -10452,7 +10936,7 @@ function showTutorialStep1() {
         const listenLimit = currentLevelData?.listens;
         if (listenLimit) {
             // Listen-limit levels (ch6) always show the count
-            const msg = `Press Listen. You have ${listenLimit} listens. Make each one count.`;
+            const msg = `Press Listen. You have ${listenLimit} listen${listenLimit === 1 ? '' : 's'}. Make each one count.`;
             const levelId = currentLevel;
             scheduleLevelSetupTimeout(() => {
                 if (currentLevel === levelId && document.getElementById('screen-puzzle')?.classList.contains('active')) {
@@ -10480,8 +10964,10 @@ function onTutorialMelodyPlayed() {
     if (currentLevel === 'ch1_01' && !gameProgress['_tutorialSpotlightDone']) {
         removeSpotlight();
         removeTutorialTooltip();
-        // Extended sing-back moment
+        // Extended sing-back moment. Remember the real title so we can put it back \u2014
+        // otherwise the coaching sentence stays in the topbar for the whole level.
         const el = document.getElementById('puzzle-level-name');
+        const previousTitle = el ? el.textContent : '';
         if (el) {
             el.textContent = 'Try replaying it in your head \u2014 what shape did the melody make?';
             el.style.color = 'var(--gold)';
@@ -10489,7 +10975,7 @@ function onTutorialMelodyPlayed() {
         const levelId = currentLevel;
         scheduleLevelSetupTimeout(() => {
             if (currentLevel !== levelId || !document.getElementById('screen-puzzle')?.classList.contains('active')) return;
-            if (el) { el.style.color = ''; }
+            if (el) { el.style.color = ''; el.textContent = previousTitle; }
             gameProgress['_tutorialSpotlightDone'] = true;
             saveProgress();
             showTutorialStep2WithSpotlight();
@@ -10552,9 +11038,29 @@ function removeSpotlight() {
     document.querySelectorAll('.spotlight-lift').forEach(el => el.classList.remove('spotlight-lift'));
 }
 
-// Play the solution notes for a specific column when user taps an empty column
-function playColumnPreview(col) {
+// Play the solution notes for a specific column when user taps an empty column.
+// opts.countsAsListen: charge this preview against the level's listen budget and the
+// star score. Required for empty columns, because their audio IS the answer — without
+// it the listen limit and the 3-star gate can both be bypassed by tapping each gap.
+function playColumnPreview(col, opts = {}) {
     if (!fullMelodyNotes || isPlaying) return;
+
+    // Resolve what we would play first, so an empty column never spends a listen.
+    const isTargetCol = col === numCols && fullMelodyNotes.targetNote;
+    const colNotes = isTargetCol ? [fullMelodyNotes.targetNote] : fullMelodyNotes.pieceNotes[col];
+    if (!colNotes || colNotes.length === 0) return;
+
+    if (opts.countsAsListen) {
+        if (currentLevelData && currentLevelData.listens > 0) {
+            if (listensRemaining <= 0) {
+                showToast('No listens remaining!', 'info');
+                return;
+            }
+            listensRemaining--;
+            updateListenCounter();
+        }
+        if (!composerMode) totalListens++;
+    }
 
     getAudioCtx();
     getMasterGain();
@@ -10568,17 +11074,11 @@ function playColumnPreview(col) {
 
     let t = audioCtx.currentTime + 0.05;
 
-    // Target column: play the target note
-    if (col === numCols && fullMelodyNotes.targetNote) {
+    if (isTargetCol) {
         playNote(midiToFreq(fullMelodyNotes.targetNote), t, eighth * 2 * 0.9);
         t += eighth * 2;
     } else {
-        const notes = fullMelodyNotes.pieceNotes[col];
-        if (!notes || notes.length === 0) {
-            clearPlayhead();
-            return;
-        }
-        notes.forEach((midi, i) => {
+        colNotes.forEach((midi, i) => {
             const dur = (i % 2 === 0) ? swL : swS;
             playNote(midiToFreq(midi), t, dur * 0.9);
             t += dur;
@@ -10751,7 +11251,12 @@ function showSuccessModal(stars, listens) {
     // Stats line: listens, hints, mistakes
     const summary = lastCompletionSummary || {};
     const bestStr = !summary.firstComplete && summary.isNewBestListens ? ' new best' : '';
-    document.getElementById('success-stats').innerHTML = '<span class="success-stat-value">' + listens + '</span> listens' + bestStr + '&nbsp;\u00b7&nbsp;<span class="success-stat-value">' + hintsUsed + '</span> hints&nbsp;\u00b7&nbsp;<span class="success-stat-value">' + wrongPlacements + '</span> mistakes';
+    const plural = (n, word) => n === 1 ? word : word + 's';
+    const stat = (n, word) => '<span class="success-stat-value">' + n + '</span> ' + plural(n, word);
+    document.getElementById('success-stats').innerHTML =
+        stat(listens, 'listen') + bestStr +
+        '&nbsp;\u00b7&nbsp;' + stat(hintsUsed, 'hint') +
+        '&nbsp;\u00b7&nbsp;' + stat(wrongPlacements, 'mistake');
     renderSuccessFeedback(stars, listens);
     renderSuccessNextGoal(stars, listens);
     renderSuccessMissions();
@@ -10901,7 +11406,7 @@ function showWarmupQuestion() {
         btn.dataset.label = v.label;
         const piece = findPiece(v.name, v.label);
         btn.innerHTML = piece && piece.thumbnail
-            ? `<img src="${piece.thumbnail}" draggable="false"><span>${v.name}</span>`
+            ? `<img src="${piece.thumbnail}" alt="" draggable="false"><span>${v.name}</span>`
             : v.name;
         btn.onclick = () => checkWarmupAnswer(v.name, v.label, btn);
         choicesEl.appendChild(btn);
@@ -10946,7 +11451,7 @@ function checkWarmupAnswer(choiceName, choiceLabel, btnEl) {
         const iconEl = mysteryBtn.querySelector('.piece-intro-var-icon');
         const labelEl = mysteryBtn.querySelector('.piece-intro-var-label');
         iconEl.innerHTML = answerPiece && answerPiece.thumbnail
-            ? '<img src="' + answerPiece.thumbnail + '" draggable="false">'
+            ? '<img src="' + answerPiece.thumbnail + '" alt="" draggable="false">'
             : answerName;
         labelEl.textContent = answerName + ' · ' + answerLabel;
         mysteryBtn.classList.remove('flipping');
@@ -11068,8 +11573,33 @@ const PIECE_INTRO_HINTS = {
 
 let pieceIntroState = { pieceName: null, labelA: null, labelB: null, quizAnswer: null, quizRound: 1, quizOrder: [], callback: null };
 
+// The "Meet the Piece" overlay owns a block of static markup (#piece-intro-title and
+// friends). The Jam Session intro reuses the same overlay, so it must not overwrite
+// that markup \u2014 doing so used to permanently break every later showPieceIntro() call.
+// We snapshot the pristine markup once and restore it before each piece intro.
+let _pieceIntroMarkup = null;
+
+function capturePieceIntroMarkup() {
+    const overlay = document.getElementById('piece-intro-overlay');
+    if (overlay && _pieceIntroMarkup === null) _pieceIntroMarkup = overlay.innerHTML;
+}
+
+function ensurePieceIntroMarkup() {
+    const overlay = document.getElementById('piece-intro-overlay');
+    if (!overlay) return null;
+    if (_pieceIntroMarkup !== null && !document.getElementById('piece-intro-title')) {
+        overlay.innerHTML = _pieceIntroMarkup;
+    }
+    return overlay;
+}
+
 function showJamSessionIntro(callback) {
     const overlay = document.getElementById('piece-intro-overlay');
+    if (!overlay) { callback(); return; }
+    capturePieceIntroMarkup();
+    // Escape routes this overlay through dismissPieceIntro(), so park the callback
+    // where that handler can find it.
+    pieceIntroState.callback = callback;
     overlay.classList.remove('hidden');
     overlay.innerHTML = `
         <div class="piece-intro-modal" style="text-align:center;">
@@ -11099,6 +11629,14 @@ const PIECE_CONTRAST = {
 function showPieceIntro(pieceName, callback) {
     const map = FLIP_MAP[pieceName];
     if (!map) { callback(); return; }
+
+    // Restore the static markup if a previous overlay (e.g. the Jam Session intro)
+    // replaced it, otherwise every lookup below would be null and the callback that
+    // starts the level would never fire.
+    if (!ensurePieceIntroMarkup() || !document.getElementById('piece-intro-title')) {
+        callback();
+        return;
+    }
 
     const labelA = map.defaultLabel;
     const labelB = map.flipH || labelA;
@@ -11133,11 +11671,14 @@ function showPieceIntro(pieceName, callback) {
 
     document.getElementById('piece-intro-overlay').classList.remove('hidden');
 
-    // Tooltip hint for Part 1
-    setTimeout(() => {
-        const varA = document.getElementById('piece-intro-var-a');
-        showTooltipAt(varA, 'Tap a piece to hear it.', 'arrow-down');
-    }, 400);
+    // Part 1 hint lives inside the modal. It used to be a floating tutorial tooltip
+    // anchored above the left variant, which overlapped the "Meet the ..." title —
+    // positionTooltip only knows about the puzzle chrome, not modal content.
+    const nudge = document.getElementById('piece-intro-nudge');
+    if (nudge) {
+        nudge.classList.remove('is-dismissed');
+        nudge.textContent = 'Tap a piece to hear it.';
+    }
 }
 
 function generatePieceIntroNotes(pieceName, label) {
@@ -11151,6 +11692,8 @@ function generatePieceIntroNotes(pieceName, label) {
 
 function playPieceIntroVariant(which) {
     removeTutorialTooltip();
+    // Once they've tapped a piece the nudge has served its purpose.
+    document.getElementById('piece-intro-nudge')?.classList.add('is-dismissed');
     getAudioCtx();
     getMasterGain();
     const { pieceName, labelA, labelB } = pieceIntroState;
@@ -11202,7 +11745,7 @@ function pieceIntroNext() {
         // Advance from Part 1 to Part 2
         part1.style.display = 'none';
         part2.classList.remove('hidden');
-        document.getElementById('piece-intro-title').textContent = 'Which one is this?';
+        document.getElementById('piece-intro-title').textContent = 'Name that ' + pieceIntroState.pieceName;
         pieceIntroState.quizRound = 1;
         startPieceIntroQuiz();
     } else {
@@ -11261,7 +11804,7 @@ function checkPieceIntroAnswer(choice) {
         const iconEl = mysteryBtn.querySelector('.piece-intro-var-icon');
         const labelEl = mysteryBtn.querySelector('.piece-intro-var-label');
         iconEl.innerHTML = correctPiece && correctPiece.thumbnail
-            ? '<img src="' + correctPiece.thumbnail + '" draggable="false">'
+            ? '<img src="' + correctPiece.thumbnail + '" alt="" draggable="false">'
             : correctLabel;
         labelEl.textContent = correctLabel;
         mysteryBtn.classList.remove('flipping');
@@ -11329,7 +11872,7 @@ function showPieceIntroCongrats() {
 function pieceIntroMoreQuiz() {
     document.getElementById('piece-intro-part3').classList.add('hidden');
     document.getElementById('piece-intro-part2').classList.remove('hidden');
-    document.getElementById('piece-intro-title').textContent = 'Which one is this?';
+    document.getElementById('piece-intro-title').textContent = 'Name that ' + pieceIntroState.pieceName;
     document.getElementById('piece-intro-next-btn').style.display = '';
     const quizOrder = Math.random() < 0.5 ? ['a', 'b'] : ['b', 'a'];
     pieceIntroState.quizRound = 1;
@@ -11338,9 +11881,14 @@ function pieceIntroMoreQuiz() {
 }
 
 function dismissPieceIntro() {
-    document.getElementById('piece-intro-overlay').classList.add('hidden');
-    document.getElementById('piece-intro-next-btn').style.display = '';
-    if (pieceIntroState.callback) pieceIntroState.callback();
+    document.getElementById('piece-intro-overlay')?.classList.add('hidden');
+    // May be absent when another overlay (Jam Session intro) is borrowing the container;
+    // the callback must still run or the pending level never starts.
+    const nextBtn = document.getElementById('piece-intro-next-btn');
+    if (nextBtn) nextBtn.style.display = '';
+    const cb = pieceIntroState.callback;
+    pieceIntroState.callback = null;
+    if (cb) cb();
 }
 
 // ==================================================================
@@ -11584,7 +12132,7 @@ function processAchievementQueue() {
 
     const iconHtml = icon.startsWith('<') ? icon :
         (icon.includes('/') || icon.includes('.') ?
-            `<img src="${icon}" draggable="false">` : icon);
+            `<img src="${icon}" alt="" draggable="false">` : icon);
 
     toast.innerHTML = `
         <div class="achievement-toast-icon">${iconHtml}</div>
@@ -12863,6 +13411,30 @@ function getScreenTransitionWipe() {
     return wipe;
 }
 
+// Return the wipe to its idle state. Safe to call at any point in a transition.
+function resetScreenTransitionWipe() {
+    if (screenTransitionWatchdog) {
+        clearTimeout(screenTransitionWatchdog);
+        screenTransitionWatchdog = null;
+    }
+    const wipe = document.getElementById('screen-transition-wipe');
+    if (wipe) wipe.className = 'screen-transition-wipe';
+}
+
+// Last-resort safety net: a full-screen wipe at z-index 9000 makes the game unusable,
+// so never let one outlive its animation regardless of how the transition was cut short.
+let screenTransitionWatchdog = null;
+function armScreenTransitionWatchdog() {
+    if (screenTransitionWatchdog) clearTimeout(screenTransitionWatchdog);
+    screenTransitionWatchdog = setTimeout(() => {
+        screenTransitionWatchdog = null;
+        const wipe = document.getElementById('screen-transition-wipe');
+        if (wipe && wipe.classList.contains('active')) {
+            wipe.className = 'screen-transition-wipe';
+        }
+    }, 1600);
+}
+
 function setScreenActive(name) {
     const allScreens = document.querySelectorAll('.screen');
     const target = document.getElementById('screen-' + name);
@@ -12897,6 +13469,10 @@ showScreen = function(name, opts = {}) {
     const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
     if (!prev || isSameScreen || reducedMotion) {
+        // We already bumped the token and cleared the pending timers above, so any
+        // in-flight wipe will never reach its own cleanup. Reset it here or it stays
+        // stuck at z-index 9000 and the game is unreachable until a reload.
+        resetScreenTransitionWipe();
         setScreenActive(name);
         return;
     }
@@ -12915,6 +13491,7 @@ showScreen = function(name, opts = {}) {
         // Restart the CSS animation even if the previous transition ended recently.
         void wipe.offsetWidth;
         wipe.classList.add('active', 'brass-covering');
+        armScreenTransitionWatchdog();
 
         const coverTimer = setTimeout(() => {
             if (token !== screenTransitionToken) return;
@@ -13089,7 +13666,7 @@ function onDailyPressed() {
     levelData.removeCols.forEach(col => { gridState[col] = null; });
 
     trayAvailable = [...(levelData.trayBasePieces || [])];
-    trayFlipState = new Array(trayAvailable.length).fill(false);
+    trayFlipState = seedTrayFlipState(trayAvailable, levelData, template);
     maxTraySize = 4;
     const trayEl = document.getElementById('piece-tray');
     if (trayEl) trayEl.classList.toggle('tray-compact', maxTraySize >= 4);
@@ -13097,7 +13674,7 @@ function onDailyPressed() {
     hintsUsed = 0;
     wrongPlacements = 0;
     totalListens = 0;
-    hintsRemaining = levelData.hints || 3;
+    hintsRemaining = getLevelHintBudget(levelData);
     currentHintCol = null;
     currentHintLevel = 0;
     levelStartTime = Date.now();
@@ -13117,7 +13694,7 @@ function onDailyPressed() {
     if (levelNameEl) levelNameEl.textContent = 'DAILY CHALLENGE';
     document.getElementById('hint-btn').style.display = '';
     document.getElementById('timer-display').style.display = '';
-    document.getElementById('puzzle-stars').style.display = '';
+    document.querySelector('.topbar-star-row').style.display = '';
     updateStarsDisplay();
     updateHintButton();
 
@@ -13224,7 +13801,7 @@ function startComposerMode(len) {
 
     // Topbar: show composer UI
     document.getElementById('puzzle-level-name').innerHTML = '<span style="color:var(--purple);">Composer Mode</span>';
-    document.getElementById('puzzle-stars').style.display = 'none';
+    document.querySelector('.topbar-star-row').style.display = 'none';
 
     // Hide hint btn and timer, show composer toolbar
     document.getElementById('hint-btn').style.display = 'none';
@@ -13401,6 +13978,7 @@ async function init() {
     loadSettings();
     loadSoundParams();
     initKnobInteraction();
+    capturePieceIntroMarkup();
 
     // Try inline data first (works from file://), fallback to fetch
     if (typeof DEFAULT_LIBRARY_DATA !== 'undefined' && DEFAULT_LIBRARY_DATA.library) {
@@ -13468,6 +14046,16 @@ window.addEventListener('resize', () => {
     if (_resizeTimer) clearTimeout(_resizeTimer);
     _resizeTimer = setTimeout(() => {
         if (document.getElementById('screen-puzzle').classList.contains('active')) {
+            // The bottombar min-height is locked once at level start to stop layout shift
+            // during drags. On a viewport change that stale value squeezes the grid, so
+            // re-measure it before sizing the cells.
+            const bottombar = document.querySelector('.puzzle-bottombar');
+            if (bottombar) {
+                bottombar.classList.remove('height-locked');
+                bottombar.style.removeProperty('--bottombar-h');
+                bottombar.style.setProperty('--bottombar-h', bottombar.offsetHeight + 'px');
+                bottombar.classList.add('height-locked');
+            }
             sizeCells();
             renderGrid();
             applyHighlights();

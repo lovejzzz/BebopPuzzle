@@ -6,6 +6,26 @@ A jazz music theory game that teaches bebop vocabulary through tactile puzzle-so
 
 ---
 
+## What's New in v1.6
+
+### Gameplay & Audio
+- Empty-column previews now count as listens, closing a shortcut around Jam Session limits and star scoring
+- Zero-hint levels honor their intended budgets, and limited-listen levels no longer spend a listen during intro playback
+- Generated melodies stay within the Rhodes sampler's playable register and sound the same each time a puzzle loads
+- Puzzle generation now respects each level's Flip and Duplicate capabilities so every tray is solvable
+
+### Reliability & Feedback
+- Fixed the Jam Session intro breaking later piece introductions
+- Fixed Composer Mode map crashes and transition wipes that could leave the game behind a black screen
+- Rejected drops now explain whether the piece, direction, or height is wrong
+- Tutorial prompts, star info, titles, and completion stats now clean up and display correctly
+
+### Responsive & Accessibility
+- Landscape phone layouts now keep every grid row reachable, with scrollable short-viewport panels
+- Added keyboard piece placement with clear focus states and screen-reader announcements
+- Added accessible labels and alt text to piece images and icon-only controls
+- Improved tooltip placement around the Tempo panel and other floating UI
+
 ## What's New in v1.5
 
 ### Boardgame Kit

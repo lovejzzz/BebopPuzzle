@@ -4588,7 +4588,7 @@
             max-width: 380px;
             width: 100%;
             /* On short viewports the card overflowed the screen with no scroll, putting
-               the footer — and the v1.5 span that opens the changelog — out of reach. */
+               the footer — and the version span that opens the changelog — out of reach. */
             max-height: calc(100vh - 48px);
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
@@ -5068,7 +5068,7 @@
                 <button class="settings-btn settings-btn-danger" onclick="confirmResetProgress()">Reset All Progress</button>
             </div>
             <div class="settings-footer">
-                Bebop Puzzle <span class="settings-version" onclick="showChangelog()">v1.5</span><br>Made By Tian Xing
+                Bebop Puzzle <span class="settings-version" onclick="showChangelog()">v1.6</span><br>Made By Tian Xing
             </div>
         </div>
     </div>
@@ -5083,7 +5083,41 @@
                 <button class="changelog-close" onclick="closeChangelog()">✕</button>
             </div>
 
-            <div class="changelog-version-tag">v1.5</div>
+            <div class="changelog-version-tag">v1.6</div>
+
+            <div class="changelog-section">
+                <div class="changelog-section-title">Gameplay &amp; Audio</div>
+                <ul class="changelog-list">
+                    <li>Empty-column previews now count as listens, closing a shortcut around Jam Session limits and star scoring</li>
+                    <li>Zero-hint levels now honor their intended budgets</li>
+                    <li>Limited-listen levels no longer spend a listen during intro playback</li>
+                    <li>Generated melodies stay within the Rhodes sampler's playable register and remain consistent when replayed</li>
+                    <li>Puzzle generation now respects each level's Flip and Duplicate capabilities so every tray is solvable</li>
+                </ul>
+            </div>
+
+            <div class="changelog-section">
+                <div class="changelog-section-title">Reliability &amp; Feedback</div>
+                <ul class="changelog-list">
+                    <li>Fixed the Jam Session intro breaking later piece introductions</li>
+                    <li>Fixed Composer Mode map crashes and transition wipes that could leave a black screen</li>
+                    <li>Rejected drops now explain whether the piece, direction, or height is wrong</li>
+                    <li>Tutorial prompts, star info, titles, and completion stats now clean up and display correctly</li>
+                </ul>
+            </div>
+
+            <div class="changelog-section">
+                <div class="changelog-section-title">Responsive &amp; Accessibility</div>
+                <ul class="changelog-list">
+                    <li>Landscape phone layouts now keep every grid row reachable, with scrollable short-viewport panels</li>
+                    <li>Added keyboard piece placement with visible focus states and screen-reader announcements</li>
+                    <li>Added accessible labels and alt text to piece images and icon-only controls</li>
+                    <li>Improved tooltip placement around the Tempo panel and other floating UI</li>
+                </ul>
+            </div>
+
+            <hr style="border:none;border-top:1px solid var(--border-subtle);margin:16px 0;">
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Previous (v1.5)</div>
 
             <div class="changelog-section">
                 <div class="changelog-section-title">Boardgame Kit</div>

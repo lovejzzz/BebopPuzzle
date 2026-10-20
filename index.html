@@ -5909,6 +5909,16 @@ function getEighth() { return 60 / currentBPM / 2; }
 let isPlaying = false;
 let playbackTimeouts = [];
 let celebrationTimeouts = [];
+let celebrationTeardown = null; // removes the skip handlers of a running celebration
+
+// Abort a running win celebration without firing its completion callback. Leaving the
+// level (map, another level, Daily, Composer) must also disarm the skip handlers, or the
+// play button stays in skip mode and the next tap opens a stale success modal.
+function cancelCelebration() {
+    celebrationTimeouts.forEach(t => clearTimeout(t));
+    celebrationTimeouts = [];
+    if (celebrationTeardown) { const t = celebrationTeardown; celebrationTeardown = null; t(); }
+}
 let activePlayheadEls = [];
 
 // Sound design parameters (0–1 range, persisted)
@@ -6011,6 +6021,7 @@ function buildProcessingChain() {
     applySoundParams();
 }
 
+let _lastDriveCurveAmount = null;
 function applySoundParams() {
     if (!_chainBuilt) return;
     const p = soundParams;
@@ -6019,8 +6030,12 @@ function applySoundParams() {
     const toneFreq = 300 * Math.pow(10000 / 300, p.tone);
     _toneFilter.frequency.value = toneFreq;
 
-    // Drive: update curve and gain staging (volume-compensated)
-    _driveShaper.curve = buildDriveCurve(p.drive);
+    // Drive: update curve and gain staging (volume-compensated). The 8192-sample curve
+    // is only rebuilt when drive actually changes — reassigning it during playback clicks.
+    if (_lastDriveCurveAmount !== p.drive) {
+        _driveShaper.curve = buildDriveCurve(p.drive);
+        _lastDriveCurveAmount = p.drive;
+    }
     const driveIn = 1 + p.drive * 3;
     // Compensate for both the input boost AND the RMS increase from soft-clip compression
     _driveInputGain.gain.value = driveIn;
@@ -7228,7 +7243,21 @@ function isCurrentDailyChallenge() {
     return isDailyMode || (typeof currentLevel === 'string' && currentLevel.startsWith('_daily_'));
 }
 
+// Retry scaffolding counts failed attempts: leaving or restarting a level that was
+// played (listened to, hinted, or attempted) but not solved. Solving clears the count.
+let levelAttemptSolved = true;
+function recordAbandonedAttempt() {
+    if (levelAttemptSolved || composerMode || !currentLevel) return;
+    levelAttemptSolved = true;
+    if (typeof currentLevel !== 'string' || currentLevel.startsWith('_')) return;
+    if (totalListens + hintsUsed + wrongPlacements === 0) return;
+    const key = '_retry_' + currentLevel;
+    gameProgress[key] = (gameProgress[key] || 0) + 1;
+    saveProgress();
+}
+
 function goToMap(overrideChapter) {
+    recordAbandonedAttempt();
     if (composerMode) {
         exitComposerMode();
         return;
@@ -7238,8 +7267,7 @@ function goToMap(overrideChapter) {
     clearLevelSetupTimeouts();
     cancelDragProcessing();
     stopPlayback();
-    celebrationTimeouts.forEach(t => clearTimeout(t));
-    celebrationTimeouts = [];
+    cancelCelebration();
     guidedStepTimeouts.forEach(t => clearTimeout(t));
     guidedStepTimeouts = [];
     isGuidedMode = false;
@@ -7473,6 +7501,7 @@ function animateLevelEntrance(kind) {
 }
 
 function startLevel(levelId, opts = {}) {
+    recordAbandonedAttempt();
     const transitionKind = opts.transition || 'level-start';
     markLevelLaunch(levelId);
     // Unlock AudioContext now (synchronous, within user gesture) so auto-play works later
@@ -7486,8 +7515,7 @@ function startLevel(levelId, opts = {}) {
     document.getElementById('timer-display').style.display = '';
     document.querySelector('.topbar-star-row').style.display = '';
     stopPlayback(); // ensure any ongoing playback is halted before loading new level
-    celebrationTimeouts.forEach(t => clearTimeout(t));
-    celebrationTimeouts = [];
+    cancelCelebration();
     guidedStepTimeouts.forEach(t => clearTimeout(t));
     guidedStepTimeouts = [];
     clearHintVisuals();
@@ -7587,6 +7615,7 @@ function startLevel(levelId, opts = {}) {
     stuckIdleTimer = setInterval(checkIdleStuck, 15000);
     hideGuideMe();
 
+    levelAttemptSolved = false;
     // Invisible retry scaffolding — subtle difficulty reduction on repeated attempts
     currentBPM = 90; // reset before retry scaffolding (prevents compounding across levels)
     const retryCount = gameProgress['_retry_' + currentLevel] || 0;
@@ -7625,9 +7654,7 @@ function startLevel(levelId, opts = {}) {
         if (craftMode === 'hidden') {
             hideCraftTable();
         } else {
-            showCraftTable();
-            const dupeBtn = document.getElementById('craft-dupe-btn');
-            if (dupeBtn) dupeBtn.style.display = craftMode === 'flip' ? 'none' : '';
+            showCraftTable(craftMode);
         }
 
         // Lock bottombar height to prevent layout shift during drag
@@ -7911,7 +7938,7 @@ function renderGrid() {
             if (isPuzzleCol(col) && !puzzleInteractionLocked) {
                 el.style.cursor = 'grab';
                 el.addEventListener('mousedown', e => { e.stopPropagation(); startDrag(e, piece, {col, position}); });
-                el.addEventListener('touchstart', e => { e.stopPropagation(); startDragTouch(e, piece, {col, position}); }, {passive:false});
+                el.addEventListener('touchstart', e => { e.stopPropagation(); if (touchDragInProgress(e)) { e.preventDefault(); return; } startDragTouch(e, piece, {col, position}); }, {passive:false});
             } else {
                 el.style.cursor = '';
             }
@@ -8086,6 +8113,7 @@ function renderTray() {
             startDrag(e, p, null);
         });
         card.addEventListener('touchstart', e => {
+            if (touchDragInProgress(e)) { e.preventDefault(); return; }
             const p = findPiece(baseName, label);
             if (!p) return;
             e.preventDefault();
@@ -8112,11 +8140,15 @@ let craftFlipH = false;        // kept for compat — always mirrors craftStack[
 let craftOutputPiece = null;   // the result ready to drag/claim
 let craftOpen = false;
 
-function showCraftTable() {
+// mode: 'full' (Flip + Dupe) or 'flip' (Dupe hidden). Always set explicitly so a
+// flip-only level does not leave Dupe hidden for the Daily Challenge or Composer.
+function showCraftTable(mode = 'full') {
     const table = document.getElementById('craft-table');
     const divider = document.getElementById('craft-tray-divider');
     if (table) table.classList.add('visible');
     if (divider) divider.classList.add('visible');
+    const dupeBtn = document.getElementById('craft-dupe-btn');
+    if (dupeBtn) dupeBtn.style.display = mode === 'flip' ? 'none' : '';
     craftOpen = true;
     // Old static onboarding overlay removed — craft table is taught contextually
     // via flip tooltip (3.4) and duplicate tooltip (3.7)
@@ -8290,7 +8322,27 @@ function scheduleDupeProactiveHint() {
     }, 8000);
 }
 
+// Flip / Dupe run timed animations that snapshot the stack and later wipe it. While one
+// is running the craft table must not accept or release pieces, or a piece dropped in
+// mid-animation is silently destroyed (and the snapshot is duplicated).
+let craftBusy = false;
+let craftTimers = [];
+function craftTimeout(fn, ms) {
+    const id = setTimeout(() => { craftTimers = craftTimers.filter(t => t !== id); fn(); }, ms);
+    craftTimers.push(id);
+    return id;
+}
+function cancelCraftAnimations() {
+    craftTimers.forEach(t => clearTimeout(t));
+    craftTimers = [];
+    craftBusy = false;
+    document.querySelectorAll('.craft-flip-ghost').forEach(g => g.remove());
+    const dz = document.getElementById('craft-drop-zone');
+    if (dz) { dz.style.opacity = ''; dz.classList.remove('duplicating', 'consuming'); }
+}
+
 function hideCraftTable() {
+    cancelCraftAnimations();
     const table = document.getElementById('craft-table');
     const divider = document.getElementById('craft-tray-divider');
     if (table) table.classList.remove('visible');
@@ -8420,7 +8472,8 @@ function updateCraftDrop() {
 }
 
 function craftDzDragOut(e) {
-    if (craftStack.length === 0) return;
+    if (craftStack.length === 0 || craftBusy) return;
+    if (e.type === 'touchstart' && touchDragInProgress(e)) { e.preventDefault(); return; }
     const top = craftStack[craftStack.length - 1];
     const label = getFlippedLabel(top.baseName, top.flipH);
     const piece = findPiece(top.baseName, label);
@@ -8557,6 +8610,7 @@ function craftOutputTouchStart(e) {
     if (!craftOutputPiece || !output.classList.contains('claimable')) return;
     e.preventDefault();
     e.stopPropagation();
+    if (touchDragInProgress(e)) return;
     const { baseName, flipH } = craftOutputPiece;
     const label = getFlippedLabel(baseName, flipH);
     const piece = findPiece(baseName, label);
@@ -8659,7 +8713,8 @@ function claimOutputPiece() {
 }
 
 function craftToggleFlip() {
-    if (craftStack.length === 0) return;
+    if (craftStack.length === 0 || craftBusy) return;
+    craftBusy = true;
     // Advance craft tutorial if active (step 2 → 3 for flip)
     if (craftTutorialStep === 2 && craftTutorialType === 'flip') {
         removeSpotlight();
@@ -8728,7 +8783,7 @@ function craftToggleFlip() {
         ghost.appendChild(inner);
         document.body.appendChild(ghost);
         allGhosts.push(ghost);
-        setTimeout(() => {
+        craftTimeout(() => {
             spawnSparkles(ghost, 2);
             // Land offset mirrors updateCraftDrop layer positioning in output zone
             const outStackOffset = (preFlipStack.length - 1 - i) * 4;
@@ -8748,7 +8803,8 @@ function craftToggleFlip() {
     const lastLaunch = (preFlipStack.length - 1) * GHOST_STAGGER;
     const totalDuration = lastLaunch + GHOST_FLIGHT;
 
-    setTimeout(() => {
+    craftTimeout(() => {
+        craftBusy = false;
         // Sparkle burst on output
         spawnSparkles(output, 3);
 
@@ -8773,7 +8829,8 @@ function craftToggleFlip() {
 }
 
 function craftDuplicate() {
-    if (craftStack.length === 0) return;
+    if (craftStack.length === 0 || craftBusy) return;
+    craftBusy = true;
     sfx('dupe');
 
     // Snapshot the stack before clearing it
@@ -8789,7 +8846,7 @@ function craftDuplicate() {
     spawnSparkles(dz, 6);
 
     // Step 2: After shake, dissolve original + show duplicates in output
-    setTimeout(() => {
+    craftTimeout(() => {
         dz.classList.remove('duplicating');
         spawnSparkles(dz, 3);
 
@@ -8797,7 +8854,8 @@ function craftDuplicate() {
         restartCssAnimation(dz, 'consuming');
 
         // After dissolve, clear input and show result — user clicks to claim
-        setTimeout(() => {
+        craftTimeout(() => {
+            craftBusy = false;
             // Clear input stack
             craftStack = [];
             craftBaseName = null;
@@ -8838,7 +8896,7 @@ function initCraftOutput() {
 }
 
 function isCraftDrop(clientX, clientY) {
-    if (!craftOpen) return false;
+    if (!craftOpen || craftBusy) return false;
     const dz = document.getElementById('craft-drop-zone');
     const rect = dz.getBoundingClientRect();
     return clientX >= rect.left && clientX <= rect.right &&
@@ -8928,6 +8986,8 @@ function cancelDragProcessing() {
     document.removeEventListener('mouseup', onDragEnd);
     document.removeEventListener('touchmove', onTouchMove);
     document.removeEventListener('touchend', onTouchEnd);
+    document.removeEventListener('touchcancel', onTouchCancel);
+    touchDrag = null;
     clearSnapPreview();
     document.getElementById('craft-drop-zone')?.classList.remove('drag-hover');
     document.querySelectorAll('.tray-piece').forEach(t => t.classList.remove('dragging'));
@@ -9007,6 +9067,35 @@ function startDrag(e, piece, fromGrid) {
     document.addEventListener('mouseup', onDragEnd);
 }
 
+// Active touch drag: which finger owns it, where it started and whether it has moved
+// far enough to count as a drag. A touch that never moves is a tap and must not move
+// the piece (the preview is lifted above the finger, so a tap would otherwise drop it
+// half a row higher).
+let touchDrag = null;
+const TOUCH_DRAG_THRESHOLD = 8;
+
+// Ignore extra fingers while one touch drag is already running.
+function touchDragInProgress(e) {
+    return !!touchDrag || (e.touches && e.touches.length > 1);
+}
+
+// Abort a drag without placing anything: grid and tray pieces stay where they were;
+// a piece lifted out of the craft table (already removed from it) goes back to the tray.
+function abortDrag() {
+    if (draggedFromCraft && draggedPiece) {
+        if (dragRaf) { cancelAnimationFrame(dragRaf); dragRaf = null; }
+        pendingDragPoint = null;
+        currentSnapCol = null; currentSnapPos = null; dragRejectedCol = null;
+        finishDrag(undefined, undefined);
+        return;
+    }
+    cancelDragProcessing();
+    dragRejectedCol = null;
+    renderTray();
+    renderGrid();
+    applyHighlights();
+}
+
 function startDragTouch(e, piece, fromGrid) {
     e.preventDefault();
     if (puzzleInteractionLocked) {
@@ -9017,7 +9106,8 @@ function startDragTouch(e, piece, fromGrid) {
         return;
     }
     removeTutorialTooltip();
-    const touch = e.touches[0];
+    const touch = e.changedTouches?.[0] || e.touches[0];
+    touchDrag = { id: touch.identifier, x: touch.clientX, y: touch.clientY, moved: false };
     draggedPiece = piece;
     draggedFromGrid = fromGrid;
     const firstCell = document.querySelector('.grid-cell');
@@ -9039,6 +9129,13 @@ function startDragTouch(e, piece, fromGrid) {
 
     document.addEventListener('touchmove', onTouchMove, {passive:false});
     document.addEventListener('touchend', onTouchEnd);
+    document.addEventListener('touchcancel', onTouchCancel);
+}
+
+function findDragTouch(list) {
+    if (!touchDrag || !list) return null;
+    for (const t of list) if (t.identifier === touchDrag.id) return t;
+    return null;
 }
 
 function updateDragPreview(x, y, isTouchEvent) {
@@ -9115,7 +9212,11 @@ function onDragMove(e) {
 
 function onTouchMove(e) {
     e.preventDefault();
-    const touch = e.touches[0];
+    const touch = findDragTouch(e.touches);
+    if (!touch) return;
+    if (!touchDrag.moved && Math.hypot(touch.clientX - touchDrag.x, touch.clientY - touchDrag.y) > TOUCH_DRAG_THRESHOLD) {
+        touchDrag.moved = true;
+    }
     updateDragPreview(touch.clientX, touch.clientY, true);
     const snapPoint = getTouchSnapPoint(touch);
     scheduleDragProcess(snapPoint.x, snapPoint.y);
@@ -9164,7 +9265,7 @@ function finishDrag(clientX, clientY, snapPoint = null) {
                 { const _snapEl = document.querySelector(`.grid-column[data-col="${currentSnapCol}"] .placed-piece`);
                   if (_snapEl) { _snapEl.classList.add('snap-in'); _snapEl.addEventListener('animationend', () => _snapEl.classList.remove('snap-in'), {once:true}); } }
                 applyHighlights();
-                setTimeout(() => flashConnectedNeighbors(currentSnapCol), 250);
+                { const flashCol = currentSnapCol; setTimeout(() => flashConnectedNeighbors(flashCol), 250); }
                 checkAnswer(currentSnapCol);
             }
         } else {
@@ -9211,7 +9312,10 @@ function finishDrag(clientX, clientY, snapPoint = null) {
 
         // Place piece into craft table
         const baseName = draggedPiece.name;
-        const flipState = draggedTrayIndex >= 0 ? !!trayFlipState[draggedTrayIndex] : false;
+        const flipMap = FLIP_MAP[baseName];
+        const flipState = draggedTrayIndex >= 0
+            ? !!trayFlipState[draggedTrayIndex]
+            : !!(flipMap && flipMap.flipH && draggedPiece.label === flipMap.flipH);
         placePieceInCraft(baseName, flipState);
 
         // Remove from grid if dragged from grid
@@ -9254,7 +9358,7 @@ function finishDrag(clientX, clientY, snapPoint = null) {
               if (_snapEl) { _snapEl.classList.add('snap-in'); _snapEl.addEventListener('animationend', () => _snapEl.classList.remove('snap-in'), {once:true}); } }
             applyHighlights();
             // Delay connection flash so it doesn't clash with snap-in animation
-            setTimeout(() => flashConnectedNeighbors(currentSnapCol), 250);
+            { const flashCol = currentSnapCol; setTimeout(() => flashConnectedNeighbors(flashCol), 250); }
             checkAnswer(currentSnapCol);
         } else if (draggedFromGrid) {
             // Can't place here, put piece back
@@ -9322,11 +9426,25 @@ function onDragEnd(e) {
 }
 
 function onTouchEnd(e) {
+    const touch = findDragTouch(e.changedTouches);
+    if (!touch) return; // a different finger lifted
+    const moved = touchDrag.moved;
     document.removeEventListener('touchmove', onTouchMove);
     document.removeEventListener('touchend', onTouchEnd);
-    const touch = e.changedTouches?.[0];
-    const snapPoint = touch ? getTouchSnapPoint(touch) : null;
-    finishDrag(touch?.clientX, touch?.clientY, snapPoint);
+    document.removeEventListener('touchcancel', onTouchCancel);
+    touchDrag = null;
+    if (!moved) { abortDrag(); return; }
+    const snapPoint = getTouchSnapPoint(touch);
+    finishDrag(touch.clientX, touch.clientY, snapPoint);
+}
+
+function onTouchCancel(e) {
+    if (!findDragTouch(e.changedTouches)) return;
+    document.removeEventListener('touchmove', onTouchMove);
+    document.removeEventListener('touchend', onTouchEnd);
+    document.removeEventListener('touchcancel', onTouchCancel);
+    touchDrag = null;
+    abortDrag();
 }
 
 // ==================================================================
@@ -9435,9 +9553,45 @@ function kbCommit() {
     checkAnswer(col);
 }
 
+// Keyboard path into the craft table: Enter on the drop zone while holding a tray piece.
+function kbPlaceInCraft() {
+    if (!kbIsActive() || kbHeldTrayIndex < 0 || !craftOpen || craftBusy) return;
+    const idx = kbHeldTrayIndex;
+    const baseName = trayAvailable[idx];
+    const flip = !!trayFlipState[idx];
+    if (craftOutputPiece) {
+        const allOut = craftOutputPiece.pieces ||
+            [{ baseName: craftOutputPiece.baseName, flipH: craftOutputPiece.flipH }];
+        if (!composerMode && maxTraySize > 0 && trayAvailable.length - 1 + allOut.length > maxTraySize) {
+            showToast('Hand is full! Place a piece on the board first.', 'info');
+            announce('Hand is full. Place a piece on the board first.');
+            return;
+        }
+        allOut.forEach(p => { trayAvailable.push(p.baseName); trayFlipState.push(p.flipH); });
+        clearCraftOutput();
+    }
+    const piece = kbHeldPiece;
+    kbCancel(true);
+    placePieceInCraft(baseName, flip);
+    collapseTrayPiece(idx);
+    announce(`${pieceAltText(piece)} is on the craft table. Press F to flip${document.getElementById('craft-dupe-btn')?.style.display === 'none' ? '' : ', D to duplicate'}, C to take the result.`);
+}
+
 // Columns are only reachable by Tab while a piece is held, so Tab order stays short.
 function updateKeyboardAffordances() {
     const held = kbIsActive();
+    const dz = document.getElementById('craft-drop-zone');
+    if (dz) {
+        if (held && craftOpen && !craftBusy) {
+            dz.setAttribute('tabindex', '0');
+            dz.setAttribute('role', 'button');
+            dz.setAttribute('aria-label', 'Put the held piece on the craft table');
+        } else {
+            dz.removeAttribute('tabindex');
+            dz.removeAttribute('role');
+            dz.removeAttribute('aria-label');
+        }
+    }
     document.querySelectorAll('#melody-grid .grid-column').forEach(colEl => {
         const col = parseInt(colEl.dataset.col);
         const placeable = held && isPuzzleCol(col) && !gridState[col];
@@ -9457,6 +9611,13 @@ document.addEventListener('keydown', e => {
     if (!document.getElementById('screen-puzzle')?.classList.contains('active')) return;
     const tray = e.target.closest?.('.tray-piece');
     const colEl = e.target.closest?.('#melody-grid .grid-column');
+
+    if (e.target.id === 'craft-drop-zone' && kbIsActive() && (e.code === 'Enter' || e.code === 'Space')) {
+        e.preventDefault();
+        e.stopPropagation();
+        kbPlaceInCraft();
+        return;
+    }
 
     // stopPropagation keeps Space from also reaching the global play/pause shortcut.
     if (tray && (e.code === 'Enter' || e.code === 'Space')) {
@@ -9556,6 +9717,10 @@ function clearCompletionGuidance() {
     if (craftProactiveTimeout) { clearTimeout(craftProactiveTimeout); craftProactiveTimeout = null; }
     if (dupeProactiveTimeout) { clearTimeout(dupeProactiveTimeout); dupeProactiveTimeout = null; }
     if (singBackTimeout) { clearTimeout(singBackTimeout); singBackTimeout = null; }
+    // A guided walkthrough still pending would restart the level mid-celebration.
+    guidedStepTimeouts.forEach(t => clearTimeout(t));
+    guidedStepTimeouts = [];
+    isGuidedMode = false;
 }
 
 function lockSolvedPuzzlePieces() {
@@ -9662,7 +9827,14 @@ function checkAnswer(col) {
         const el = document.querySelector(`.grid-column[data-col="${col}"] .placed-piece`);
         if (el) {
             el.style.animation = 'shake 0.4s ease';
+            // The shaking piece is about to be returned to the tray; grabbing it now
+            // would leave a second copy behind.
+            el.style.pointerEvents = 'none';
+        }
+        {
             setTimeout(() => {
+                // Left the level, or the column changed meanwhile: nothing to return.
+                if (gridState[col] !== state) return;
                 // Always return the piece to the tray on wrong placement
                 // (regardless of whether it came from grid or tray — a wrong answer should never stay on the board)
                 const baseName = state.piece.name;
@@ -9774,8 +9946,7 @@ function playCelebrationMelody(callback) {
     const originTime = audioCtx.currentTime + 0.1;
     let currentTime = originTime;
     let globalNoteIdx = 0;
-    celebrationTimeouts.forEach(t => clearTimeout(t));
-    celebrationTimeouts = [];
+    cancelCelebration();
 
     // Phase 1: Gold flash across all placed pieces left-to-right
     // We schedule gold flashes for every column, slightly staggered
@@ -9861,9 +10032,24 @@ function playCelebrationMelody(callback) {
     const totalMs = (currentTime - audioCtx.currentTime) * 1000 + 500;
 
     let celebrationDone = false;
+    function removeSkipHandlers() {
+        const pa = document.querySelector('.puzzle-area');
+        if (pa) pa.removeEventListener('click', skipHandler);
+        const btn = document.getElementById('play-btn');
+        if (btn) {
+            btn.dataset.skipMode = '';
+            btn.removeEventListener('click', skipHandler);
+        }
+    }
+    celebrationTeardown = () => {
+        celebrationDone = true;
+        removeSkipHandlers();
+        setPlayButtonState('idle');
+    };
     function finishCelebration() {
         if (celebrationDone) return;
         celebrationDone = true;
+        celebrationTeardown = null;
         celebrationTimeouts.forEach(t => clearTimeout(t));
         celebrationTimeouts = [];
         stopPlayback();
@@ -9873,14 +10059,7 @@ function playCelebrationMelody(callback) {
         });
         document.querySelectorAll('.resolution-ring').forEach(el => el.classList.remove('resolution-ring'));
         document.querySelectorAll('.resolution-flash,.resolution-badge,.resolution-particle').forEach(el => el.remove());
-        const pa = document.querySelector('.puzzle-area');
-        if (pa) pa.removeEventListener('click', skipHandler);
-        // Restore play button
-        const btn = document.getElementById('play-btn');
-        if (btn) {
-            btn.dataset.skipMode = '';
-            btn.removeEventListener('click', skipHandler);
-        }
+        removeSkipHandlers();
         setPlayButtonState('idle');
         callback();
     }
@@ -9890,7 +10069,8 @@ function playCelebrationMelody(callback) {
 
     // Turn play button into a skip button during celebration
     function skipHandler() { finishCelebration(); }
-    setTimeout(() => {
+    const armTid = setTimeout(() => {
+        if (celebrationDone) return;
         const pa = document.querySelector('.puzzle-area');
         if (pa) pa.addEventListener('click', skipHandler);
         const btn = document.getElementById('play-btn');
@@ -9900,9 +10080,11 @@ function playCelebrationMelody(callback) {
             btn.addEventListener('click', skipHandler);
         }
     }, 400); // small delay so the final placement click doesn't immediately skip
+    celebrationTimeouts.push(armTid);
 }
 
 function completeLevel() {
+    levelAttemptSolved = true;
     // Timer was already stopped in checkAnswer at the moment of solve; guard for safety
     if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
     if (stuckIdleTimer) { clearInterval(stuckIdleTimer); stuckIdleTimer = null; }
@@ -9913,14 +10095,14 @@ function completeLevel() {
 
     const prev = getLevelProgress(currentLevel);
     const prevStars = prev.stars || 0;
-    const prevBestListens = prev.bestListens || null;
+    const prevBestListens = prev.bestListens ?? null;
     lastCompletionSummary = {
         stars,
         previousStars: prevStars,
         firstComplete: !prev.completed,
         starsImproved: stars > prevStars,
         previousBestListens: prevBestListens,
-        isNewBestListens: !prevBestListens || totalListens < prevBestListens,
+        isNewBestListens: prevBestListens === null || totalListens < prevBestListens,
         elapsed,
         missionResults: null
     };
@@ -9928,7 +10110,7 @@ function completeLevel() {
         completed: true,
         stars: Math.max(prev.stars || 0, stars),
         bestTime: prev.bestTime ? Math.min(prev.bestTime, elapsed) : elapsed,
-        bestListens: prev.bestListens ? Math.min(prev.bestListens, totalListens) : totalListens
+        bestListens: prev.bestListens != null ? Math.min(prev.bestListens, totalListens) : totalListens
     };
     lastCompletionSummary.missionResults = updateMissionProgress({
         stars,
@@ -10338,6 +10520,10 @@ function hideGuideMe() {
 
 function startGuidedMode() {
     isGuidedMode = true;
+    // The walkthrough places every piece itself; player input meanwhile would race it.
+    cancelDragProcessing();
+    if (typeof kbCancel === 'function') kbCancel(true);
+    puzzleInteractionLocked = true;
     if (stuckIdleTimer) { clearInterval(stuckIdleTimer); stuckIdleTimer = null; }
     hideGuideMe();
     clearHintVisuals();
@@ -10633,26 +10819,9 @@ function playPiecePreview(baseName, label) {
     getAudioCtx();
     getMasterGain();
 
-    let notes = null;
-
-    // Use actual melody notes so the preview matches the puzzle's octave/register
-    if (fullMelodyNotes && currentLevelData) {
-        const solEntry = currentLevelData.solution.find(s =>
-            s.pieceName === baseName && s.pieceLabel === label);
-        if (solEntry && fullMelodyNotes.pieceNotes[solEntry.col]?.length > 0) {
-            notes = fullMelodyNotes.pieceNotes[solEntry.col];
-        }
-    }
-
-    // Fallback: compute from level context (or hardcoded if no level)
-    if (!notes) {
-        const chord = currentLevelData ? parseChord(currentLevelData.chords[0]) : parseChord('G7');
-        const targetNote = (fullMelodyNotes && fullMelodyNotes.targetNote) || 60;
-        const piece = findPiece(baseName, label);
-        if (!piece) return;
-        const sel = selectRandomIntervals(piece);
-        notes = calculatePieceNotes(piece, chord, targetNote, sel);
-    }
+    // Always a neutral example (G7 → C), never the puzzle's own notes: previewing the
+    // real column would let players hear the answer without spending a listen.
+    const notes = generatePieceIntroNotes(baseName, label);
     if (!notes || notes.length === 0) return 0;
 
     const eighth = getEighth();
@@ -11305,9 +11474,6 @@ function retryLevel() {
             // Daily challenge retry — regenerate the same seeded puzzle
             onDailyPressed();
         } else {
-            // Track retry count for invisible scaffolding
-            const key = '_retry_' + currentLevel;
-            gameProgress[key] = (gameProgress[key] || 0) + 1;
             startLevel(currentLevel, { transition: 'level-retry' });
         }
     });
@@ -11389,6 +11555,11 @@ function showWarmup() {
         picks.push(learned[Math.floor(Math.random() * learned.length)]);
     }
     warmupState = { pieces: picks, current: 0, correctCount: 0, answer: null };
+    if (warmupNextTimeout) { clearTimeout(warmupNextTimeout); warmupNextTimeout = null; }
+    const mysteryContainer = document.querySelector('.warmup-modal .piece-intro-mystery');
+    if (mysteryContainer) mysteryContainer.style.display = '';
+    const skipBtn = document.querySelector('.warmup-modal .piece-intro-skip');
+    if (skipBtn) skipBtn.style.display = '';
 
     document.getElementById('warmup-overlay').classList.remove('hidden');
     showWarmupQuestion();
@@ -11511,10 +11682,11 @@ function checkWarmupAnswer(choiceName, choiceLabel, btnEl) {
     // Disable all buttons
     document.querySelectorAll('.warmup-choice').forEach(b => b.onclick = null);
 
-    // Next question after delay
+    // Next question after delay (tracked: Skip must cancel it)
     warmupState.current++;
-    setTimeout(() => showWarmupQuestion(), 2000);
+    warmupNextTimeout = setTimeout(() => { warmupNextTimeout = null; showWarmupQuestion(); }, 2000);
 }
+let warmupNextTimeout = null;
 
 function finishWarmup() {
     const { correctCount, pieces } = warmupState;
@@ -11570,6 +11742,7 @@ function finishWarmup() {
 }
 
 function dismissWarmup() {
+    if (warmupNextTimeout) { clearTimeout(warmupNextTimeout); warmupNextTimeout = null; }
     document.getElementById('warmup-overlay').classList.add('hidden');
     // Restore hidden elements for next time
     const mysteryContainer = document.querySelector('.warmup-modal .piece-intro-mystery');
@@ -12193,7 +12366,13 @@ function processAchievementQueue() {
 // ==================================================================
 // KEYBOARD SHORTCUTS
 // ==================================================================
+// Global shortcuts must not fire while the player types (Composer chord inputs, etc.).
+function isTypingTarget(el) {
+    return !!(el && el.closest && el.closest('input, select, textarea, [contenteditable=""], [contenteditable="true"]'));
+}
+
 document.addEventListener('keydown', e => {
+    if (isTypingTarget(e.target)) return;
     if (document.getElementById('screen-puzzle').classList.contains('active')) {
         if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
         if (e.code === 'KeyH') useHint();
@@ -12399,6 +12578,9 @@ playNote = function(freq, startTime, duration) {
     const ctx = getAudioCtx();
     const dest = getMasterGain();
     const v = settings.volMusic;
+    // Muted: exponential ramps to a zero target throw a RangeError, which would abort
+    // whatever called us (melody playback, drop handling, the win celebration).
+    if (!(v > 0)) return;
 
     // Try sample-based playback
     if (_samplesReady) {
@@ -12628,7 +12810,7 @@ function applySwingFromX(clientX) {
     const swing = 0.50 + Math.max(0, Math.min(1, pct)) * 0.25;
     soundParams.swing = Math.round(swing * 100) / 100; // round to 1%
     updateSwingGauge();
-    saveSoundParams();
+    // Saved once in endKnobDrag, not on every pointer move.
 }
 
 function startSliderDrag(e, slider) {
@@ -13408,8 +13590,13 @@ function confirmResetProgress() {
 function doResetProgress(btn) {
     gameProgress = {};
     saveProgress();
-    localStorage.removeItem('bebopOnboardDone');
-    localStorage.removeItem('bebopCraftOnboard');
+    // Replay the craft-table onboarding too (settings and sound params are kept).
+    try {
+        ['bebopCraftTutorial_flip', 'bebopCraftTutorial_dupe', 'bebopCraftFlipDone', 'bebopDupeTooltipDone']
+            .forEach(k => localStorage.removeItem(k));
+    } catch (e) {}
+    craftFlipTooltipShown = false;
+    craftDupeTooltipShown = false;
     document.getElementById('reset-overlay')?.remove();
     showToast('Progress reset', 'info');
     renderMap();
@@ -13647,6 +13834,7 @@ function onDailyPressed() {
     hideCraftTable();
     hideTempoHint();
     composerMode = false;
+    cancelCelebration();
     if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
     if (stuckIdleTimer) { clearInterval(stuckIdleTimer); stuckIdleTimer = null; }
 
@@ -13781,6 +13969,7 @@ function onComposerPressed() {
 
 function startComposerMode(len) {
     stopPlayback();
+    cancelCelebration();
     clearHintVisuals();
     if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
     composerMode = true;
@@ -14046,14 +14235,16 @@ document.addEventListener('DOMContentLoaded', init);
     let _secretBuf = '';
     const SECRET_CODE = '676767';
     document.addEventListener('keydown', e => {
-        if (e.key >= '0' && e.key <= '9') {
+        if (isTypingTarget(e.target)) return;
+        if (!(e.key >= '0' && e.key <= '9')) { _secretBuf = ''; return; }
+        {
             _secretBuf += e.key;
             if (_secretBuf.length > SECRET_CODE.length) _secretBuf = _secretBuf.slice(-SECRET_CODE.length);
             if (_secretBuf === SECRET_CODE) {
                 _secretBuf = '';
                 // Unlock all levels: mark every level as completed with 3 stars
                 LEVELS.forEach(l => {
-                    gameProgress[l.id] = { completed: true, stars: 3, bestTime: 30 };
+                    gameProgress[l.id] = { ...(gameProgress[l.id] || {}), completed: true, stars: 3 };
                 });
                 saveProgress();
                 renderMap();

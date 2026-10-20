@@ -5861,7 +5861,7 @@ function calculateApproachNotes(piece, targetNote, sel) {
 
 function calculateNeighborNotes(piece, targetNote, sel) {
     if (targetNote === null) return [];
-    const above = piece.label === 'Down-Up';
+    const above = piece.label === 'Upper First';
     const s2 = getInterval(sel,'int1'), s4 = getInterval(sel,'int3');
     if (above) return [targetNote, targetNote+s2, targetNote, targetNote-s4];
     else return [targetNote, targetNote-s2, targetNote, targetNote+s4];
@@ -6235,7 +6235,7 @@ const LEVEL_TEMPLATES = [
     {id:"ch2_15", ch:2, name:"Neighbor Mastery",  len:5, rem:3, pool:["Arpeggio","Neighbor"], newPc:null,       hints:0, time:180},
 
     // Chapter 3: Approaches — "The Precision Chapter" (high fill ratio, directional choices)
-    {id:"ch3_01", ch:3, name:"Leading Tone",      len:2, rem:1, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:3, time:60,  tutorial:"The Approach walks chromatically into the target. Sing the line — hear the steps leading in?"},
+    {id:"ch3_01", ch:3, name:"Leading Tone",      len:2, rem:1, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:3, time:60,  tutorial:"The Approach walks by step and slides a half step into the target. Sing it — hear the steps leading in?"},
     {id:"ch3_02", ch:3, name:"Chromatic Slide",   len:2, rem:1, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:3, time:60},
     {id:"ch3_03", ch:3, name:"Half Step Hustle",  len:3, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:3, time:100},
     {id:"ch3_04", ch:3, name:"Sidestep",          len:3, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:3, time:100},
@@ -6313,8 +6313,7 @@ const TUTORIAL_LEVELS = {
         targetPiece:{position:1.5},
         removeCols:[0],
         trayBasePieces:["Arpeggio"],
-        hints:3, timeThreshold:60, craft:'hidden',
-        tutorial:"Listen to the melody, then drag the piece into the highlighted column."
+        hints:3, timeThreshold:60, craft:'hidden'
     },
     // Ch1 Level 2: slightly longer chain, still no craft table
     "ch1_02": {
@@ -6328,8 +6327,7 @@ const TUTORIAL_LEVELS = {
         targetPiece:{position:0.5},
         removeCols:[2],
         trayBasePieces:["Arpeggio"],
-        hints:3, timeThreshold:90, craft:'hidden',
-        tutorial:"Listen again — where does this piece fit?"
+        hints:3, timeThreshold:90, craft:'hidden'
     },
     // Ch1 Level 3: flip introduction — answer needs Descending, tray gives Ascending
     "ch1_03": {
@@ -6342,8 +6340,7 @@ const TUTORIAL_LEVELS = {
         targetPiece:{position:0},
         removeCols:[0],
         trayBasePieces:["Arpeggio"],
-        hints:3, timeThreshold:60, craft:'flip',
-        tutorial:"This piece needs to go the other way!"
+        hints:3, timeThreshold:60, craft:'flip'
     },
     // Ch1 Level 6: duplicate introduction — 2 holes, 1 tray card, both Ascending
     "ch1_06": {
@@ -6357,22 +6354,20 @@ const TUTORIAL_LEVELS = {
         targetPiece:{position:1.0},
         removeCols:[0, 1],
         trayBasePieces:["Arpeggio"],
-        hints:3, timeThreshold:120, craft:'full',
-        tutorial:"You need two pieces but only have one!"
+        hints:3, timeThreshold:120, craft:'full'
     },
     // Ch2 Level 1: Neighbor introduction
     "ch2_01": {
         id:"ch2_01", chapter:2, name:"Close Quarters",
         chords:["Dm7","G7"], targetChord:"Cmaj7",
         solution:[
-            {col:0, pieceName:"Neighbor", pieceLabel:"Down-Up", position:1},
+            {col:0, pieceName:"Neighbor", pieceLabel:"Upper First", position:1},
             {col:1, pieceName:"Arpeggio", pieceLabel:"Ascending", position:0.5}
         ],
         targetPiece:{position:0},
         removeCols:[0],
         trayBasePieces:["Neighbor"],
-        hints:3, timeThreshold:60,
-        tutorial:"You unlocked the Neighbor piece! Sing the melody back — can you hear where it stays close?"
+        hints:3, timeThreshold:60
     },
     // Ch3 Level 1: Approach introduction
     "ch3_01": {
@@ -6380,13 +6375,12 @@ const TUTORIAL_LEVELS = {
         chords:["Dm7","G7"], targetChord:"Cmaj7",
         solution:[
             {col:0, pieceName:"Approach", pieceLabel:"Ascending", position:1},
-            {col:1, pieceName:"Neighbor", pieceLabel:"Down-Up", position:0.5}
+            {col:1, pieceName:"Neighbor", pieceLabel:"Upper First", position:0.5}
         ],
         targetPiece:{position:0.5},
         removeCols:[0],
         trayBasePieces:["Approach"],
-        hints:3, timeThreshold:60,
-        tutorial:"The Approach walks chromatically into the target. Sing the line — hear the steps leading in?"
+        hints:3, timeThreshold:60
     },
     // Ch4 Level 1: Enclosure introduction
     "ch4_01": {
@@ -6399,8 +6393,7 @@ const TUTORIAL_LEVELS = {
         targetPiece:{position:1},
         removeCols:[0],
         trayBasePieces:["Enclosure"],
-        hints:3, timeThreshold:60,
-        tutorial:"Enclosures surround the target from both sides. Hum it back — notice how it circles the note?"
+        hints:3, timeThreshold:60
     },
     // Ch5 Level 1: All Mixed
     "ch5_01": {
@@ -6408,13 +6401,12 @@ const TUTORIAL_LEVELS = {
         chords:["Dm7","G7"], targetChord:"Cmaj7",
         solution:[
             {col:0, pieceName:"Enclosure", pieceLabel:"From Above", position:1},
-            {col:1, pieceName:"Neighbor", pieceLabel:"Down-Up", position:1}
+            {col:1, pieceName:"Neighbor", pieceLabel:"Upper First", position:1}
         ],
         targetPiece:{position:1},
         removeCols:[0],
         trayBasePieces:["Enclosure"],
-        hints:3, timeThreshold:60,
-        tutorial:"All four piece types are in play. Sing the melody first, then match the shapes to what you hear."
+        hints:3, timeThreshold:60
     }
 };
 
@@ -6427,8 +6419,8 @@ const LEVELS = LEVEL_TEMPLATES.map(t => ({id: t.id, chapter: t.ch, name: t.name}
 const PIECE_RULES = {
     'Arpeggio|Ascending':   { entry:1.0, exit:0.0 },
     'Arpeggio|Descending':  { entry:0.0, exit:1.0 },
-    'Neighbor|Down-Up':  { entry:0.5, exit:0.5 },
-    'Neighbor|Up-Down':  { entry:0.5, exit:0.5 },
+    'Neighbor|Upper First':  { entry:0.5, exit:0.5 },
+    'Neighbor|Lower First':  { entry:0.5, exit:0.5 },
     'Approach|Ascending':   { entry:1.0, exit:0.0 },
     'Approach|Descending':  { entry:0.0, exit:1.0 },
     'Enclosure|From Below': { entry:1.0, exit:0.5 },
@@ -6792,7 +6784,7 @@ function renderChapterIcon(iconStr, size) {
 const FLIP_MAP = {
     'Arpeggio':  { defaultLabel: 'Ascending',  flipH: 'Descending' },
     'Approach':  { defaultLabel: 'Ascending',  flipH: 'Descending' },
-    'Neighbor':  { defaultLabel: 'Down-Up', flipH: 'Up-Down' },
+    'Neighbor':  { defaultLabel: 'Upper First', flipH: 'Lower First' },
     'Enclosure': { defaultLabel: 'From Below', flipH: 'From Above' },
 };
 
@@ -7550,6 +7542,8 @@ function startLevel(levelId, opts = {}) {
     // Tutorial levels use hardcoded puzzles; others are generated fresh
     if (TUTORIAL_LEVELS[levelId]) {
         currentLevelData = JSON.parse(JSON.stringify(TUTORIAL_LEVELS[levelId]));
+        // Tutorial copy lives only in LEVEL_TEMPLATES (single source of truth).
+        if (template.tutorial) currentLevelData.tutorial = template.tutorial;
     } else {
         currentLevelData = generateRandomPuzzle(template);
     }
@@ -9404,7 +9398,7 @@ function explainRejectedDrop(piece) {
 
     const sameFits = getValidSnapPositions(piece, col).some(s => s.valid);
     if (sameFits) {
-        showToast('Right piece — try a different height in that column.', 'info', 2600);
+        showToast('That shape fits at another height in this column.', 'info', 2600);
         return;
     }
 
@@ -10154,10 +10148,10 @@ function getLevelHintBudget(levelData) {
 const HINT_DESCRIPTIONS = {
     'Arpeggio Ascending': 'The melody moves upward through the chord tones.',
     'Arpeggio Descending': 'The melody moves downward through the chord tones.',
-    'Approach Ascending': 'The melody steps upward into the target note.',
-    'Approach Descending': 'The melody steps downward into the target note.',
-    'Neighbor Down-Up': 'The melody goes down then up around the target note.',
-    'Neighbor Up-Down': 'The melody goes up then down around the target note.',
+    'Approach Ascending': 'The melody walks up by step and slides a half step into the target note.',
+    'Approach Descending': 'The melody walks down by step and slides a half step into the target note.',
+    'Neighbor Upper First': 'The melody touches the note above, returns, then the note below.',
+    'Neighbor Lower First': 'The melody touches the note below, returns, then the note above.',
     'Enclosure': 'The melody circles around the target note from both sides.'
 };
 
@@ -10326,7 +10320,7 @@ function showOptionsHint(answer) {
     const HINT_EAR_TIPS = {
         'Arpeggio': 'Hear the jump? That\'s the Arpeggio.',
         'Neighbor': 'Hear how it stays close? That\'s the Neighbor.',
-        'Approach': 'Hear the chromatic walk? That\'s the Approach.',
+        'Approach': 'Hear the steady walk into the note? That\'s the Approach.',
         'Enclosure': 'Hear it circle the note? That\'s the Enclosure.',
     };
     const earTip = HINT_EAR_TIPS[answer.pieceName];
@@ -10575,7 +10569,7 @@ function guidedStep(stepIdx) {
     const PIECE_EXPLAIN = {
         'Arpeggio': 'Hear the jump? That\'s the Arpeggio.',
         'Neighbor': 'Hear how it stays close? That\'s the Neighbor.',
-        'Approach': 'Hear the chromatic walk? That\'s the Approach.',
+        'Approach': 'Hear the steady walk into the note? That\'s the Approach.',
         'Enclosure': 'Hear it circle the note? That\'s the Enclosure.'
     };
     const explain = PIECE_EXPLAIN[answer.pieceName] || '';
@@ -11067,7 +11061,7 @@ function simplifyTutorialText(text) {
     if (/all four/i.test(text)) return 'Listen, then match each shape.';
     if (/Tap any filled column/i.test(text)) return 'Tap filled columns to hear them.';
     if (/Listen to the melody/i.test(text)) return 'Listen first, then place the piece.';
-    return text.length > 58 ? text.slice(0, 55).trim() + '...' : text;
+    return text;
 }
 
 function getObjectiveTooltipTarget(text) {
@@ -11773,8 +11767,8 @@ function updateLastPlayedTimestamp() {
 // ==================================================================
 const PIECE_INTRO_HINTS = {
     'Arpeggio': { a: 'Ascending — hear how it jumps up through the chord?', b: 'Descending — hear how it leaps down?' },
-    'Neighbor': { a: 'Down-Up — hear how it dips down and returns?', b: 'Up-Down — hear how it reaches up and comes back?' },
-    'Approach': { a: 'Ascending — hear the chromatic walk upward?', b: 'Descending — hear it stepping down into the note?' },
+    'Neighbor': { a: 'Upper First — it steps up, returns, then dips below.', b: 'Lower First — it dips below, returns, then steps up.' },
+    'Approach': { a: 'Ascending — hear it walk up and slide into the note?', b: 'Descending — hear it walk down and slide into the note?' },
     'Enclosure': { a: 'From Below — it starts below, rises above, then lands.', b: 'From Above — it starts above, dips below, then lands.' },
 };
 
@@ -12104,14 +12098,14 @@ function dismissPieceIntro() {
 const PIECE_DESCRIPTIONS = {
     'Arpeggio': 'Leaps through the notes of the chord. The foundation of bebop vocabulary — every great line starts here.',
     'Neighbor': 'Decorates the target note by stepping to an adjacent tone and returning. Perfect for adding smooth melodic motion.',
-    'Approach': 'Steps chromatically into the target note from above or below. A classic bebop device for creating tension and resolution.',
+    'Approach': 'Walks by step toward the target and slides in by a half step, from above or below. A classic bebop device for tension and resolution.',
     'Enclosure': 'Surrounds the target note from both sides before landing on it. The ultimate bebop secret weapon for hip lines.',
 };
 
 const PIECE_TAGLINES = {
     'Arpeggio':  'Leaping',
     'Neighbor':  'Smooth',
-    'Approach':  'Chromatic',
+    'Approach':  'Stepwise',
     'Enclosure': 'Surrounding',
 };
 

@@ -191,7 +191,7 @@ const DEFAULT_LIBRARY_DATA = {
     {
       "id": 1770068563603,
       "name": "Neighbor",
-      "label": "Down-Up",
+      "label": "Upper First",
       "entryY": 0.5,
       "exitY": 0.5,
       "allowInversions": false,
@@ -272,7 +272,7 @@ const DEFAULT_LIBRARY_DATA = {
     {
       "id": 1770068153450,
       "name": "Neighbor",
-      "label": "Up-Down",
+      "label": "Lower First",
       "entryY": 0.5,
       "exitY": 0.5,
       "allowInversions": false,

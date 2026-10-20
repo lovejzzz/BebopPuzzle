@@ -52,9 +52,11 @@ and fix every bug found in the October 2026 audit.
 ## Phase D — Mobile & accessibility (audit #14)
 
 - Remove `user-scalable=no` / `maximum-scale`.
-- Minimum 11 px for all text (tray labels, badges).
-- Each piece family gets a non-colour cue (letter badge A / N / Ap / E) on tray cards.
-- Trim the empty band above the grid on narrow portrait phones.
+- On-screen text no smaller than 10 px (tray piece labels 11 px); print-kit styles unchanged.
+- Non-colour cue: checked — tray cards already print the piece name and variant, and grid
+  pieces differ by shape, so no extra badge was added.
+- Empty band above the grid: checked — it is the grid being vertically centred; layout kept.
+- `touch-action: manipulation` so pinch-zoom works without double-tap zoom.
 
 ## Phase E — Ear-training core (audit #1, #3, #4, #5, #6, #7)
 

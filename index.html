@@ -4363,6 +4363,7 @@
             border-color: rgba(251,191,36,0.3);
             color: var(--gold);
         }
+        .sound-preset-btn[aria-pressed="true"],
         .sound-preset-btn.active {
             background: rgba(251,191,36,0.12);
             border-color: rgba(251,191,36,0.4);
@@ -9331,8 +9332,7 @@ function cancelDragProcessing() {
     document.removeEventListener('mouseup', onDragEnd);
     document.removeEventListener('touchmove', onTouchMove);
     document.removeEventListener('touchend', onTouchEnd);
-    document.removeEventListener('touchcancel', onTouchCancel);
-    touchDrag = null;
+    removeTouchDragListeners();
     clearSnapPreview();
     document.getElementById('craft-drop-zone')?.classList.remove('drag-hover');
     document.querySelectorAll('.tray-piece').forEach(t => t.classList.remove('dragging'));
@@ -9421,7 +9421,40 @@ const TOUCH_DRAG_THRESHOLD = 8;
 
 // Ignore extra fingers while one touch drag is already running.
 function touchDragInProgress(e) {
+    // A drag whose finger is no longer on the screen lost its touchend (the element it
+    // started on was re-rendered away); clear it instead of blocking all touch input.
+    if (touchDrag && e.touches && ![...e.touches].some(t => t.identifier === touchDrag.id)) {
+        removeTouchDragListeners();
+        abortDrag();
+    }
     return !!touchDrag || (e.touches && e.touches.length > 1);
+}
+
+// Touch events keep targeting the element the touch started on, even after that
+// element is removed from the page (tray re-render, craft table reset). Events on a
+// detached node never bubble to document, so the drag also listens on the node itself
+// and handles events there only once it is detached.
+function addTouchDragListeners(el) {
+    document.addEventListener('touchmove', onTouchMove, {passive:false});
+    document.addEventListener('touchend', onTouchEnd);
+    document.addEventListener('touchcancel', onTouchCancel);
+    if (!el || !touchDrag) return;
+    const detachedOnly = fn => ev => { if (!el.isConnected) fn(ev); };
+    touchDrag.el = el;
+    touchDrag.fns = { touchmove: detachedOnly(onTouchMove), touchend: detachedOnly(onTouchEnd), touchcancel: detachedOnly(onTouchCancel) };
+    el.addEventListener('touchmove', touchDrag.fns.touchmove, {passive:false});
+    el.addEventListener('touchend', touchDrag.fns.touchend);
+    el.addEventListener('touchcancel', touchDrag.fns.touchcancel);
+}
+
+function removeTouchDragListeners() {
+    document.removeEventListener('touchmove', onTouchMove);
+    document.removeEventListener('touchend', onTouchEnd);
+    document.removeEventListener('touchcancel', onTouchCancel);
+    if (touchDrag && touchDrag.el && touchDrag.fns) {
+        for (const [type, fn] of Object.entries(touchDrag.fns)) touchDrag.el.removeEventListener(type, fn);
+    }
+    touchDrag = null;
 }
 
 // Abort a drag without placing anything: grid and tray pieces stay where they were;
@@ -9472,9 +9505,7 @@ function startDragTouch(e, piece, fromGrid) {
     const snapPoint = getTouchSnapPoint(touch);
     scheduleDragProcess(snapPoint.x, snapPoint.y);
 
-    document.addEventListener('touchmove', onTouchMove, {passive:false});
-    document.addEventListener('touchend', onTouchEnd);
-    document.addEventListener('touchcancel', onTouchCancel);
+    addTouchDragListeners(e.target);
 }
 
 function findDragTouch(list) {
@@ -9774,10 +9805,7 @@ function onTouchEnd(e) {
     const touch = findDragTouch(e.changedTouches);
     if (!touch) return; // a different finger lifted
     const moved = touchDrag.moved;
-    document.removeEventListener('touchmove', onTouchMove);
-    document.removeEventListener('touchend', onTouchEnd);
-    document.removeEventListener('touchcancel', onTouchCancel);
-    touchDrag = null;
+    removeTouchDragListeners();
     if (!moved) { abortDrag(); return; }
     const snapPoint = getTouchSnapPoint(touch);
     finishDrag(touch.clientX, touch.clientY, snapPoint);
@@ -9785,10 +9813,7 @@ function onTouchEnd(e) {
 
 function onTouchCancel(e) {
     if (!findDragTouch(e.changedTouches)) return;
-    document.removeEventListener('touchmove', onTouchMove);
-    document.removeEventListener('touchend', onTouchEnd);
-    document.removeEventListener('touchcancel', onTouchCancel);
-    touchDrag = null;
+    removeTouchDragListeners();
     abortDrag();
 }
 
@@ -10132,8 +10157,8 @@ function checkAnswer(col) {
                     t += dur;
                 });
             }
-            currentHintCol = null;
-            currentHintLevel = 0;
+            // Only the hinted column's ladder is finished; hints elsewhere keep their step.
+            if (col === currentHintCol) { currentHintCol = null; currentHintLevel = 0; }
             applyHighlights();
         }
     } else {
@@ -10146,7 +10171,10 @@ function checkAnswer(col) {
         if (nameMatch && !labelMatch) feedback = 'Right piece, other direction.';
         else if (nameMatch && !posMatch) feedback = 'Right piece, wrong height.';
         else feedback = 'Not this shape.';
-        const compared = playMistakeComparison(col, state);
+        // Height does not change the notes, and limited-listen levels must not get a
+        // free listen of the answer — compare by ear only when it is meaningful.
+        const compared = !(nameMatch && labelMatch) && !(currentLevelData.listens > 0) && playMistakeComparison(col, state);
+        if (nameMatch && labelMatch) feedback = 'Right piece, wrong height — follow the line from its neighbour.';
         showToast(compared ? `${feedback} Hear yours, then the melody.` : `${feedback} Listen again and compare.`, 'error', 3200);
         // Detect "right piece, wrong direction" → show flip tooltip
         if (nameMatch && !labelMatch && shouldShowFlipTooltip()) {
@@ -10210,10 +10238,12 @@ function playMistakeComparison(col, placedState) {
     const start = audioCtx.currentTime + 0.45;
     const mid = playRun(yours, start) + eighth * 2;
     const end = playRun(correct, mid);
-    // Light the column while the melody's version plays
+    // Treat it as playback: Listen stops it instead of layering, and leaving the
+    // level cancels the playhead timers (stopPlayback clears playbackTimeouts).
+    isPlaying = true;
     const toMs = t => Math.max(0, (t - audioCtx.currentTime) * 1000);
-    setTimeout(() => setPlayheadColumn(col, false), toMs(mid));
-    setTimeout(() => clearPlayhead(), toMs(end));
+    playbackTimeouts.push(setTimeout(() => setPlayheadColumn(col, false), toMs(mid)));
+    playbackTimeouts.push(setTimeout(() => { clearPlayhead(); isPlaying = false; }, toMs(end)));
     return true;
 }
 
@@ -10607,6 +10637,14 @@ function revealHint(answer) {
     const piece = findPiece(answer.pieceName, answer.pieceLabel);
     if (!piece) return;
     showHintToast(`It's the ${answer.pieceName} ${answer.pieceLabel}. Listen to how it sounds in the line.`);
+    const existing = gridState[answer.col];
+    if (existing && existing.piece && !isSolved(answer.col)) {
+        // A wrong piece still sitting here (e.g. mid-shake) goes back to the tray.
+        const fm = FLIP_MAP[existing.piece.name];
+        trayAvailable.push(existing.piece.name);
+        trayFlipState.push(!!(fm && fm.flipH && existing.piece.label === fm.flipH));
+        renderTray();
+    }
     const sel = answer.selectedIntervals || selectRandomIntervals(piece);
     gridState[answer.col] = { piece, position: answer.position, selectedIntervals: sel };
     sfx('place');
@@ -12874,6 +12912,7 @@ function isTypingTarget(el) {
 
 document.addEventListener('keydown', e => {
     if (isTypingTarget(e.target)) return;
+    if (e.defaultPrevented) return; // already handled (keyboard placement, craft zone)
     if (document.getElementById('screen-puzzle').classList.contains('active')) {
         if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
         if (e.code === 'KeyH') onHintKey();
@@ -14778,6 +14817,8 @@ document.addEventListener('DOMContentLoaded', init);
 (function() {
     let _secretBuf = '';
     const SECRET_CODE = '676767';
+    // Developer shortcut only: open the game with ?dev to enable it.
+    if (!new URLSearchParams(location.search).has('dev')) return;
     document.addEventListener('keydown', e => {
         if (isTypingTarget(e.target)) return;
         if (!(e.key >= '0' && e.key <= '9')) { _secretBuf = ''; return; }

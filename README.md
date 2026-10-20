@@ -6,6 +6,33 @@ A jazz music theory game that teaches bebop vocabulary through tactile puzzle-so
 
 ---
 
+## What's New in v1.7
+
+### Ear Training First
+- **Puzzles now need your ears.** Every generated level has at least one spot where several pieces fit by shape, so only listening tells you which one belongs (bigger levels have two). Same-shape decoys (an Approach when you need an Arpeggio, and vice versa) join the tray.
+- **Hear the harmony.** Soft shell-voiced chords play under the melody (root, 7th, 3rd). Switch them off in the Sound panel.
+- **Hear your mistake.** A wrong placement plays your piece, then the melody's notes for that spot, so you can compare.
+- **Your line.** The success screen spells out every note with its role over the chord (R, 3, 5, 7, 9, chromatic…), plus slow playback to try on your instrument.
+- **New hint ladder.** 1) loop the spot slowly, 2) choose between the pieces that fit the same way, 3) reveal. Pressing H asks for confirmation.
+
+### Better Bebop Lines
+- Approaches walk through the chord's scale and slide in by a half step; Neighbors use the upper scale tone and the lower half step; Enclosures pair a scale tone above with a half step below.
+- Column downbeats favour chord tones; from Chapter 4 the line can resolve to the 3rd or 7th.
+- Levels named after tunes use real snippets of their changes (Giant Steps, Autumn Leaves, Rhythm Changes, Donna Lee, Cherokee, Countdown…).
+- Neighbor directions renamed **Upper First / Lower First** (the old names described the opposite of what played).
+
+### Progression & Scoring
+- Each level is a stable puzzle: Retry replays it, **Remix** deals a fresh one.
+- The 3-star listen allowance scales with the number of empty columns.
+- Chapter 5's opening is smoother; Jam Session decoys always fit like a real piece.
+- Daily Challenge unlocks with Chapter 2 and only uses chapters you have reached; daily missions rotate.
+- Flippable tray cards have their own ⇄ button (after the Chapter 1 flip lesson).
+
+### Fixes & Performance
+- 18 bugs fixed (celebration skip, touch taps moving pieces, craft-table races, muted-volume crash, shortcuts while typing, and more).
+- Piece art is drawn as SVG (library: 252 KB → 8 KB); Rhodes samples are self-hosted (17 files instead of 37 hot-linked).
+- Pinch-zoom allowed; no on-screen text below 10px.
+
 ## What's New in v1.6
 
 ### Gameplay & Audio
@@ -75,13 +102,15 @@ Think of it like connecting pipes — the heights have to line up.
 
 ### Snap Positions
 
-Pieces can sit at 4 vertical positions in each column (0, 0.5, 1.0, 1.5). Dragging a piece over a column shows a preview of where it will snap. If the connection math works, it locks in.
+Pieces can sit at several vertical positions in each column (0, 0.5, 1.0, 1.5, 2.0). Dragging a piece over a column shows a preview of where it will snap. If the connection math works, it locks in.
+
+Shapes alone do not decide every spot: an Arpeggio and an Approach have the same shape, and so do the two Neighbor directions. That is where your ears come in.
 
 ### The Craft Table
 
 The craft table sits to the right of the tray. Drag any piece from the tray onto it to:
 
-- **Flip** — mirror the piece horizontally (e.g. Ascending becomes Descending)
+- **Flip** — mirror the piece horizontally (e.g. Ascending becomes Descending). After the Chapter 1 flip lesson, tray cards also have their own ⇄ flip button (or press F while holding a piece with the keyboard)
 - **Duplicate** — make a copy so you can use the same piece type twice
 
 You can also drag the result piece directly from the craft table onto the grid.
@@ -90,15 +119,18 @@ You can also drag the result piece directly from the craft table onto the grid.
 
 Each level gives you a limited number of hints:
 
-- **1st hint** — a tempo slider that lets you slow down the melody playback (60–90 BPM) so you can hear the target line more clearly
-- **2nd hint** — highlights which column needs a piece and what position it should be at
+- **1st hint** — loops one empty spot slowly so you can hear its shape
+- **2nd hint** — shows the height and lets you choose between the pieces that fit there the same way
+- **3rd hint** — places the right piece
+
+The tempo slider is always available to slow the melody down.
 
 ### Stars
 
 Earn 1-3 stars per level based on listen count, hint usage, and mistakes. Stars unlock new chapters.
 
-- 3 stars: 2 or fewer listens, no hints, no mistakes
-- 2 stars: 4 or fewer listens, at most 1 hint or mistake
+- 3 stars: no hints, no mistakes, and at most (empty columns + 1) listens
+- 2 stars: at most (empty columns + 3) listens, and at most 1 hint or mistake
 - 1 star: completed
 
 ---
@@ -114,7 +146,7 @@ Start with ascending and descending arpeggios. Learn the grid, snapping, and con
 Unlock neighbor tones (upper and lower). These stay close to the target — great for smooth lines.
 
 **Chapter 3 — Approaches**
-Unlock chromatic approach patterns. Walk into the target note from above or below — a bebop classic.
+Unlock approach patterns: walk through the scale and slide into the target by a half step, from above or below — a bebop classic.
 
 **Chapter 4 — Enclosures**
 Unlock enclosures that surround the target from both sides. The bebop secret weapon.
@@ -148,6 +180,7 @@ Open the sound panel (EQ) during any puzzle to customize the Rhodes EP tone:
 - **Tremolo** — adjust depth and speed
 - **Swing** — vintage gauge from 50% (straight) to 75% (hard shuffle)
 - **Presets** — Clean, Warm, Driven, Dreamy, Classic
+- **Chords under melody** — toggle the soft comping that plays the harmony
 
 All settings persist across sessions.
 

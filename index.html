@@ -4949,7 +4949,8 @@
     </style>
 </head>
 <body>
-    <script src="library-data.js"></script>
+    <script src="library-data.js?v=1.7"></script>
+    <script src="piece-art.js?v=1.7"></script>
     <div class="ambient-bg"></div>
     <div class="noise-overlay"></div>
 
@@ -12534,22 +12535,24 @@ async function loadRhodesSamples() {
     if (_samplesLoading || _samplesReady) return;
     _samplesLoading = true;
     const ctx = getAudioCtx();
-    // Load Rhodes samples for MIDI 48 (C3) to 84 (C6) — covers the game's range
-    const BASE = 'https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM/electric_piano_1-mp3/';
+    // Self-hosted Rhodes samples, one every minor third from C3 (48) to C7 (96); every
+    // other note is pitch-shifted at most a semitone. The original CDN is a fallback.
+    const LOCAL = 'samples/rhodes/';
+    const CDN = 'https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM/electric_piano_1-mp3/';
+    const fetchSample = url => fetch(url).then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status));
     const promises = [];
-    for (let midi = 48; midi <= 84; midi++) {
-        const name = midiToSampleName(midi);
-        const url = BASE + encodeURIComponent(name) + '.mp3';
+    for (let midi = 48; midi <= 96; midi += 3) {
+        const file = encodeURIComponent(midiToSampleName(midi)) + '.mp3';
         promises.push(
-            fetch(url)
-                .then(r => r.ok ? r.arrayBuffer() : null)
-                .then(buf => buf ? ctx.decodeAudioData(buf) : null)
+            fetchSample(LOCAL + file)
+                .catch(() => fetchSample(CDN + file))
+                .then(buf => ctx.decodeAudioData(buf))
                 .then(decoded => { if (decoded) _sampleCache[midi] = decoded; })
                 .catch(() => {}) // silently skip failed samples
         );
     }
     await Promise.all(promises);
-    _samplesReady = Object.keys(_sampleCache).length > 10;
+    _samplesReady = Object.keys(_sampleCache).length >= 12;
     _samplesLoading = false;
     if (_samplesReady) console.log('Rhodes samples loaded:', Object.keys(_sampleCache).length, 'notes');
     else console.warn('Rhodes sample loading incomplete, using synth fallback');
@@ -14197,18 +14200,16 @@ async function init() {
     initKnobInteraction();
     capturePieceIntroMarkup();
 
-    // Try inline data first (works from file://), fallback to fetch
+    // Piece library (vector shapes + interval options); artwork is generated as SVG.
     if (typeof DEFAULT_LIBRARY_DATA !== 'undefined' && DEFAULT_LIBRARY_DATA.library) {
         library = DEFAULT_LIBRARY_DATA.library;
     } else {
-        try {
-            const resp = await fetch('default-library.json');
-            if (resp.ok) {
-                const data = await resp.json();
-                if (data.library) library = data.library;
-            }
-        } catch(e) { console.warn('Failed to load library:', e); }
+        console.warn('Piece library missing — library-data.js failed to load');
     }
+    // Labels renamed in v1.7; a cached older library-data.js may still use the old ones.
+    const LEGACY_LABELS = { 'Down-Up': 'Upper First', 'Up-Down': 'Lower First' };
+    library.forEach(p => { if (LEGACY_LABELS[p.label]) p.label = LEGACY_LABELS[p.label]; });
+    if (typeof applyPieceArt === 'function') applyPieceArt(library);
 
     library.forEach(p => enrichPieceConnectionData(p));
     initCraftOutput();

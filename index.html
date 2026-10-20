@@ -2221,13 +2221,18 @@
         }
 
         /* ---- Hint visuals ---- */
-        .grid-column.hint-listen { animation: hint-listen-pulse 1.2s ease-in-out 3; border-radius: 12px; }
+        /* On a pseudo-element: the column itself runs the level-entrance animation,
+           and replacing that animation would reset it to invisible. */
+        .grid-column.hint-listen::after {
+            content: ''; position: absolute; inset: -4px; border-radius: 14px; pointer-events: none;
+            animation: hint-listen-pulse 1.2s ease-in-out 3;
+        }
         @keyframes hint-listen-pulse {
             0%, 100% { box-shadow: 0 0 0 0 rgba(240,168,48,0); }
             50% { box-shadow: 0 0 0 2px rgba(240,168,48,0.6), 0 0 22px rgba(240,168,48,0.3); }
         }
         @media (prefers-reduced-motion: reduce) {
-            .grid-column.hint-listen { animation: none; box-shadow: 0 0 0 2px rgba(240,168,48,0.6); }
+            .grid-column.hint-listen::after { animation: none; box-shadow: 0 0 0 2px rgba(240,168,48,0.6); }
         }
         .hint-ghost {
             position: absolute; left: 0; right: 0;
@@ -4424,6 +4429,18 @@
             .tempo-hint-value { font-size: 13px; }
             .play-btn { width: 48px; height: 48px; }
             .play-status-label { font-size: 10px; }
+            /* Compact trays and the craft table were still desktop-sized here, leaving
+               the board a thin strip; shrink them so the grid gets the height. */
+            .piece-tray.tray-compact .tray-piece { padding: 4px 4px 3px; gap: 2px; }
+            .piece-tray.tray-compact .tray-piece-thumb,
+            .piece-tray.tray-compact .tray-piece-thumb img { width: 40px; height: 40px; min-width: 40px; min-height: 40px; }
+            .piece-tray.tray-compact .tray-piece-label { font-size: 10px; }
+            .piece-tray.tray-compact .tray-piece-variant { font-size: 10px; }
+            .craft-drop-zone, .craft-output { width: 60px; height: 60px; }
+            .tray-surface { padding: 6px 12px 8px; }
+            .piece-tray { min-height: 0; padding: 6px 2px 2px; }
+            .craft-inline-btns { flex-direction: row; }
+            .craft-inline-mid { gap: 2px; }
         }
         @media (max-width: 480px) {
             .puzzle-topbar { padding: 10px 12px; }
@@ -6086,6 +6103,7 @@ function getEighth() { return 60 / currentBPM / 2; }
 let isPlaying = false;
 let playbackTimeouts = [];
 let celebrationTimeouts = [];
+let mistakeReplayActive = false; // the "yours, then the melody" comparison is sounding
 let celebrationTeardown = null; // removes the skip handlers of a running celebration
 
 // Abort a running win celebration without firing its completion callback. Leaving the
@@ -6358,6 +6376,7 @@ function stopPlayback() {
     playbackTimeouts.forEach(t => clearTimeout(t));
     playbackTimeouts = [];
     isPlaying = false;
+    mistakeReplayActive = false;
     stopPlayButtonProgress(true);
     // Instantly silence all melody oscillators routed through the master gain
     if (masterGain && audioCtx) {
@@ -6375,7 +6394,12 @@ function togglePlay() {
     clearAutoPlayTimeout();
     const btn = document.getElementById('play-btn');
     if (btn && btn.dataset.skipMode === '1') return;
-    if (isPlaying) { stopPlayback(); return; }
+    if (isPlaying) {
+        // Listen during the mistake comparison goes straight to the melody.
+        const wasReplay = mistakeReplayActive;
+        stopPlayback();
+        if (!wasReplay) return;
+    }
     playMelody();
 }
 
@@ -8370,6 +8394,10 @@ function canFlipInTray() {
 
 function flipTrayCard(idx) {
     if (!canFlipInTray() || idx < 0 || idx >= trayAvailable.length) return;
+    // Re-rendering the tray drops keyboard focus; put it back where it was.
+    const focusedCard = document.activeElement?.closest?.('.tray-piece');
+    const refocus = focusedCard && parseInt(focusedCard.dataset.trayIndex) === idx
+        ? (document.activeElement.classList.contains('tray-flip-btn') ? 'btn' : 'card') : null;
     trayFlipState[idx] = !trayFlipState[idx];
     sfx('flip');
     markFlipTooltipDone();
@@ -8378,6 +8406,7 @@ function flipTrayCard(idx) {
     announce(`${trayAvailable[idx]} flipped to ${label}.`);
     const card = document.querySelector(`.tray-piece[data-tray-index="${idx}"]`);
     if (card) restartCssAnimation(card, 'tray-flipped');
+    if (card && refocus) (refocus === 'btn' ? card.querySelector('.tray-flip-btn') || card : card).focus();
 }
 
 function renderTray() {
@@ -10241,9 +10270,10 @@ function playMistakeComparison(col, placedState) {
     // Treat it as playback: Listen stops it instead of layering, and leaving the
     // level cancels the playhead timers (stopPlayback clears playbackTimeouts).
     isPlaying = true;
+    mistakeReplayActive = true;
     const toMs = t => Math.max(0, (t - audioCtx.currentTime) * 1000);
     playbackTimeouts.push(setTimeout(() => setPlayheadColumn(col, false), toMs(mid)));
-    playbackTimeouts.push(setTimeout(() => { clearPlayhead(); isPlaying = false; }, toMs(end)));
+    playbackTimeouts.push(setTimeout(() => { clearPlayhead(); isPlaying = false; mistakeReplayActive = false; }, toMs(end)));
     return true;
 }
 
@@ -10617,7 +10647,10 @@ function getLevelFitAlternatives() {
 
 function showListenHint(answer) {
     const colEl = document.querySelector(`.grid-column[data-col="${answer.col}"]`);
-    if (colEl) restartCssAnimation(colEl, 'hint-listen');
+    if (colEl) {
+        restartCssAnimation(colEl, 'hint-listen');
+        setTimeout(() => colEl.classList.remove('hint-listen'), 4000);
+    }
     showHintToast('Listen to this spot slowly — does it leap, walk, or circle the note?');
     if (isPlaying) stopPlayback();
     const slowPreview = () => {
@@ -10768,7 +10801,9 @@ function showOptionsHint(answer) {
 
     // Wrong options: first the pieces that fit this spot exactly like the answer (the
     // choice only the ear can make), then other pieces from this level's tray.
+    // Same height first: those are drawn exactly like the answer.
     const sameFit = (getLevelFitAlternatives()[answer.col] || [])
+        .sort((a, b) => (Math.abs(a.position - answer.position) < 0.01 ? 0 : 1) - (Math.abs(b.position - answer.position) < 0.01 ? 0 : 1))
         .map(a => findPiece(a.pieceName, a.pieceLabel))
         .filter(p => p && !(p.name === answer.pieceName && p.label === answer.pieceLabel));
     const poolNames = new Set(currentLevelData.trayBasePieces || []);
@@ -11474,7 +11509,10 @@ function getPlacementCandidate(placement, targetRect, tipRect, bounds) {
         const area = rectOverlapArea(candidateRect, rect);
         if (area > 0) floatingPenalty += 200 + area / 40;
     });
-    return { placement, left, top, score: overflow * 100 + distancePenalty + blockedPenalty + floatingPenalty };
+    // Never cover the element the tooltip is pointing at (a clamped side placement can
+    // slide right back over a button near the screen edge).
+    const targetPenalty = rectOverlapArea(candidateRect, targetRect) > 0 ? 1000 : 0;
+    return { placement, left, top, score: overflow * 100 + distancePenalty + blockedPenalty + floatingPenalty + targetPenalty };
 }
 
 function positionTooltip(tip, targetEl, options = {}) {
@@ -11960,9 +11998,18 @@ function renderSuccessLine() {
     const chords = [...currentLevelData.chords, currentLevelData.targetChord];
     const parsed = chords.map(parseChord);
     const removed = new Set(currentLevelData.removeCols || []);
+    // The whole line in order, so a chromatic note can be spelled by where it goes:
+    // rising into the next note → sharp (G♯ → A), falling → flat (B♭ → A).
+    const flat = [];
+    for (let c = 0; c < numCols; c++) (fullMelodyNotes.pieceNotes[c] || []).forEach(n => flat.push(n));
+    flat.push(fullMelodyNotes.targetNote);
+    let idx = 0;
     const cell = (midi, c) => {
         const role = noteRole(midi, parsed[c]);
-        return `<div class="sl-note">${spellNote(midi, spellingForKey(chords[c]))}<span class="sl-role${role === 'chr' ? ' sl-chr' : ''}">${escapeHtml(role)}</span></div>`;
+        const next = flat[++idx];
+        let spelling = spellingForKey(chords[c]);
+        if (role === 'chr' && next != null && next !== midi) spelling = next > midi ? SHARP_SPELLING : FLAT_SPELLING;
+        return `<div class="sl-note">${spellNote(midi, spelling)}<span class="sl-role${role === 'chr' ? ' sl-chr' : ''}">${escapeHtml(role)}</span></div>`;
     };
     let cols = '';
     for (let c = 0; c < numCols; c++) {

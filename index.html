@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Bebop Puzzle</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,6 +49,8 @@
             background: var(--bg-deep);
             color: var(--text-primary);
             overflow: hidden;
+            /* Pinch-zoom stays available; double-tap zoom would fight quick taps. */
+            touch-action: manipulation;
             height: 100dvh;
             height: 100vh; /* fallback for older browsers */
             @supports (height: 100dvh) { height: 100dvh; }
@@ -217,13 +219,15 @@
             --menu-glow: rgba(91,141,239,0.13);
         }
         .landing-btn-daily .daily-check { color: #34d399; margin-left: 6px; }
+        .landing-btn-daily .daily-lock { opacity: 0.7; font-size: 0.85em; margin-left: 4px; }
 
         .landing-btn-composer {
             --menu-accent: #a78bfa;
             --menu-border-hover: rgba(167,139,250,0.34);
             --menu-glow: rgba(167,139,250,0.12);
         }
-        .landing-btn-composer.locked {
+        .landing-btn-composer.locked,
+        .landing-btn-daily.locked {
             --menu-accent: rgba(139,148,158,0.42);
             --menu-border-hover: rgba(255,255,255,0.09);
             --menu-glow: rgba(0,0,0,0.18);
@@ -394,13 +398,13 @@
             justify-content: center;
             border: 1px solid currentColor;
             border-radius: 4px;
-            font-size: 8px;
+            font-size: 10px;
             font-weight: 900;
             line-height: 1;
         }
         .map-tab .tab-lock {
             margin-left: 2px;
-            font-size: 8px;
+            font-size: 10px;
             font-weight: 900;
             letter-spacing: 0;
             opacity: 0.9;
@@ -641,7 +645,7 @@
             font-size: 16px;
         }
         .mission-top-badge-label {
-            font-size: 9px;
+            font-size: 10px;
             line-height: 1;
             color: var(--green);
             font-weight: 900;
@@ -1279,7 +1283,7 @@
         .level-node.playable .level-next-badge {
             position: absolute; top: -6px; right: -6px;
             background: var(--gold); color: #1a0800;
-            font-size: 9px; font-weight: 800;
+            font-size: 10px; font-weight: 800;
             padding: 2px 6px; border-radius: 6px;
             box-shadow: 0 2px 8px var(--gold-glow);
         }
@@ -2041,6 +2045,18 @@
         .piece-tray.tray-compact .tray-piece-thumb img { width: 56px; height: 56px; }
         .piece-tray::-webkit-scrollbar { display: none; }
 
+        .tray-flip-btn {
+            position: absolute; top: -8px; right: -8px; z-index: 2;
+            width: 26px; height: 26px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: #2a2118; color: var(--gold); border: 1px solid rgba(240,168,48,0.55);
+            font-size: 13px; line-height: 1; cursor: pointer; padding: 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+        }
+        .tray-flip-btn:hover { background: #3a2d1f; }
+        .tray-flip-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+        .tray-piece.tray-flipped .tray-piece-thumb { animation: tray-flip 0.3s ease; }
+        @keyframes tray-flip { 0% { transform: scaleX(1); } 50% { transform: scaleX(0); } 100% { transform: scaleX(1); } }
         .tray-piece {
             position: relative;
             flex-shrink: 0;
@@ -2205,6 +2221,14 @@
         }
 
         /* ---- Hint visuals ---- */
+        .grid-column.hint-listen { animation: hint-listen-pulse 1.2s ease-in-out 3; border-radius: 12px; }
+        @keyframes hint-listen-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(240,168,48,0); }
+            50% { box-shadow: 0 0 0 2px rgba(240,168,48,0.6), 0 0 22px rgba(240,168,48,0.3); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .grid-column.hint-listen { animation: none; box-shadow: 0 0 0 2px rgba(240,168,48,0.6); }
+        }
         .hint-ghost {
             position: absolute; left: 0; right: 0;
             border: 2px dashed var(--purple);
@@ -2241,14 +2265,14 @@
         }
         .hint-piece-option img { border-radius: 6px; }
         .hint-piece-option-label {
-            font-size: 8px; font-weight: 700;
+            font-size: 10px; font-weight: 700;
             text-align: center; margin-top: 3px;
             text-transform: uppercase;
             color: var(--text-muted);
         }
         .hint-piece-option-variant {
             max-width: 54px;
-            font-size: 7px;
+            font-size: 10px;
             font-weight: 700;
             line-height: 1.1;
             text-align: center;
@@ -2428,6 +2452,28 @@
         }
         .success-overlay.hidden { display: none; }
 
+        .success-line-wrap { margin: 12px 0 2px; }
+        .success-line-title {
+            font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+            color: var(--text-muted); margin-bottom: 6px;
+        }
+        .success-line { display: flex; gap: 4px; justify-content: center; }
+        .sl-col {
+            flex: 1 1 0; min-width: 0; padding: 5px 2px 4px; border-radius: 8px;
+            background: rgba(255,255,255,0.035); border: 1px solid transparent;
+        }
+        .sl-col.sl-yours { border-color: rgba(240,168,48,0.45); }
+        .sl-col.sl-target { flex: 0 0 auto; padding: 5px 6px 4px; }
+        .sl-chord { font-size: 11px; font-weight: 800; color: var(--gold); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sl-note { font-size: 12px; line-height: 1.3; color: var(--text-primary); white-space: nowrap; }
+        .sl-role { font-size: 10px; color: var(--text-muted); margin-left: 2px; }
+        .sl-role.sl-chr { color: #7fa8f5; }
+        .success-line-play {
+            margin-top: 8px; padding: 6px 12px; border-radius: 999px; cursor: pointer;
+            background: rgba(240,168,48,0.1); border: 1px solid rgba(240,168,48,0.35);
+            color: var(--gold); font: 700 11px 'DM Sans', sans-serif;
+        }
+        .success-line-play:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
         .success-modal {
             background: var(--bg-card);
             border: 1px solid var(--border-medium);
@@ -2626,7 +2672,7 @@
             justify-content: center;
             border: 1px solid currentColor;
             border-radius: 6px;
-            font-size: 9px;
+            font-size: 10px;
             font-weight: 900;
             letter-spacing: 0.08em;
             line-height: 1;
@@ -3828,7 +3874,7 @@
             border-radius: 999px;
             background: rgba(52,211,153,0.9);
             color: #07110c;
-            font-size: 8px;
+            font-size: 10px;
             font-weight: 900;
             line-height: 1;
             text-transform: uppercase;
@@ -4124,7 +4170,7 @@
             gap: 8px; flex: 1; min-width: 0;
         }
         .knob-label {
-            font-size: 9px; font-weight: 700; letter-spacing: 0.12em;
+            font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
             text-transform: uppercase; color: var(--text-muted);
             text-align: center;
         }
@@ -4217,7 +4263,7 @@
             margin-bottom: 12px;
         }
         .swing-gauge-label {
-            font-size: 9px; font-weight: 700; letter-spacing: 0.12em;
+            font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
             text-transform: uppercase; color: var(--text-muted);
         }
         .swing-gauge-value {
@@ -4293,7 +4339,7 @@
         }
         .swing-gauge-tick-label {
             position: absolute;
-            font-size: 7px; font-weight: 600;
+            font-size: 10px; font-weight: 600;
             color: var(--text-muted);
             transform: translateX(-50%);
         }
@@ -4317,6 +4363,7 @@
             border-color: rgba(251,191,36,0.3);
             color: var(--gold);
         }
+        .sound-preset-btn[aria-pressed="true"],
         .sound-preset-btn.active {
             background: rgba(251,191,36,0.12);
             border-color: rgba(251,191,36,0.4);
@@ -4372,11 +4419,11 @@
             .puzzle-bottombar { padding: 6px 12px 8px; }
             .tray-piece-thumb { width: 44px; height: 44px; min-width: 44px; min-height: 44px; }
             .tray-piece-thumb img { width: 44px; height: 44px; }
-            .tray-piece-label { font-size: 8px; }
+            .tray-piece-label { font-size: 11px; }
             .tempo-hint { padding: 6px 10px; width: 132px; }
             .tempo-hint-value { font-size: 13px; }
             .play-btn { width: 48px; height: 48px; }
-            .play-status-label { font-size: 8px; }
+            .play-status-label { font-size: 10px; }
         }
         @media (max-width: 480px) {
             .puzzle-topbar { padding: 10px 12px; }
@@ -4391,13 +4438,13 @@
             .play-btn { width: 56px; height: 56px; }
             .play-btn::before { inset: -6px; }
             .play-btn-icon { transform: translateX(1px) scale(0.86); }
-            .play-status-label { min-width: 56px; font-size: 9px; }
+            .play-status-label { min-width: 56px; font-size: 10px; }
             .hint-btn { min-width: 44px; min-height: 44px; }
             .craft-btn { min-width: 44px; min-height: 44px; }
             .star-info-btn { display: none; }
             .tempo-hint { padding: 8px 10px; }
             .tempo-hint-value { font-size: 14px; }
-            .tempo-hint-labels { font-size: 9px; }
+            .tempo-hint-labels { font-size: 10px; }
             .mission-strip { grid-template-columns: 1fr; }
             .mission-desc { min-height: 0; }
             .success-modal, .warmup-modal, .piece-intro-modal, .reward-modal {
@@ -4405,8 +4452,8 @@
             }
             .piece-tray.tray-compact .tray-piece-thumb { width: 44px; height: 44px; }
             .piece-tray.tray-compact .tray-piece-thumb img { width: 44px; height: 44px; }
-            .piece-tray.tray-compact .tray-piece-label { font-size: 9px; }
-            .piece-tray.tray-compact .tray-piece-variant { font-size: 8px; }
+            .piece-tray.tray-compact .tray-piece-label { font-size: 11px; }
+            .piece-tray.tray-compact .tray-piece-variant { font-size: 10px; }
         }
         /* Mobile: compact tray + craft tool strip */
         @media (max-width: 640px) {
@@ -4468,7 +4515,7 @@
             .craft-piece-label,
             .craft-variant-label {
                 max-width: 100%;
-                font-size: 9px;
+                font-size: 10px;
                 min-height: 10px;
             }
             .craft-btn { min-width: 0; min-height: 0; }
@@ -4502,13 +4549,13 @@
             }
             .craft-claim-hint.visible {
                 margin-top: 2px;
-                font-size: 9px;
+                font-size: 10px;
             }
             /* Compact tempo panel on mobile to avoid grid overlap */
             .tempo-hint { width: 120px; padding: 6px 10px; right: 4px; margin-bottom: 4px; }
             .tempo-hint-value { font-size: 14px; margin-bottom: 2px; }
-            .tempo-hint-labels { font-size: 9px; }
-            .tempo-hint-title { font-size: 9px; margin-bottom: 3px; }
+            .tempo-hint-labels { font-size: 10px; }
+            .tempo-hint-title { font-size: 10px; margin-bottom: 3px; }
         }
 
         /* =============================================
@@ -4949,7 +4996,8 @@
     </style>
 </head>
 <body>
-    <script src="library-data.js"></script>
+    <script src="library-data.js?v=1.7"></script>
+    <script src="piece-art.js?v=1.7"></script>
     <div class="ambient-bg"></div>
     <div class="noise-overlay"></div>
 
@@ -5068,7 +5116,7 @@
                 <button class="settings-btn settings-btn-danger" onclick="confirmResetProgress()">Reset All Progress</button>
             </div>
             <div class="settings-footer">
-                Bebop Puzzle <span class="settings-version" onclick="showChangelog()">v1.6</span><br>Made By Tian Xing
+                Bebop Puzzle <span class="settings-version" onclick="showChangelog()">v1.7</span><br>Made By Tian Xing
             </div>
         </div>
     </div>
@@ -5081,6 +5129,40 @@
             <div class="changelog-header">
                 <div class="changelog-title">What's New</div>
                 <button class="changelog-close" onclick="closeChangelog()">✕</button>
+            </div>
+
+            <div class="changelog-version-tag">v1.7</div>
+
+            <div class="changelog-section">
+                <div class="changelog-section-title">Ear Training First</div>
+                <ul class="changelog-list">
+                    <li>Every puzzle now has spots where several pieces fit by shape — only your ears can tell which one belongs</li>
+                    <li>Soft chords play under the melody so you hear the harmony (toggle in the Sound panel)</li>
+                    <li>A wrong placement plays your piece, then the melody, so you can compare</li>
+                    <li>"Your line" on the success screen names every note and its role over the chord, with slow playback</li>
+                    <li>New hints: loop the spot slowly, choose between same-shape pieces, then reveal</li>
+                </ul>
+            </div>
+
+            <div class="changelog-section">
+                <div class="changelog-section-title">Better Bebop Lines</div>
+                <ul class="changelog-list">
+                    <li>Approaches walk the scale and slide in by a half step; Neighbors and Enclosures use real bebop shapes</li>
+                    <li>Neighbor directions are now called Upper First and Lower First</li>
+                    <li>Tune-named levels use real changes (Giant Steps, Autumn Leaves, Rhythm Changes…)</li>
+                    <li>From Chapter 4, lines can resolve to the 3rd or 7th</li>
+                </ul>
+            </div>
+
+            <div class="changelog-section">
+                <div class="changelog-section-title">Progress &amp; Polish</div>
+                <ul class="changelog-list">
+                    <li>Retry replays the same puzzle; Remix deals a new one</li>
+                    <li>3-star listen limits scale with the number of empty columns</li>
+                    <li>Daily Challenge unlocks with Chapter 2; daily missions rotate</li>
+                    <li>Flip pieces right on the tray card</li>
+                    <li>18 bug fixes, faster loading, pinch-zoom and larger small text</li>
+                </ul>
             </div>
 
             <div class="changelog-version-tag">v1.6</div>
@@ -5432,8 +5514,8 @@
                 </div>
                 <div class="star-info-popup hidden" id="star-info-popup">
                     <div style="font-weight:700;margin-bottom:4px;">Star Rating</div>
-                    <div>★★★ ≤2 listens, no hints, no mistakes</div>
-                    <div>★★☆ ≤4 listens, at most 1 hint or mistake</div>
+                    <div id="star-info-3">★★★ ≤2 listens, no hints, no mistakes</div>
+                    <div id="star-info-2">★★☆ ≤4 listens, at most 1 hint or mistake</div>
                     <div>★☆☆ Complete the level</div>
                 </div>
             </div>
@@ -5516,11 +5598,13 @@
             <div id="success-perfect-text"></div>
             <div class="success-stars" id="success-stars"></div>
             <div class="success-stats" id="success-stats"></div>
+            <div class="success-line-wrap" id="success-line-wrap"></div>
             <div class="success-feedback" id="success-feedback"></div>
             <div class="success-next-goal" id="success-next-goal"></div>
             <div class="success-missions" id="success-missions"></div>
             <div class="success-actions">
                 <button class="success-btn success-btn-retry" onclick="retryLevel()">Retry</button>
+                <button class="success-btn success-btn-retry" id="success-remix-btn" onclick="remixLevel()" title="A new puzzle for this level">Remix</button>
                 <button class="success-btn success-btn-next" onclick="nextLevel()">Next</button>
             </div>
         </div>
@@ -5730,6 +5814,10 @@
                 <button class="sound-preset-btn" onclick="applySoundPreset('classic')">Classic</button>
             </div>
 
+            <div class="sound-panel-presets">
+                <button class="sound-preset-btn" id="comp-toggle" onclick="toggleComp()" aria-pressed="true">Chords under melody: On</button>
+            </div>
+
             <div class="sound-panel-preview">
                 <button class="sound-preview-btn" onclick="previewSoundPanel()">♪ Preview Sound</button>
             </div>
@@ -5791,10 +5879,93 @@ function parseChord(chordSymbol) {
     };
 }
 
-function getTargetNote(position, chord) {
+// ------------------------------------------------------------------
+// Chord scales — which pitches belong to each chord's sound. Used to keep
+// stepwise pieces (Approach, Neighbor, Enclosure) inside the harmony, so only the
+// final half step into a target is chromatic, as in real bebop lines.
+// ------------------------------------------------------------------
+const CHORD_SCALES = {
+    '0,4,7,11': [0,2,4,5,7,9,11],      // maj7  → Ionian
+    '0,3,7,10': [0,2,3,5,7,9,10],      // m7    → Dorian
+    '0,4,7,10': [0,2,4,5,7,9,10],      // 7     → Mixolydian
+    '0,3,6,10': [0,1,3,5,6,8,10],      // m7b5  → Locrian
+    '0,3,6,9':  [0,2,3,5,6,8,9,11],    // dim7  → whole-half diminished
+    '0,4,7,9':  [0,2,4,5,7,9,11],      // 6     → major
+    '0,3,7,9':  [0,2,3,5,7,9,11],      // m6    → melodic minor
+    '0,4,6,10': [0,1,3,4,6,8,10],      // 7alt  → altered
+};
+
+function chordScalePcs(chord) {
+    if (!chord) return null;
+    const rel = CHORD_SCALES[chord.intervals.join(',')] || CHORD_SCALES['0,4,7,10'];
+    return new Set(rel.map(i => (chord.rootIndex + i) % 12));
+}
+
+// Nearest scale tone strictly above (dir = 1) or below (dir = -1) `note`.
+// Without a chord this falls back to a whole step.
+function scaleStep(note, chord, dir) {
+    const pcs = chordScalePcs(chord);
+    if (!pcs) return note + 2 * dir;
+    for (let i = 1; i <= 3; i++) {
+        const n = note + i * dir;
+        if (pcs.has(((n % 12) + 12) % 12)) return n;
+    }
+    return note + 2 * dir;
+}
+
+function isChordTone(note, chord) {
+    if (!chord) return false;
+    const pc = ((note - chord.rootIndex) % 12 + 12) % 12;
+    return chord.intervals.includes(pc);
+}
+
+// Role of a note over a chord: chord tones as R/3/5/7, colour tones as 9/11/13,
+// everything else (passing / leading tones) as "chr" for chromatic.
+function noteRole(note, chord) {
+    if (!chord) return '';
+    const pc = ((note - chord.rootIndex) % 12 + 12) % 12;
+    const idx = chord.intervals.indexOf(pc);
+    if (idx >= 0) {
+        const third = chord.intervals[1] === 3 ? '♭3' : '3';
+        const fifth = chord.intervals[2] === 6 ? '♭5' : chord.intervals[2] === 8 ? '♯5' : '5';
+        const seventh = chord.intervals[3] === 9 ? (chord.intervals[1] === 3 && chord.intervals[2] === 6 ? '°7' : '6') :
+            chord.intervals[3] === 10 ? '♭7' : '7';
+        return ['R', third, fifth, seventh][idx];
+    }
+    const pcs = chordScalePcs(chord);
+    if (pcs && pcs.has((note % 12 + 12) % 12)) {
+        return { 1: '♭9', 2: '9', 3: '♯9', 5: '11', 6: '♯11', 8: '♭13', 9: '13' }[pc] || 'scale';
+    }
+    return 'chr';
+}
+
+// Note spelling that follows the key: flats in flat keys, sharps in sharp keys.
+const SHARP_SPELLING = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+const FLAT_SPELLING  = ['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
+const MIXED_SPELLING = ['C','C♯','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
+// Spelling follows the key each chord implies: major chords their own key, minor
+// chords their relative major (Fm7 → A♭ → flats), dominants the key they resolve to
+// (D7 → G → sharps), half-diminished the relative major of their minor resolution.
+function spellingForKey(chordSymbol) {
+    const chord = parseChord(chordSymbol);
+    if (!chord) return MIXED_SPELLING;
+    const iv = chord.intervals.join(',');
+    const offset = { '0,3,7,10': 3, '0,3,7,9': 3, '0,4,7,10': 5, '0,4,6,10': 5, '0,3,6,10': 8, '0,3,6,9': 1 }[iv] || 0;
+    const keyPc = (chord.rootIndex + offset) % 12;
+    if ([5, 10, 3, 8, 1, 6].includes(keyPc)) return FLAT_SPELLING;   // F B♭ E♭ A♭ D♭ G♭
+    if ([7, 2, 9, 4, 11].includes(keyPc)) return SHARP_SPELLING;     // G D A E B
+    return MIXED_SPELLING;
+}
+function spellNote(midi, spelling = MIXED_SPELLING) {
+    return spelling[((midi % 12) + 12) % 12];
+}
+
+// degree: chord tone the line resolves to (0 = root, 1 = 3rd, 2 = 5th, 3 = 7th).
+// Defaults to the historical mapping: root on half rows, 5th on whole rows.
+function getTargetNote(position, chord, degreeOverride) {
     if (!chord) return null;
     const isMiddleOrEdge = position % 1 !== 0;
-    const degree = isMiddleOrEdge ? 0 : 2;
+    const degree = degreeOverride ?? (isMiddleOrEdge ? 0 : 2);
     let octave;
     if (position < 0) octave = 6;
     else if (position < 1) octave = 5;
@@ -5851,42 +6022,48 @@ function getInterval(sel, key) {
     return sel && sel[key] ? intervalToSemitones(sel[key]) : 1;
 }
 
-function calculateApproachNotes(piece, targetNote, sel) {
+// Approach: walks through the chord's scale and slides into the target by a
+// chromatic half step (from below when Ascending, from above when Descending).
+function calculateApproachNotes(piece, chord, targetNote) {
     if (targetNote === null) return [];
-    const isAsc = piece.label === 'Ascending';
-    const s1=getInterval(sel,'int1'), s2=getInterval(sel,'int2'), s3=getInterval(sel,'int3'), s4=getInterval(sel,'int4');
-    if (isAsc) { const n4=targetNote-s4, n3=n4-s3, n2=n3-s2, n1=n2-s1; return [n1,n2,n3,n4]; }
-    else { const n4=targetNote+s4, n3=n4+s3, n2=n3+s2, n1=n2+s1; return [n1,n2,n3,n4]; }
+    const dir = piece.label === 'Ascending' ? -1 : 1; // side the line comes from
+    const n4 = targetNote + dir;
+    const n3 = scaleStep(n4, chord, dir);
+    const n2 = scaleStep(n3, chord, dir);
+    const n1 = scaleStep(n2, chord, dir);
+    return [n1, n2, n3, n4];
 }
 
-function calculateNeighborNotes(piece, targetNote, sel) {
+// Neighbor: decorates the target with its upper scale neighbor and its lower
+// chromatic neighbor. Upper First touches the note above first; Lower First, below.
+function calculateNeighborNotes(piece, chord, targetNote) {
     if (targetNote === null) return [];
-    const above = piece.label === 'Down-Up';
-    const s2 = getInterval(sel,'int1'), s4 = getInterval(sel,'int3');
-    if (above) return [targetNote, targetNote+s2, targetNote, targetNote-s4];
-    else return [targetNote, targetNote-s2, targetNote, targetNote+s4];
+    const upper = scaleStep(targetNote, chord, 1);
+    const lower = targetNote - 1;
+    if (piece.label === 'Upper First') return [targetNote, upper, targetNote, lower];
+    return [targetNote, lower, targetNote, upper];
 }
 
-function calculateEnclosureNotes(piece, targetNote, sel) {
+// Enclosure: two notes on one side of the target, then two on the other, ending
+// on the classic pair — scale tone above / chromatic half step below.
+function calculateEnclosureNotes(piece, chord, targetNote) {
     if (targetNote === null) return [];
-    const s12=getInterval(sel,'int1'), s34=getInterval(sel,'int2'), s4t=getInterval(sel,'int3');
     if (piece.label === 'From Above') {
-        // First two notes are ABOVE the target, then leaps below
-        const n2=targetNote+s12, n1=n2+s12, n4=targetNote-s4t, n3=n4-s34;
-        return [n1,n2,n3,n4];
-    } else {
-        // First two notes are BELOW the target, then leaps above
-        const n2=targetNote-s12, n1=n2-s12, n4=targetNote+s4t, n3=n4+s34;
-        return [n1,n2,n3,n4];
+        const n2 = scaleStep(targetNote, chord, 1), n1 = scaleStep(n2, chord, 1);
+        const n4 = targetNote - 1, n3 = scaleStep(n4, chord, -1);
+        return [n1, n2, n3, n4];
     }
+    const n2 = targetNote - 1, n1 = scaleStep(n2, chord, -1);
+    const n4 = scaleStep(targetNote, chord, 1), n3 = scaleStep(n4, chord, 1);
+    return [n1, n2, n3, n4];
 }
 
 function calculatePieceNotes(piece, chord, targetNote, sel) {
     const n = piece.name.toLowerCase();
     if (n.includes('arpeggio')) return calculateArpeggioNotes(piece, chord, targetNote);
-    if (n.includes('approach')) return calculateApproachNotes(piece, targetNote, sel);
-    if (n.includes('neighbor')) return calculateNeighborNotes(piece, targetNote, sel);
-    if (n.includes('enclosure')) return calculateEnclosureNotes(piece, targetNote, sel);
+    if (n.includes('approach')) return calculateApproachNotes(piece, chord, targetNote);
+    if (n.includes('neighbor')) return calculateNeighborNotes(piece, chord, targetNote);
+    if (n.includes('enclosure')) return calculateEnclosureNotes(piece, chord, targetNote);
     return [];
 }
 
@@ -5909,10 +6086,20 @@ function getEighth() { return 60 / currentBPM / 2; }
 let isPlaying = false;
 let playbackTimeouts = [];
 let celebrationTimeouts = [];
+let celebrationTeardown = null; // removes the skip handlers of a running celebration
+
+// Abort a running win celebration without firing its completion callback. Leaving the
+// level (map, another level, Daily, Composer) must also disarm the skip handlers, or the
+// play button stays in skip mode and the next tap opens a stale success modal.
+function cancelCelebration() {
+    celebrationTimeouts.forEach(t => clearTimeout(t));
+    celebrationTimeouts = [];
+    if (celebrationTeardown) { const t = celebrationTeardown; celebrationTeardown = null; t(); }
+}
 let activePlayheadEls = [];
 
 // Sound design parameters (0–1 range, persisted)
-let soundParams = { tone: 0.9, drive: 0.0, reverb: 0.03, tremRate: 0.2, tremDepth: 0.1, swing: 0.64 };
+let soundParams = { tone: 0.9, drive: 0.0, reverb: 0.03, tremRate: 0.2, tremDepth: 0.1, swing: 0.64, comp: true };
 
 // Processing chain nodes (created lazily)
 let _toneFilter = null;
@@ -6011,6 +6198,7 @@ function buildProcessingChain() {
     applySoundParams();
 }
 
+let _lastDriveCurveAmount = null;
 function applySoundParams() {
     if (!_chainBuilt) return;
     const p = soundParams;
@@ -6019,8 +6207,12 @@ function applySoundParams() {
     const toneFreq = 300 * Math.pow(10000 / 300, p.tone);
     _toneFilter.frequency.value = toneFreq;
 
-    // Drive: update curve and gain staging (volume-compensated)
-    _driveShaper.curve = buildDriveCurve(p.drive);
+    // Drive: update curve and gain staging (volume-compensated). The 8192-sample curve
+    // is only rebuilt when drive actually changes — reassigning it during playback clicks.
+    if (_lastDriveCurveAmount !== p.drive) {
+        _driveShaper.curve = buildDriveCurve(p.drive);
+        _lastDriveCurveAmount = p.drive;
+    }
     const driveIn = 1 + p.drive * 3;
     // Compensate for both the input boost AND the RMS increase from soft-clip compression
     _driveInputGain.gain.value = driveIn;
@@ -6193,96 +6385,96 @@ function togglePlay() {
 const LEVEL_TEMPLATES = [
     // Chapter 1: Arpeggios — progressive mechanics introduction
     // Levels 1-2: craft hidden, Levels 3-5: flip only, Levels 6-8: full craft
-    {id:"ch1_01", ch:1, name:"First Chorus",    len:2, rem:1, pool:["Arpeggio"], newPc:"Arpeggio", hints:3, time:60,  craft:'hidden', tutorial:"Listen to the melody, then drag the piece into the highlighted column."},
-    {id:"ch1_02", ch:1, name:"Turnaround",      len:3, rem:1, pool:["Arpeggio"], newPc:null, hints:3, time:90,  craft:'hidden', tutorial:"Tap any filled column to hear just that part of the melody."},
-    {id:"ch1_03", ch:1, name:"Going Down",      len:2, rem:1, pool:["Arpeggio"], newPc:null, hints:3, time:60,  craft:'flip',   tutorial:"This piece needs to go the other way!"},
-    {id:"ch1_04", ch:1, name:"High Wire",       len:3, rem:1, pool:["Arpeggio"], newPc:null, hints:3, time:90,  craft:'flip', requireFlip:true},
-    {id:"ch1_05", ch:1, name:"Walking Bass",    len:4, rem:1, pool:["Arpeggio"], newPc:null, hints:3, time:100, craft:'flip'},
-    {id:"ch1_06", ch:1, name:"Double Up",       len:3, rem:2, pool:["Arpeggio"], newPc:null, hints:3, time:120, craft:'full',   tutorial:"You need two pieces but only have one!"},
-    {id:"ch1_07", ch:1, name:"Contrary Motion", len:4, rem:2, pool:["Arpeggio"], newPc:null, hints:2, time:120, craft:'full'},
-    {id:"ch1_08", ch:1, name:"Blowing Session", len:4, rem:3, pool:["Arpeggio"], newPc:null, hints:1, time:180, craft:'full'},
+    {id:"ch1_01", ch:1, name:"First Chorus",    len:2, rem:1, pool:["Arpeggio"], newPc:"Arpeggio", hints:3,  craft:'hidden', tutorial:"Listen to the melody, then drag the piece into the highlighted column."},
+    {id:"ch1_02", ch:1, name:"Turnaround",      len:3, rem:1, pool:["Arpeggio"], newPc:null, hints:3,  craft:'hidden', tutorial:"Tap any filled column to hear just that part of the melody."},
+    {id:"ch1_03", ch:1, name:"Going Down",      len:2, rem:1, pool:["Arpeggio"], newPc:null, hints:3,  craft:'flip',   tutorial:"This piece needs to go the other way!"},
+    {id:"ch1_04", ch:1, name:"High Wire",       len:3, rem:1, pool:["Arpeggio"], newPc:null, hints:3,  craft:'flip', requireFlip:true},
+    {id:"ch1_05", ch:1, name:"Walking Bass",    len:4, rem:1, pool:["Arpeggio"], newPc:null, hints:3, craft:'flip'},
+    {id:"ch1_06", ch:1, name:"Double Up",       len:3, rem:2, pool:["Arpeggio"], newPc:null, hints:3, craft:'full',   tutorial:"You need two pieces but only have one!"},
+    {id:"ch1_07", ch:1, name:"Contrary Motion", len:4, rem:2, pool:["Arpeggio"], newPc:null, hints:2, craft:'full'},
+    {id:"ch1_08", ch:1, name:"Blowing Session", len:4, rem:3, pool:["Arpeggio"], newPc:null, hints:1, craft:'full'},
 
     // Chapter 2: Neighbors — "The Smooth Chapter" (longer chains, fewer removals)
-    {id:"ch2_01", ch:2, name:"Close Quarters",    len:2, rem:1, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:3, time:60,  tutorial:"You unlocked the Neighbor piece! Sing the melody back — can you hear where it stays close?"},
-    {id:"ch2_02", ch:2, name:"Half Step Away",    len:3, rem:1, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:3, time:75},
-    {id:"ch2_03", ch:2, name:"Grace Note",        len:3, rem:1, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:3, time:75},
-    {id:"ch2_04", ch:2, name:"Long Tone",         len:4, rem:1, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:3, time:90},
-    {id:"ch2_05", ch:2, name:"Ballad Tempo",      len:4, rem:2, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:3, time:110},
-    {id:"ch2_06", ch:2, name:"Lean In",           len:3, rem:2, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:2, time:100},
-    {id:"ch2_07", ch:2, name:"Passing Tone",      len:4, rem:2, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:2, time:120},
-    {id:"ch2_08", ch:2, name:"Sustained Line",    len:5, rem:2, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:2, time:130},
-    {id:"ch2_09", ch:2, name:"Free Choice",       len:4, rem:2, pool:["Arpeggio","Neighbor"], newPc:null,       hints:2, time:110},
-    {id:"ch2_10", ch:2, name:"Vibrato",           len:5, rem:2, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:2, time:130},
-    {id:"ch2_11", ch:2, name:"Open Voicing",      len:4, rem:3, pool:["Arpeggio","Neighbor"], newPc:null,       hints:1, time:160},
-    {id:"ch2_12", ch:2, name:"Body and Soul",     len:5, rem:3, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:1, time:170},
-    {id:"ch2_13", ch:2, name:"Round Midnight",    len:5, rem:3, pool:["Arpeggio","Neighbor"], newPc:null,       hints:1, time:170},
-    {id:"ch2_14", ch:2, name:"Tenderly",          len:5, rem:3, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:1, time:180},
-    {id:"ch2_15", ch:2, name:"Neighbor Mastery",  len:5, rem:3, pool:["Arpeggio","Neighbor"], newPc:null,       hints:0, time:180},
+    {id:"ch2_01", ch:2, name:"Close Quarters",    len:2, rem:1, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:3,  tutorial:"You unlocked the Neighbor piece! Sing the melody back — can you hear where it stays close?"},
+    {id:"ch2_02", ch:2, name:"Half Step Away",    len:3, rem:1, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:3,},
+    {id:"ch2_03", ch:2, name:"Grace Note",        len:3, rem:1, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:3,},
+    {id:"ch2_04", ch:2, name:"Long Tone",         len:4, rem:1, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:3,},
+    {id:"ch2_05", ch:2, name:"Ballad Tempo",      len:4, rem:2, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:3,},
+    {id:"ch2_06", ch:2, name:"Lean In",           len:3, rem:2, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:2,},
+    {id:"ch2_07", ch:2, name:"Passing Tone",      len:4, rem:2, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:2,},
+    {id:"ch2_08", ch:2, name:"Sustained Line",    len:5, rem:2, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:2,},
+    {id:"ch2_09", ch:2, name:"Free Choice",       len:4, rem:2, pool:["Arpeggio","Neighbor"], newPc:null,       hints:2,},
+    {id:"ch2_10", ch:2, name:"Vibrato",           len:5, rem:2, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:2,},
+    {id:"ch2_11", ch:2, name:"Open Voicing",      len:4, rem:3, pool:["Arpeggio","Neighbor"], newPc:null,       hints:1,},
+    {id:"ch2_12", ch:2, name:"Body and Soul",     len:5, rem:3, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:1,},
+    {id:"ch2_13", ch:2, name:"Round Midnight",    len:5, rem:3, pool:["Arpeggio","Neighbor"], newPc:null,       hints:1,},
+    {id:"ch2_14", ch:2, name:"Tenderly",          len:5, rem:3, pool:["Arpeggio","Neighbor"], newPc:"Neighbor", hints:1,},
+    {id:"ch2_15", ch:2, name:"Neighbor Mastery",  len:5, rem:3, pool:["Arpeggio","Neighbor"], newPc:null,       hints:0,},
 
     // Chapter 3: Approaches — "The Precision Chapter" (high fill ratio, directional choices)
-    {id:"ch3_01", ch:3, name:"Leading Tone",      len:2, rem:1, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:3, time:60,  tutorial:"The Approach walks chromatically into the target. Sing the line — hear the steps leading in?"},
-    {id:"ch3_02", ch:3, name:"Chromatic Slide",   len:2, rem:1, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:3, time:60},
-    {id:"ch3_03", ch:3, name:"Half Step Hustle",  len:3, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:3, time:100},
-    {id:"ch3_04", ch:3, name:"Sidestep",          len:3, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:3, time:100},
-    {id:"ch3_05", ch:3, name:"No Safety Net",     len:3, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:null,       hints:3, time:100},
-    {id:"ch3_06", ch:3, name:"Donna Lee",         len:4, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:2, time:120},
-    {id:"ch3_07", ch:3, name:"Outside In",        len:4, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:null,       hints:2, time:120},
-    {id:"ch3_08", ch:3, name:"Fill Every Bar",    len:3, rem:3, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:2, time:130},
-    {id:"ch3_09", ch:3, name:"Confirmation",      len:4, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:2, time:120},
-    {id:"ch3_10", ch:3, name:"Anthropology",      len:4, rem:3, pool:["Arpeggio","Neighbor","Approach"], newPc:null,       hints:1, time:160},
-    {id:"ch3_11", ch:3, name:"Cherokee",          len:4, rem:3, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:1, time:160},
-    {id:"ch3_12", ch:3, name:"The Long Walk",     len:5, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:null,       hints:1, time:150},
-    {id:"ch3_13", ch:3, name:"Epistrophy",        len:5, rem:3, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:1, time:180},
-    {id:"ch3_14", ch:3, name:"Salt Peanuts",      len:5, rem:3, pool:["Arpeggio","Neighbor","Approach"], newPc:null,       hints:0, time:180},
-    {id:"ch3_15", ch:3, name:"Approach Mastery",  len:5, rem:3, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:0, time:180},
+    {id:"ch3_01", ch:3, name:"Leading Tone",      len:2, rem:1, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:3,  tutorial:"The Approach walks by step and slides a half step into the target. Sing it — hear the steps leading in?"},
+    {id:"ch3_02", ch:3, name:"Chromatic Slide",   len:2, rem:1, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:3,},
+    {id:"ch3_03", ch:3, name:"Half Step Hustle",  len:3, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:3,},
+    {id:"ch3_04", ch:3, name:"Sidestep",          len:3, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:3,},
+    {id:"ch3_05", ch:3, name:"No Safety Net",     len:3, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:null,       hints:3,},
+    {id:"ch3_06", ch:3, name:"Donna Lee",         len:4, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:2,},
+    {id:"ch3_07", ch:3, name:"Outside In",        len:4, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:null,       hints:2,},
+    {id:"ch3_08", ch:3, name:"Fill Every Bar",    len:3, rem:3, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:2,},
+    {id:"ch3_09", ch:3, name:"Confirmation",      len:4, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:2,},
+    {id:"ch3_10", ch:3, name:"Anthropology",      len:4, rem:3, pool:["Arpeggio","Neighbor","Approach"], newPc:null,       hints:1,},
+    {id:"ch3_11", ch:3, name:"Cherokee",          len:4, rem:3, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:1,},
+    {id:"ch3_12", ch:3, name:"The Long Walk",     len:5, rem:2, pool:["Arpeggio","Neighbor","Approach"], newPc:null,       hints:1,},
+    {id:"ch3_13", ch:3, name:"Epistrophy",        len:5, rem:3, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:1,},
+    {id:"ch3_14", ch:3, name:"Salt Peanuts",      len:5, rem:3, pool:["Arpeggio","Neighbor","Approach"], newPc:null,       hints:0,},
+    {id:"ch3_15", ch:3, name:"Approach Mastery",  len:5, rem:3, pool:["Arpeggio","Neighbor","Approach"], newPc:"Approach", hints:0,},
 
     // Chapter 4: Enclosures — "The Asymmetry Chapter" (aggressive mixing, rem:4 boss)
-    {id:"ch4_01", ch:4, name:"The Cage",          len:2, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:3, time:60,  tutorial:"Enclosures surround the target from both sides. Hum it back — notice how it circles the note?"},
-    {id:"ch4_02", ch:4, name:"Upper & Lower",     len:2, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:3, time:60},
-    {id:"ch4_03", ch:4, name:"Orbiting",          len:3, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:3, time:90},
-    {id:"ch4_04", ch:4, name:"Double Bind",       len:3, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:3, time:110},
-    {id:"ch4_05", ch:4, name:"Birdland",          len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:3, time:120},
-    {id:"ch4_06", ch:4, name:"Wild Card",         len:3, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null,        hints:2, time:110},
-    {id:"ch4_07", ch:4, name:"Dizzy's Club",      len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:2, time:120},
-    {id:"ch4_08", ch:4, name:"Three Deep",        len:4, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:2, time:150},
-    {id:"ch4_09", ch:4, name:"Catch and Release", len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null,        hints:2, time:120},
-    {id:"ch4_10", ch:4, name:"Thelonious",        len:4, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:1, time:160},
-    {id:"ch4_11", ch:4, name:"Coast to Coast",    len:5, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null,        hints:1, time:150},
-    {id:"ch4_12", ch:4, name:"52nd Street",       len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:1, time:180},
-    {id:"ch4_13", ch:4, name:"Night in Tunisia",  len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null,        hints:1, time:180},
-    {id:"ch4_14", ch:4, name:"Minton's Playhouse",len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:0, time:180},
-    {id:"ch4_15", ch:4, name:"Enclosure Mastery", len:5, rem:4, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null,        hints:0, time:200},
+    {id:"ch4_01", ch:4, name:"The Cage",          len:2, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:3,  tutorial:"Enclosures surround the target from both sides. Hum it back — notice how it circles the note?"},
+    {id:"ch4_02", ch:4, name:"Upper & Lower",     len:2, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:3,},
+    {id:"ch4_03", ch:4, name:"Orbiting",          len:3, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:3,},
+    {id:"ch4_04", ch:4, name:"Double Bind",       len:3, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:3,},
+    {id:"ch4_05", ch:4, name:"Birdland",          len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:3,},
+    {id:"ch4_06", ch:4, name:"Wild Card",         len:3, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null,        hints:2,},
+    {id:"ch4_07", ch:4, name:"Dizzy's Club",      len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:2,},
+    {id:"ch4_08", ch:4, name:"Three Deep",        len:4, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:2,},
+    {id:"ch4_09", ch:4, name:"Catch and Release", len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null,        hints:2,},
+    {id:"ch4_10", ch:4, name:"Thelonious",        len:4, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:1,},
+    {id:"ch4_11", ch:4, name:"Coast to Coast",    len:5, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null,        hints:1,},
+    {id:"ch4_12", ch:4, name:"52nd Street",       len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:1,},
+    {id:"ch4_13", ch:4, name:"Night in Tunisia",  len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null,        hints:1,},
+    {id:"ch4_14", ch:4, name:"Minton's Playhouse",len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:"Enclosure", hints:0,},
+    {id:"ch4_15", ch:4, name:"Enclosure Mastery", len:5, rem:4, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null,        hints:0,},
 
     // Chapter 5: All Mixed — jazz legends
-    {id:"ch5_01", ch:5, name:"Open Mic",          len:2, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:3, time:60,  tutorial:"All four piece types are in play. Sing the melody first, then match the shapes to what you hear."},
-    {id:"ch5_02", ch:5, name:"Warm Up",           len:2, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:3, time:60},
-    {id:"ch5_03", ch:5, name:"Blue in Green",     len:3, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:3, time:90},
-    {id:"ch5_04", ch:5, name:"Bird's Eye View",   len:3, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:3, time:90},
-    {id:"ch5_05", ch:5, name:"Nardis",            len:3, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:3, time:120},
-    {id:"ch5_06", ch:5, name:"Hot House",         len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:3, time:120},
-    {id:"ch5_07", ch:5, name:"Giant Steps",       len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, time:120},
-    {id:"ch5_08", ch:5, name:"Autumn Leaves",     len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, time:120},
-    {id:"ch5_09", ch:5, name:"Billie's Bounce",   len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, time:120},
-    {id:"ch5_10", ch:5, name:"Rhythm Changes",    len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, time:120},
-    {id:"ch5_11", ch:5, name:"Monk's Dream",      len:4, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:180},
-    {id:"ch5_12", ch:5, name:"Countdown",         len:4, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:180},
-    {id:"ch5_13", ch:5, name:"Dizzy Atmosphere",  len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:180},
-    {id:"ch5_14", ch:5, name:"Miles Ahead",       len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:180},
-    {id:"ch5_15", ch:5, name:"Bebop Legend",      len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:180},
+    {id:"ch5_01", ch:5, name:"Open Mic",          len:2, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:3,  tutorial:"All four piece types are in play. Sing the melody first, then match the shapes to what you hear."},
+    {id:"ch5_02", ch:5, name:"Warm Up",           len:3, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:3,},
+    {id:"ch5_03", ch:5, name:"Blue in Green",     len:3, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:3,},
+    {id:"ch5_04", ch:5, name:"Bird's Eye View",   len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:3,},
+    {id:"ch5_05", ch:5, name:"Nardis",            len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:3,},
+    {id:"ch5_06", ch:5, name:"Hot House",         len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:3,},
+    {id:"ch5_07", ch:5, name:"Giant Steps",       len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2,},
+    {id:"ch5_08", ch:5, name:"Autumn Leaves",     len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2,},
+    {id:"ch5_09", ch:5, name:"Billie's Bounce",   len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2,},
+    {id:"ch5_10", ch:5, name:"Rhythm Changes",    len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2,},
+    {id:"ch5_11", ch:5, name:"Monk's Dream",      len:4, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1,},
+    {id:"ch5_12", ch:5, name:"Countdown",         len:4, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1,},
+    {id:"ch5_13", ch:5, name:"Dizzy Atmosphere",  len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1,},
+    {id:"ch5_14", ch:5, name:"Miles Ahead",       len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1,},
+    {id:"ch5_15", ch:5, name:"Bebop Legend",      len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1,},
 
     // Chapter 6: Jam Session — extra pieces + limited listens (listens: 12 down to 1)
-    {id:"ch6_01", ch:6, name:"Sound Check",       len:3, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, time:120, listens:12, extraPieces:2, tutorial:"Jam Session rules: you have a limited number of listens. Make each one count!"},
-    {id:"ch6_02", ch:6, name:"Opening Act",       len:3, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, time:120, listens:11, extraPieces:2},
-    {id:"ch6_03", ch:6, name:"Head In",           len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, time:120, listens:10, extraPieces:2},
-    {id:"ch6_04", ch:6, name:"First Solo",        len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:150, listens:9,  extraPieces:3},
-    {id:"ch6_05", ch:6, name:"Trading Fours",     len:4, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:150, listens:8,  extraPieces:3},
-    {id:"ch6_06", ch:6, name:"Double Time",       len:4, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:150, listens:7,  extraPieces:3},
-    {id:"ch6_07", ch:6, name:"Rhythm Section",    len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, time:180, listens:6,  extraPieces:3},
-    {id:"ch6_08", ch:6, name:"Burning Tempo",     len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:0, time:180, listens:5,  extraPieces:4},
-    {id:"ch6_09", ch:6, name:"Cutting Contest",   len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:0, time:180, listens:4,  extraPieces:4},
-    {id:"ch6_10", ch:6, name:"Giant Steps",       len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:0, time:180, listens:3,  extraPieces:4},
-    {id:"ch6_11", ch:6, name:"Last Call",         len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:0, time:200, listens:2,  extraPieces:5},
-    {id:"ch6_12", ch:6, name:"One Shot",          len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:0, time:200, listens:1,  extraPieces:5}
+    {id:"ch6_01", ch:6, name:"Sound Check",       len:3, rem:1, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, listens:12, extraPieces:2, tutorial:"Jam Session rules: you have a limited number of listens. Make each one count!"},
+    {id:"ch6_02", ch:6, name:"Opening Act",       len:3, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, listens:11, extraPieces:2},
+    {id:"ch6_03", ch:6, name:"Head In",           len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:2, listens:10, extraPieces:2},
+    {id:"ch6_04", ch:6, name:"First Solo",        len:4, rem:2, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, listens:9,  extraPieces:3},
+    {id:"ch6_05", ch:6, name:"Trading Fours",     len:4, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, listens:8,  extraPieces:3},
+    {id:"ch6_06", ch:6, name:"Double Time",       len:4, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, listens:7,  extraPieces:3},
+    {id:"ch6_07", ch:6, name:"Rhythm Section",    len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:1, listens:6,  extraPieces:3},
+    {id:"ch6_08", ch:6, name:"Burning Tempo",     len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:0, listens:5,  extraPieces:4},
+    {id:"ch6_09", ch:6, name:"Cutting Contest",   len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:0, listens:4,  extraPieces:4},
+    {id:"ch6_10", ch:6, name:"Moment's Notice",   len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:0, listens:3,  extraPieces:4},
+    {id:"ch6_11", ch:6, name:"Last Call",         len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:0, listens:2,  extraPieces:5},
+    {id:"ch6_12", ch:6, name:"One Shot",          len:5, rem:3, pool:["Arpeggio","Neighbor","Approach","Enclosure"], newPc:null, hints:0, listens:1,  extraPieces:5}
 ];
 
 // Tutorial levels with hardcoded solutions (first level of each chapter)
@@ -6298,8 +6490,7 @@ const TUTORIAL_LEVELS = {
         targetPiece:{position:1.5},
         removeCols:[0],
         trayBasePieces:["Arpeggio"],
-        hints:3, timeThreshold:60, craft:'hidden',
-        tutorial:"Listen to the melody, then drag the piece into the highlighted column."
+        hints:3, craft:'hidden'
     },
     // Ch1 Level 2: slightly longer chain, still no craft table
     "ch1_02": {
@@ -6313,8 +6504,7 @@ const TUTORIAL_LEVELS = {
         targetPiece:{position:0.5},
         removeCols:[2],
         trayBasePieces:["Arpeggio"],
-        hints:3, timeThreshold:90, craft:'hidden',
-        tutorial:"Listen again — where does this piece fit?"
+        hints:3, craft:'hidden'
     },
     // Ch1 Level 3: flip introduction — answer needs Descending, tray gives Ascending
     "ch1_03": {
@@ -6327,8 +6517,7 @@ const TUTORIAL_LEVELS = {
         targetPiece:{position:0},
         removeCols:[0],
         trayBasePieces:["Arpeggio"],
-        hints:3, timeThreshold:60, craft:'flip',
-        tutorial:"This piece needs to go the other way!"
+        hints:3, craft:'flip'
     },
     // Ch1 Level 6: duplicate introduction — 2 holes, 1 tray card, both Ascending
     "ch1_06": {
@@ -6342,22 +6531,20 @@ const TUTORIAL_LEVELS = {
         targetPiece:{position:1.0},
         removeCols:[0, 1],
         trayBasePieces:["Arpeggio"],
-        hints:3, timeThreshold:120, craft:'full',
-        tutorial:"You need two pieces but only have one!"
+        hints:3, craft:'full'
     },
     // Ch2 Level 1: Neighbor introduction
     "ch2_01": {
         id:"ch2_01", chapter:2, name:"Close Quarters",
         chords:["Dm7","G7"], targetChord:"Cmaj7",
         solution:[
-            {col:0, pieceName:"Neighbor", pieceLabel:"Down-Up", position:1},
+            {col:0, pieceName:"Neighbor", pieceLabel:"Upper First", position:1},
             {col:1, pieceName:"Arpeggio", pieceLabel:"Ascending", position:0.5}
         ],
         targetPiece:{position:0},
         removeCols:[0],
         trayBasePieces:["Neighbor"],
-        hints:3, timeThreshold:60,
-        tutorial:"You unlocked the Neighbor piece! Sing the melody back — can you hear where it stays close?"
+        hints:3
     },
     // Ch3 Level 1: Approach introduction
     "ch3_01": {
@@ -6365,13 +6552,12 @@ const TUTORIAL_LEVELS = {
         chords:["Dm7","G7"], targetChord:"Cmaj7",
         solution:[
             {col:0, pieceName:"Approach", pieceLabel:"Ascending", position:1},
-            {col:1, pieceName:"Neighbor", pieceLabel:"Down-Up", position:0.5}
+            {col:1, pieceName:"Neighbor", pieceLabel:"Upper First", position:0.5}
         ],
         targetPiece:{position:0.5},
         removeCols:[0],
         trayBasePieces:["Approach"],
-        hints:3, timeThreshold:60,
-        tutorial:"The Approach walks chromatically into the target. Sing the line — hear the steps leading in?"
+        hints:3
     },
     // Ch4 Level 1: Enclosure introduction
     "ch4_01": {
@@ -6384,8 +6570,7 @@ const TUTORIAL_LEVELS = {
         targetPiece:{position:1},
         removeCols:[0],
         trayBasePieces:["Enclosure"],
-        hints:3, timeThreshold:60,
-        tutorial:"Enclosures surround the target from both sides. Hum it back — notice how it circles the note?"
+        hints:3
     },
     // Ch5 Level 1: All Mixed
     "ch5_01": {
@@ -6393,13 +6578,12 @@ const TUTORIAL_LEVELS = {
         chords:["Dm7","G7"], targetChord:"Cmaj7",
         solution:[
             {col:0, pieceName:"Enclosure", pieceLabel:"From Above", position:1},
-            {col:1, pieceName:"Neighbor", pieceLabel:"Down-Up", position:1}
+            {col:1, pieceName:"Neighbor", pieceLabel:"Upper First", position:1}
         ],
         targetPiece:{position:1},
         removeCols:[0],
         trayBasePieces:["Enclosure"],
-        hints:3, timeThreshold:60,
-        tutorial:"All four piece types are in play. Sing the melody first, then match the shapes to what you hear."
+        hints:3
     }
 };
 
@@ -6412,8 +6596,8 @@ const LEVELS = LEVEL_TEMPLATES.map(t => ({id: t.id, chapter: t.ch, name: t.name}
 const PIECE_RULES = {
     'Arpeggio|Ascending':   { entry:1.0, exit:0.0 },
     'Arpeggio|Descending':  { entry:0.0, exit:1.0 },
-    'Neighbor|Down-Up':  { entry:0.5, exit:0.5 },
-    'Neighbor|Up-Down':  { entry:0.5, exit:0.5 },
+    'Neighbor|Upper First':  { entry:0.5, exit:0.5 },
+    'Neighbor|Lower First':  { entry:0.5, exit:0.5 },
     'Approach|Ascending':   { entry:1.0, exit:0.0 },
     'Approach|Descending':  { entry:0.0, exit:1.0 },
     'Enclosure|From Below': { entry:1.0, exit:0.5 },
@@ -6492,231 +6676,335 @@ const MELODY_MAX_MIDI = 93;  // A6
 // Melody span for a candidate solution, without touching the live puzzle globals.
 // Mirrors computeFullMelodyNotes(): the chain resolves right-to-left, each piece's
 // first note becoming the target for the piece to its left.
-function melodyRangeForSolution(chordNames, targetChordName, solution, targetPos) {
+function melodyRangeForSolution(chordNames, targetChordName, solution, targetPos, targetDegree) {
+    const line = melodyForSolution(chordNames, targetChordName, solution, targetPos, targetDegree);
+    if (!line) return null;
+    const all = [line.targetNote, ...line.pieceNotes.flat()];
+    return { min: Math.min(...all), max: Math.max(...all) };
+}
+
+// Full line for a candidate solution: notes per column plus the final target.
+function melodyForSolution(chordNames, targetChordName, solution, targetPos, targetDegree) {
     const allChords = [...chordNames, targetChordName].map(parseChord);
     const n = chordNames.length;
     const targetChord = allChords[n];
     if (!targetChord) return null;
-    let nextTarget = getTargetNote(targetPos, targetChord);
+    const targetNote = getTargetNote(targetPos, targetChord, targetDegree);
+    let nextTarget = targetNote;
     if (!nextTarget || !isFinite(nextTarget)) return null;
-
-    let min = nextTarget, max = nextTarget;
+    const pieceNotes = new Array(n);
     for (let col = n - 1; col >= 0; col--) {
         const s = solution[col];
         const piece = s && findPiece(s.pieceName, s.pieceLabel);
         if (!piece || !allChords[col]) return null;
         const notes = calculatePieceNotes(piece, allChords[col], nextTarget, s.selectedIntervals || {});
-        if (!notes || notes.length === 0) return null;
-        for (const note of notes) {
-            if (!isFinite(note)) return null;
-            if (note < min) min = note;
-            if (note > max) max = note;
-        }
+        if (!notes || notes.length === 0 || notes.some(x => !isFinite(x))) return null;
+        pieceNotes[col] = notes;
         nextTarget = notes[0];
     }
-    return { min, max };
+    return { pieceNotes, targetNote, chords: allChords };
 }
 
-function generateRandomPuzzle(template) {
+// ------------------------------------------------------------------
+// Geometric ambiguity — the heart of "use your ears".
+// A removed column needs listening only when more than one piece/direction/height
+// fits it given everything the player can see (fixed columns, the target, the
+// tray). This enumerates every complete visual solution and reports, per removed
+// column, which placements are possible.
+//   level: { len, solution[{col,pieceName,pieceLabel,position}], removeCols,
+//            targetPos, trayBases[], canFlip, canDuplicate }
+// ------------------------------------------------------------------
+const SNAP_POSITIONS = [0, 0.5, 1, 1.5, 2];
+function analyzeGeometricFits(level) {
+    const { len, solution, removeCols, targetPos, trayBases, canFlip, canDuplicate } = level;
+    const removed = new Set(removeCols);
+    const variants = [];
+    const baseCounts = {};
+    trayBases.forEach(b => { baseCounts[b] = (baseCounts[b] || 0) + 1; });
+    Object.keys(baseCounts).forEach(base => {
+        const fm = FLIP_MAP[base];
+        if (!fm) return;
+        const labels = canFlip ? [fm.defaultLabel, fm.flipH] :
+            [...new Set(solution.filter(s => removed.has(s.col) && s.pieceName === base).map(s => s.pieceLabel))];
+        (labels.length ? labels : [fm.defaultLabel]).forEach(label => {
+            const rule = PIECE_RULES[base + '|' + label];
+            if (rule) variants.push({ base, label, rule });
+        });
+    });
+
+    const alts = {};
+    removeCols.forEach(c => { alts[c] = new Map(); });
+    let count = 0;
+    const MAX = 400;
+    const used = {};
+    const chosen = {};
+
+    function edgeOf(col) { // absolute exit height of column `col` (fixed or chosen)
+        if (removed.has(col)) {
+            const ch = chosen[col];
+            return ch.pos + ch.rule.exit;
+        }
+        const s = solution[col];
+        return s.position + PIECE_RULES[s.pieceName + '|' + s.pieceLabel].exit;
+    }
+
+    function rightOk(col, pos, rule) {
+        const r = col + 1;
+        if (r === len) return Math.abs(pos + rule.exit - (targetPos + 0.5)) < 0.01;
+        if (removed.has(r)) return true; // checked when r is chosen
+        const s = solution[r];
+        const rr = PIECE_RULES[s.pieceName + '|' + s.pieceLabel];
+        return Math.abs(pos + rule.exit - (s.position + rr.entry)) < 0.01;
+    }
+
+    function dfs(i) {
+        if (count >= MAX) return;
+        if (i === removeCols.length) {
+            count++;
+            removeCols.forEach(c => {
+                const ch = chosen[c];
+                alts[c].set(ch.base + '|' + ch.label + '|' + ch.pos, { pieceName: ch.base, pieceLabel: ch.label, position: ch.pos });
+            });
+            return;
+        }
+        const col = removeCols[i];
+        for (const v of variants) {
+            if (!canDuplicate && (used[v.base] || 0) >= baseCounts[v.base]) continue;
+            const positions = col === 0 ? SNAP_POSITIONS : [edgeOf(col - 1) - v.rule.entry];
+            for (const pos of positions) {
+                if (!SNAP_POSITIONS.some(p => Math.abs(p - pos) < 0.01)) continue;
+                if (!rightOk(col, pos, v.rule)) continue;
+                chosen[col] = { base: v.base, label: v.label, rule: v.rule, pos };
+                used[v.base] = (used[v.base] || 0) + 1;
+                dfs(i + 1);
+                used[v.base]--;
+            }
+        }
+    }
+    dfs(0);
+
+    const altsByCol = {};
+    let earCols = 0;
+    removeCols.forEach(c => {
+        altsByCol[c] = [...alts[c].values()];
+        if (altsByCol[c].length > 1) earCols++;
+    });
+    return { solutions: count, earCols, altsByCol };
+}
+
+// Same-shape twin for each piece family: drawn identically, told apart only by ear.
+const SAME_SHAPE_TWIN = { 'Arpeggio': 'Approach', 'Approach': 'Arpeggio' };
+
+// Levels named after tunes use a real snippet of that tune's changes (chords before
+// the target, then the chord the line resolves to). Lengths match the templates.
+const TUNE_PROGRESSIONS = {
+    ch2_12: { chords: ['Bbm7', 'Ebm7', 'Bb7', 'Ebm7', 'Ab7'], target: 'Dbmaj7' },    // Body and Soul
+    ch2_13: { chords: ['Bbm7', 'Ebm6', 'Cm7b5', 'Fm7b5', 'Bb7'], target: 'Ebm6' },   // 'Round Midnight
+    ch3_06: { chords: ['F7', 'Bb7', 'Bbm7', 'Eb7'], target: 'Abmaj7' },              // Donna Lee
+    ch3_09: { chords: ['Dm7', 'G7', 'Cm7', 'F7'], target: 'Bbmaj7' },                // Confirmation
+    ch3_10: { chords: ['Bb6', 'G7', 'Cm7', 'F7'], target: 'Bb6' },                   // Anthropology (rhythm changes)
+    ch3_11: { chords: ['C#m7', 'F#7', 'Bm7', 'E7'], target: 'Amaj7' },               // Cherokee (bridge)
+    ch4_13: { chords: ['Eb7', 'Dm6', 'Eb7', 'Em7b5', 'A7'], target: 'Dm6' },         // A Night in Tunisia
+    ch5_03: { chords: ['Db7', 'Cm7', 'F7'], target: 'Bbmaj7' },                      // Blue in Green
+    ch5_05: { chords: ['Cmaj7', 'Am7', 'Fmaj7', 'B7'], target: 'Em7' },              // Nardis
+    ch5_06: { chords: ['Em7b5', 'A7', 'Dm7b5', 'G7'], target: 'Cm6' },               // Hot House
+    ch5_07: { chords: ['Bmaj7', 'D7', 'Gmaj7', 'Bb7'], target: 'Ebmaj7' },           // Giant Steps
+    ch5_08: { chords: ['Bbmaj7', 'Ebmaj7', 'Am7b5', 'D7'], target: 'Gm6' },          // Autumn Leaves
+    ch5_09: { chords: ['F7', 'D7', 'Gm7', 'C7'], target: 'F7' },                     // Billie's Bounce (F blues)
+    ch5_10: { chords: ['Bbmaj7', 'Gm7', 'Cm7', 'F7'], target: 'Bbmaj7' },            // Rhythm Changes
+    ch5_12: { chords: ['Em7', 'F7', 'Bbmaj7', 'Db7'], target: 'Gbmaj7' },            // Countdown
+};
+
+function levelChords(template) {
+    const prog = TUNE_PROGRESSIONS[template.id];
+    if (prog && prog.chords.length === template.len) return { chords: [...prog.chords], targetChord: prog.target };
+    return pickRandomChords(template.len);
+}
+
+// How many removed columns must need the ear (several pieces fit by shape).
+// Tutorial-style levels with the craft table hidden cannot flip, so they are exempt.
+function minEarColumns(template) {
+    if (template.minEar !== undefined) return template.minEar;
+    if ((template.craft || 'full') === 'hidden') return 0;
+    return template.rem >= 3 ? 2 : 1;
+}
+
+// Seeded generation: the same seed always yields the same puzzle, so a retry is the
+// same puzzle and "Remix" (a new seed) gives a fresh one.
+function generateRandomPuzzle(template, seed) {
+    if (seed === undefined || seed === null) return buildPuzzle(template);
+    const orig = Math.random;
+    Math.random = seededRandom(seed);
+    try { return buildPuzzle(template); } finally { Math.random = orig; }
+}
+
+function puzzleSeed(levelId, remix = 0) {
+    return hashDateString('bebop:' + levelId + ':' + remix);
+}
+
+function buildPuzzle(template) {
     const VALID_POS = [0, 0.5, 1.0, 1.5];
-    const MAX_ATTEMPTS = 300;
+    const MAX_ATTEMPTS = 400;
+    const WANTED_CANDIDATES = 12;
+    const MAX_TRAY = 4;
 
     // The craft table is what lets a player turn tray cards into the pieces a solution
     // needs. Levels that expose only Flip (or hide the table entirely) cannot duplicate,
     // so the generator must not ask for two pieces of the same type there.
-    // Label variants are handled differently — see the tray seeding in startLevel(),
-    // which hands out the needed variant directly when Flip isn't available.
     const craftMode = template.craft || 'full';
     const canDuplicate = craftMode === 'full';
+    const canFlip = craftMode !== 'hidden';
+    const minEar = minEarColumns(template);
 
-    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    let best = null;          // best candidate meeting the ear requirement
+    let bestAny = null;       // best candidate overall (used if none meets it)
+    let qualifying = 0;
+
+    for (let attempt = 0; attempt < MAX_ATTEMPTS && qualifying < WANTED_CANDIDATES; attempt++) {
         // 1. Pick random pieces for each chain slot
         const pieces = [];
         let generatorFailed = false;
         for (let i = 0; i < template.len; i++) {
             const baseName = template.pool[Math.floor(Math.random() * template.pool.length)];
             const fm = FLIP_MAP[baseName];
-            if (!fm) { generatorFailed = true; break; } // unknown piece type — skip attempt
-            const isFlipped = Math.random() < 0.5;
-            const label = isFlipped ? fm.flipH : fm.defaultLabel;
+            if (!fm) { generatorFailed = true; break; }
+            const label = Math.random() < 0.5 ? fm.flipH : fm.defaultLabel;
             pieces.push({ baseName, label });
         }
         if (generatorFailed) continue;
 
         // 2. Ensure newPiece appears at least once in the chain
-        if (template.newPc) {
-            const hasNew = pieces.some(p => p.baseName === template.newPc);
-            if (!hasNew) {
-                const slot = Math.floor(Math.random() * template.len);
-                const fm = FLIP_MAP[template.newPc];
-                if (!fm) continue; // unknown new piece — skip attempt
-                const isFlipped = Math.random() < 0.5;
-                pieces[slot] = { baseName: template.newPc, label: isFlipped ? fm.flipH : fm.defaultLabel };
-            }
+        if (template.newPc && !pieces.some(p => p.baseName === template.newPc)) {
+            const slot = Math.floor(Math.random() * template.len);
+            const fm = FLIP_MAP[template.newPc];
+            if (!fm) continue;
+            pieces[slot] = { baseName: template.newPc, label: Math.random() < 0.5 ? fm.flipH : fm.defaultLabel };
         }
 
-        // 3. Try to find a valid start position
-        let positions = null;
+        // 3. Find a start height from which the whole chain connects
         const startOptions = [...VALID_POS];
-        // Shuffle start positions for variety
         for (let i = startOptions.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [startOptions[i], startOptions[j]] = [startOptions[j], startOptions[i]];
         }
-
+        let positions = null, targetPos = null;
         for (const startPos of startOptions) {
             const posArr = [startPos];
             let valid = true;
-
             for (let i = 0; i < template.len - 1; i++) {
-                const key = pieces[i].baseName + '|' + pieces[i].label;
-                const rule = PIECE_RULES[key];
-                if (!rule) { valid = false; break; }
-
-                const nextKey = pieces[i + 1].baseName + '|' + pieces[i + 1].label;
-                const nextRule = PIECE_RULES[nextKey];
-                if (!nextRule) { valid = false; break; }
-
-                // Connection: pos_A + exit_A = pos_B + entry_B
-                const nextPos = posArr[i] + rule.exit - nextRule.entry;
+                const rule = PIECE_RULES[pieces[i].baseName + '|' + pieces[i].label];
+                const nextRule = PIECE_RULES[pieces[i + 1].baseName + '|' + pieces[i + 1].label];
+                if (!rule || !nextRule) { valid = false; break; }
+                const nextPos = posArr[i] + rule.exit - nextRule.entry; // pos_A + exit_A = pos_B + entry_B
                 if (!VALID_POS.includes(nextPos)) { valid = false; break; }
                 posArr.push(nextPos);
             }
-
             if (!valid) continue;
-
-            // 4. Compute target position
-            const lastIdx = template.len - 1;
-            const lastKey = pieces[lastIdx].baseName + '|' + pieces[lastIdx].label;
-            const lastRule = PIECE_RULES[lastKey];
-            if (!lastRule) continue;
-
-            // Target: pos_last + exit_last = targetPos + 0.5
-            const targetPos = posArr[lastIdx] + lastRule.exit - 0.5;
-            if (!VALID_POS.includes(targetPos)) continue;
-
-            positions = posArr;
-
-            // 5. Select removeCols
-            const allCols = Array.from({length: template.len}, (_, i) => i);
-            // Shuffle columns
-            for (let i = allCols.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [allCols[i], allCols[j]] = [allCols[j], allCols[i]];
-            }
-
-            let removeCols;
-            if (template.newPc) {
-                // Ensure at least one removed col has the new piece
-                const newPieceCols = [];
-                const otherCols = [];
-                for (const c of allCols) {
-                    if (pieces[c].baseName === template.newPc) newPieceCols.push(c);
-                    else otherCols.push(c);
-                }
-                if (newPieceCols.length === 0) { positions = null; break; } // retry entire attempt
-                removeCols = [newPieceCols[0]];
-                const remaining = [...newPieceCols.slice(1), ...otherCols];
-                for (let i = removeCols.length; i < template.rem; i++) {
-                    if (remaining.length > 0) removeCols.push(remaining.shift());
-                }
-            } else {
-                removeCols = allCols.slice(0, template.rem);
-            }
-
-            if (removeCols.length < template.rem) { positions = null; continue; }
-
-            // The tray holds one card per DISTINCT base name. Without the Dupe button a
-            // level asking for two pieces of the same type would be unwinnable, so only
-            // let that happen where the player can actually duplicate.
-            if (!canDuplicate) {
-                const bases = removeCols.map(c => pieces[c].baseName);
-                if (new Set(bases).size !== bases.length) { positions = null; continue; }
-            }
-
-            // requireFlip: ensure at least one removed col uses the non-default label
-            if (template.requireFlip) {
-                const hasFlipped = removeCols.some(c => {
-                    const fm = FLIP_MAP[pieces[c].baseName];
-                    return fm && pieces[c].label !== fm.defaultLabel;
-                });
-                if (!hasFlipped) { positions = null; continue; }
-            }
-
-            removeCols.sort((a, b) => a - b);
-
-            // 6. Build trayBasePieces — unique base names of removed pieces
-            const traySet = new Set();
-            removeCols.forEach(c => traySet.add(pieces[c].baseName));
-            const trayBasePieces = [...traySet];
-
-            // 7. Pick random chords
-            const { chords, targetChord } = pickRandomChords(template.len);
-
-            // 8. Build solution array.
-            // Intervals are chosen here rather than at placement time so the melody is
-            // fully determined now — that lets us range-check it below, and keeps the
-            // puzzle's sound identical every time it is loaded.
-            const solution = pieces.map((p, i) => {
-                const lib = findPiece(p.baseName, p.label);
-                return {
-                    col: i,
-                    pieceName: p.baseName,
-                    pieceLabel: p.label,
-                    position: positions[i],
-                    selectedIntervals: lib ? selectRandomIntervals(lib) : {}
-                };
-            });
-
-            // 9. Reject chains that climb out of the playable register.
-            // Notes are derived right-to-left, and a Descending piece places its notes
-            // ABOVE its target — so a run of them ratchets the line up by an octave per
-            // column, reaching MIDI 100+. Past MIDI 96 the sampler has no usable sample
-            // and playNote silently drops to the synth, so the phrase changes timbre
-            // mid-line. Retry instead of shipping the puzzle.
-            const range = melodyRangeForSolution(chords, targetChord, solution, targetPos);
-            if (!range || range.min < MELODY_MIN_MIDI || range.max > MELODY_MAX_MIDI) {
-                positions = null;
-                continue;
-            }
-
-            // Build base tray from removed cols
-            const baseTray = [...traySet];
-
-            // Jam Session: add extra distractor pieces to tray (cap total at 4)
-            const MAX_TRAY = 4;
-            const extraTray = [];
-            if (template.extraPieces && template.extraPieces > 0) {
-                const maxExtras = Math.max(0, MAX_TRAY - baseTray.length);
-                const extraCount = Math.min(template.extraPieces, maxExtras);
-                for (let e = 0; e < extraCount; e++) {
-                    extraTray.push(template.pool[Math.floor(Math.random() * template.pool.length)]);
-                }
-            }
-
-            return {
-                id: template.id,
-                chapter: template.ch,
-                name: template.name,
-                chords,
-                targetChord,
-                solution,
-                targetPiece: { position: targetPos },
-                removeCols,
-                trayBasePieces: [...baseTray, ...extraTray].slice(0, MAX_TRAY),
-                hints: template.hints,
-                timeThreshold: template.time,
-                tutorial: template.tutorial || '',
-                listens: template.listens || 0,
-                extraPieces: template.extraPieces || 0
-            };
+            const last = pieces[template.len - 1];
+            const lastRule = PIECE_RULES[last.baseName + '|' + last.label];
+            const tPos = posArr[template.len - 1] + lastRule.exit - 0.5; // target: pos_last + exit_last = targetPos + 0.5
+            if (!VALID_POS.includes(tPos)) continue;
+            positions = posArr; targetPos = tPos;
+            break;
         }
-        // If positions null, retry with new random pieces
+        if (!positions) continue;
+
+        // 4. Choose the columns to remove
+        const allCols = Array.from({ length: template.len }, (_, i) => i);
+        for (let i = allCols.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [allCols[i], allCols[j]] = [allCols[j], allCols[i]];
+        }
+        let removeCols;
+        if (template.newPc) {
+            const newPieceCols = allCols.filter(c => pieces[c].baseName === template.newPc);
+            if (newPieceCols.length === 0) continue;
+            const rest = [...newPieceCols.slice(1), ...allCols.filter(c => pieces[c].baseName !== template.newPc)];
+            removeCols = [newPieceCols[0], ...rest.slice(0, template.rem - 1)];
+        } else {
+            removeCols = allCols.slice(0, template.rem);
+        }
+        if (removeCols.length < template.rem) continue;
+        if (!canDuplicate) {
+            const bases = removeCols.map(c => pieces[c].baseName);
+            if (new Set(bases).size !== bases.length) continue;
+        }
+        if (template.requireFlip && !removeCols.some(c => pieces[c].label !== FLIP_MAP[pieces[c].baseName].defaultLabel)) continue;
+        removeCols.sort((a, b) => a - b);
+
+        // 5. Harmony and target
+        const { chords, targetChord } = levelChords(template);
+        const targetDegree = template.ch >= 4 ? [0, 1, 2, 3][Math.floor(Math.random() * 4)] : undefined;
+
+        // 6. Solution. Intervals are fixed now so the melody is fully determined and
+        // sounds identical every time the puzzle loads.
+        const solution = pieces.map((p, i) => {
+            const lib = findPiece(p.baseName, p.label);
+            return { col: i, pieceName: p.baseName, pieceLabel: p.label, position: positions[i],
+                     selectedIntervals: lib ? selectRandomIntervals(lib) : {} };
+        });
+
+        // 7. Keep the line inside the sampler's register (see MELODY_MIN/MAX_MIDI)
+        const line = melodyForSolution(chords, targetChord, solution, targetPos, targetDegree);
+        if (!line) continue;
+        const allNotes = [line.targetNote, ...line.pieceNotes.flat()];
+        if (Math.min(...allNotes) < MELODY_MIN_MIDI || Math.max(...allNotes) > MELODY_MAX_MIDI) continue;
+
+        // 8. Tray: the needed pieces, then same-shape decoys (an Approach where an
+        // Arpeggio is needed and vice versa) so the choice has to be made by ear, then
+        // Jam Session extras. One card per base name.
+        const tray = [...new Set(removeCols.map(c => pieces[c].baseName))];
+        if (canFlip) {
+            const decoyBudget = Math.max(template.extraPieces || 0, 1);
+            let added = 0;
+            for (const c of removeCols) {
+                const twin = SAME_SHAPE_TWIN[pieces[c].baseName];
+                if (added >= decoyBudget || tray.length >= MAX_TRAY) break;
+                if (twin && template.pool.includes(twin) && !tray.includes(twin)) { tray.push(twin); added++; }
+            }
+            const extras = (template.extraPieces || 0) - added;
+            const others = template.pool.filter(b => !tray.includes(b));
+            for (let e = 0; e < extras && tray.length < MAX_TRAY && others.length; e++) {
+                tray.push(others.splice(Math.floor(Math.random() * others.length), 1)[0]);
+            }
+        }
+
+        // 9. Score: ear-needing columns first, then lines whose column downbeats are
+        // chord tones (the bebop rule of thumb), with a little randomness for variety.
+        const fits = analyzeGeometricFits({ len: template.len, solution, removeCols, targetPos,
+                                            trayBases: tray, canFlip, canDuplicate });
+        if (fits.solutions < 1) continue;
+        const downbeats = line.pieceNotes.filter((notes, col) => isChordTone(notes[0], line.chords[col])).length;
+        const score = Math.min(fits.earCols, minEar + 1) * 10 + (downbeats / template.len) * 6 + Math.random();
+
+        const candidate = {
+            id: template.id,
+            chapter: template.ch,
+            name: template.name,
+            chords,
+            targetChord,
+            targetDegree,
+            solution,
+            targetPiece: { position: targetPos },
+            removeCols,
+            trayBasePieces: tray,
+            earCols: fits.earCols,
+            hints: template.hints,
+            tutorial: template.tutorial || '',
+            listens: template.listens || 0,
+            extraPieces: template.extraPieces || 0
+        };
+        if (!bestAny || score > bestAny.score) bestAny = { score, candidate };
+        if (fits.earCols >= minEar) {
+            qualifying++;
+            if (!best || score > best.score) best = { score, candidate };
+        }
     }
+
+    if (best || bestAny) return (best || bestAny).candidate;
 
     // Fallback — should rarely happen; return a minimal valid puzzle
     console.warn('Generator exhausted attempts for', template.id, '— using fallback');
-    // Find the first pool piece that has a valid FLIP_MAP entry
     const fallbackBase = template.pool.find(n => FLIP_MAP[n]) || 'Arpeggio';
     const fm = FLIP_MAP[fallbackBase];
     const fallbackPieces = [];
@@ -6724,24 +7012,19 @@ function generateRandomPuzzle(template) {
         fallbackPieces.push({ baseName: fallbackBase, label: i % 2 === 0 ? fm.defaultLabel : fm.flipH });
     }
     // Alternating Ascending/Descending arpeggios connect at position 1.0 throughout
-    // Verified: entry/exit rules for Arpeggio Asc↔Desc give pos=1.0 for all slots
     const fallbackPos = new Array(template.len).fill(1.0);
-    const removeCols = Array.from({length: template.rem}, (_, i) => i);
+    const removeCols = Array.from({ length: template.rem }, (_, i) => i);
     const { chords, targetChord } = pickRandomChords(template.len);
-    const traySet = new Set();
-    removeCols.forEach(c => traySet.add(fallbackPieces[c].baseName));
-    // Compute target position from the last piece's exit rule
     const lastFallback = fallbackPieces[template.len - 1];
-    const lastFallbackKey = lastFallback.baseName + '|' + lastFallback.label;
-    const lastFallbackRule = PIECE_RULES[lastFallbackKey];
+    const lastFallbackRule = PIECE_RULES[lastFallback.baseName + '|' + lastFallback.label];
     const fallbackTargetPos = lastFallbackRule ? (1.0 + lastFallbackRule.exit - 0.5) : 0.5;
     return {
         id: template.id, chapter: template.ch, name: template.name,
         chords, targetChord,
         solution: fallbackPieces.map((p, i) => ({ col: i, pieceName: p.baseName, pieceLabel: p.label, position: fallbackPos[i] })),
         targetPiece: { position: fallbackTargetPos },
-        removeCols, trayBasePieces: [...traySet],
-        hints: template.hints, timeThreshold: template.time,
+        removeCols, trayBasePieces: [...new Set(removeCols.map(c => fallbackPieces[c].baseName))],
+        hints: template.hints,
         tutorial: template.tutorial || ''
     };
 }
@@ -6777,7 +7060,7 @@ function renderChapterIcon(iconStr, size) {
 const FLIP_MAP = {
     'Arpeggio':  { defaultLabel: 'Ascending',  flipH: 'Descending' },
     'Approach':  { defaultLabel: 'Ascending',  flipH: 'Descending' },
-    'Neighbor':  { defaultLabel: 'Down-Up', flipH: 'Up-Down' },
+    'Neighbor':  { defaultLabel: 'Upper First', flipH: 'Lower First' },
     'Enclosure': { defaultLabel: 'From Below', flipH: 'From Above' },
 };
 
@@ -6961,11 +7244,40 @@ function restartCssAnimation(el, className, onEnd) {
     });
 }
 
-const DAILY_MISSION_DEFS = [
-    { id: 'complete2', title: 'Two Choruses', desc: 'Complete 2 levels today', target: 2 },
-    { id: 'clean1', title: 'Clean Take', desc: 'Finish 1 level without hints', target: 1 },
-    { id: 'perfect1', title: 'Perfect Ears', desc: 'Earn one 3-star solve', target: 1 },
+// Daily missions rotate: three are drawn each day (same three for the whole day),
+// only from skills the player has unlocked. `check` says whether a solve counts.
+const DAILY_MISSION_POOL = [
+    { id: 'complete2', title: 'Two Choruses', desc: 'Complete 2 levels today', target: 2, check: () => true },
+    { id: 'clean1', title: 'Clean Take', desc: 'Finish 1 level without hints', target: 1, check: r => r.hintsUsed === 0 },
+    { id: 'perfect1', title: 'Perfect Ears', desc: 'Earn one 3-star solve', target: 1, check: r => r.stars === 3 },
+    { id: 'nomiss2', title: 'No Clams', desc: 'Finish 2 levels with no wrong placements', target: 2, check: r => r.wrongPlacements === 0 },
+    { id: 'onelisten', title: 'One Take', desc: 'Solve a level after listening only once', target: 1, check: r => r.totalListens <= 1 },
+    { id: 'longline', title: 'Long Line', desc: 'Finish a level with 5 chords', target: 1, check: r => r.len >= 5 },
+    { id: 'approach1', title: 'Leading Tones', desc: 'Place an Approach correctly', target: 1, minChapter: 3, check: r => r.placed.includes('Approach') },
+    { id: 'enclosure1', title: 'Surround Sound', desc: 'Place an Enclosure correctly', target: 1, minChapter: 4, check: r => r.placed.includes('Enclosure') },
 ];
+
+let _missionDefsCache = { key: null, defs: null };
+function getTodaysMissionDefs() {
+    const today = getDailyDateString();
+    const unlocked = CHAPTERS.filter(c => isChapterUnlocked(c.id)).map(c => c.id);
+    const maxCh = Math.max(1, ...unlocked);
+    const key = today + ':' + maxCh;
+    if (_missionDefsCache.key === key) return _missionDefsCache.defs;
+    // Keep today's chosen missions stable once picked, even if a chapter unlocks mid-day.
+    const saved = gameProgress['_missionDate'] === today && gameProgress['_missionIds'];
+    let defs;
+    if (Array.isArray(saved) && saved.length) {
+        defs = saved.map(id => DAILY_MISSION_POOL.find(d => d.id === id)).filter(Boolean);
+    } else {
+        const rng = seededRandom(hashDateString('missions:' + today));
+        const pool = DAILY_MISSION_POOL.filter(d => !d.minChapter || d.minChapter <= maxCh);
+        defs = [];
+        while (defs.length < 3 && pool.length) defs.push(pool.splice(Math.floor(rng() * pool.length), 1)[0]);
+    }
+    _missionDefsCache = { key, defs };
+    return defs;
+}
 
 let missionBadgeQueue = [];
 let missionBadgeShowing = false;
@@ -7017,8 +7329,11 @@ function getDailyMissionState() {
     if (gameProgress['_missionDate'] !== today || !gameProgress['_missions']) {
         gameProgress['_missionDate'] = today;
         gameProgress['_missions'] = {};
+        delete gameProgress['_missionIds']; // new day: draw new missions
+        _missionDefsCache.key = null;
     }
-    DAILY_MISSION_DEFS.forEach(def => {
+    gameProgress['_missionIds'] = getTodaysMissionDefs().map(d => d.id);
+    getTodaysMissionDefs().forEach(def => {
         if (!gameProgress['_missions'][def.id]) {
             gameProgress['_missions'][def.id] = { progress: 0, completed: false };
         }
@@ -7027,7 +7342,7 @@ function getDailyMissionState() {
 }
 
 function bumpMissionProgress(state, id, amount) {
-    const def = DAILY_MISSION_DEFS.find(m => m.id === id);
+    const def = getTodaysMissionDefs().find(m => m.id === id);
     const m = state[id];
     if (!def || !m || m.completed) return false;
     const before = m.progress || 0;
@@ -7041,20 +7356,18 @@ function updateMissionProgress(result) {
     }
     const state = getDailyMissionState();
     const before = {};
-    DAILY_MISSION_DEFS.forEach(def => {
+    getTodaysMissionDefs().forEach(def => {
         before[def.id] = {
             progress: state[def.id]?.progress || 0,
             completed: !!state[def.id]?.completed
         };
     });
 
-    bumpMissionProgress(state, 'complete2', 1);
-    if (result.hintsUsed === 0) bumpMissionProgress(state, 'clean1', 1);
-    if (result.stars === 3) bumpMissionProgress(state, 'perfect1', 1);
+    getTodaysMissionDefs().forEach(def => { if (def.check(result)) bumpMissionProgress(state, def.id, 1); });
 
     const updated = [];
     const completed = [];
-    DAILY_MISSION_DEFS.forEach(def => {
+    getTodaysMissionDefs().forEach(def => {
         const m = state[def.id];
         let completedNow = false;
         if (!m.completed && m.progress >= def.target) {
@@ -7132,7 +7445,7 @@ function getNextGoal(chapterId) {
         return {
             label: 'Upgrade Goal',
             title: `Perfect ${upgrade.name}`,
-            detail: `Current best: ${p.stars || 1}★. Try for ≤2 listens, no hints, no mistakes.`,
+            detail: `Current best: ${p.stars || 1}★. Try for few listens, no hints, no mistakes.`,
             progress: Math.round(((p.stars || 1) / 3) * 100)
         };
     }
@@ -7151,7 +7464,7 @@ function renderPracticePanel(chapterId) {
     const missionsHtml = areDailyMissionsUnlocked()
         ? (() => {
             const state = getDailyMissionState();
-            const missionCards = DAILY_MISSION_DEFS.map(def => {
+            const missionCards = getTodaysMissionDefs().map(def => {
                 const m = state[def.id] || { progress: 0, completed: false };
                 const pct = Math.min(100, Math.round(((m.progress || 0) / def.target) * 100));
                 return `<div class="mission-card${m.completed ? ' complete' : ''}">
@@ -7228,7 +7541,21 @@ function isCurrentDailyChallenge() {
     return isDailyMode || (typeof currentLevel === 'string' && currentLevel.startsWith('_daily_'));
 }
 
+// Retry scaffolding counts failed attempts: leaving or restarting a level that was
+// played (listened to, hinted, or attempted) but not solved. Solving clears the count.
+let levelAttemptSolved = true;
+function recordAbandonedAttempt() {
+    if (levelAttemptSolved || composerMode || !currentLevel) return;
+    levelAttemptSolved = true;
+    if (typeof currentLevel !== 'string' || currentLevel.startsWith('_')) return;
+    if (totalListens + hintsUsed + wrongPlacements === 0) return;
+    const key = '_retry_' + currentLevel;
+    gameProgress[key] = (gameProgress[key] || 0) + 1;
+    saveProgress();
+}
+
 function goToMap(overrideChapter) {
+    recordAbandonedAttempt();
     if (composerMode) {
         exitComposerMode();
         return;
@@ -7238,8 +7565,7 @@ function goToMap(overrideChapter) {
     clearLevelSetupTimeouts();
     cancelDragProcessing();
     stopPlayback();
-    celebrationTimeouts.forEach(t => clearTimeout(t));
-    celebrationTimeouts = [];
+    cancelCelebration();
     guidedStepTimeouts.forEach(t => clearTimeout(t));
     guidedStepTimeouts = [];
     isGuidedMode = false;
@@ -7473,6 +7799,7 @@ function animateLevelEntrance(kind) {
 }
 
 function startLevel(levelId, opts = {}) {
+    recordAbandonedAttempt();
     const transitionKind = opts.transition || 'level-start';
     markLevelLaunch(levelId);
     // Unlock AudioContext now (synchronous, within user gesture) so auto-play works later
@@ -7486,8 +7813,7 @@ function startLevel(levelId, opts = {}) {
     document.getElementById('timer-display').style.display = '';
     document.querySelector('.topbar-star-row').style.display = '';
     stopPlayback(); // ensure any ongoing playback is halted before loading new level
-    celebrationTimeouts.forEach(t => clearTimeout(t));
-    celebrationTimeouts = [];
+    cancelCelebration();
     guidedStepTimeouts.forEach(t => clearTimeout(t));
     guidedStepTimeouts = [];
     clearHintVisuals();
@@ -7522,8 +7848,13 @@ function startLevel(levelId, opts = {}) {
     // Tutorial levels use hardcoded puzzles; others are generated fresh
     if (TUTORIAL_LEVELS[levelId]) {
         currentLevelData = JSON.parse(JSON.stringify(TUTORIAL_LEVELS[levelId]));
+        // Tutorial copy lives only in LEVEL_TEMPLATES (single source of truth).
+        if (template.tutorial) currentLevelData.tutorial = template.tutorial;
     } else {
-        currentLevelData = generateRandomPuzzle(template);
+        // Seeded per level so Retry replays the same puzzle; Remix bumps the seed.
+        const remixKey = '_remix_' + levelId;
+        if (opts.remix) { gameProgress[remixKey] = (gameProgress[remixKey] || 0) + 1; saveProgress(); }
+        currentLevelData = generateRandomPuzzle(template, puzzleSeed(levelId, gameProgress[remixKey] || 0));
     }
     if (!currentLevelData) return;
     currentLevel = levelId;
@@ -7587,6 +7918,7 @@ function startLevel(levelId, opts = {}) {
     stuckIdleTimer = setInterval(checkIdleStuck, 15000);
     hideGuideMe();
 
+    levelAttemptSolved = false;
     // Invisible retry scaffolding — subtle difficulty reduction on repeated attempts
     currentBPM = 90; // reset before retry scaffolding (prevents compounding across levels)
     const retryCount = gameProgress['_retry_' + currentLevel] || 0;
@@ -7625,9 +7957,7 @@ function startLevel(levelId, opts = {}) {
         if (craftMode === 'hidden') {
             hideCraftTable();
         } else {
-            showCraftTable();
-            const dupeBtn = document.getElementById('craft-dupe-btn');
-            if (dupeBtn) dupeBtn.style.display = craftMode === 'flip' ? 'none' : '';
+            showCraftTable(craftMode);
         }
 
         // Lock bottombar height to prevent layout shift during drag
@@ -7745,7 +8075,7 @@ function computeFullMelodyNotes(sourceState = gridState) {
 
     let targetNote = null;
     if (sourceState[numCols] && chords[numCols]) {
-        targetNote = getTargetNote(sourceState[numCols].position, chords[numCols]);
+        targetNote = getTargetNote(sourceState[numCols].position, chords[numCols], currentLevelData.targetDegree);
     }
 
     const pieceNotes = [];
@@ -7911,7 +8241,7 @@ function renderGrid() {
             if (isPuzzleCol(col) && !puzzleInteractionLocked) {
                 el.style.cursor = 'grab';
                 el.addEventListener('mousedown', e => { e.stopPropagation(); startDrag(e, piece, {col, position}); });
-                el.addEventListener('touchstart', e => { e.stopPropagation(); startDragTouch(e, piece, {col, position}); }, {passive:false});
+                el.addEventListener('touchstart', e => { e.stopPropagation(); if (touchDragInProgress(e)) { e.preventDefault(); return; } startDragTouch(e, piece, {col, position}); }, {passive:false});
             } else {
                 el.style.cursor = '';
             }
@@ -8025,6 +8355,31 @@ function collapseTrayPiece(index, callback) {
     setTimeout(doCleanup, 300);
 }
 
+function currentCraftMode() {
+    if (composerMode) return 'full';
+    const template = currentLevelData && LEVEL_TEMPLATES.find(t => t.id === currentLevelData.id);
+    return (template && template.craft) || currentLevelData?.craft || 'full';
+}
+
+function canFlipInTray() {
+    if (!currentLevelData || puzzleInteractionLocked) return false;
+    if (currentCraftMode() === 'hidden') return false;
+    // ch1_03 teaches flipping on the craft table first
+    return !shouldShowCraftTutorial('flip') || !!getLevelProgress('ch1_03').completed;
+}
+
+function flipTrayCard(idx) {
+    if (!canFlipInTray() || idx < 0 || idx >= trayAvailable.length) return;
+    trayFlipState[idx] = !trayFlipState[idx];
+    sfx('flip');
+    markFlipTooltipDone();
+    renderTray();
+    const label = getFlippedLabel(trayAvailable[idx], trayFlipState[idx]);
+    announce(`${trayAvailable[idx]} flipped to ${label}.`);
+    const card = document.querySelector(`.tray-piece[data-tray-index="${idx}"]`);
+    if (card) restartCssAnimation(card, 'tray-flipped');
+}
+
 function renderTray() {
     const tray = document.getElementById('piece-tray');
     tray.innerHTML = '';
@@ -8059,6 +8414,24 @@ function renderTray() {
             <div class="tray-piece-variant">${label}</div>
         `;
 
+        // Flip right on the card (no trip through the craft table) once the flip
+        // lesson has been taught.
+        if (canFlipInTray() && map.flipH) {
+            const other = getFlippedLabel(baseName, !isFlipped);
+            const flipBtn = document.createElement('button');
+            flipBtn.className = 'tray-flip-btn';
+            flipBtn.type = 'button';
+            flipBtn.textContent = '⇄';
+            flipBtn.title = `Flip to ${other}`;
+            flipBtn.setAttribute('aria-label', `Flip ${baseName} to ${other}`);
+            const stop = e => e.stopPropagation();
+            flipBtn.addEventListener('mousedown', stop);
+            flipBtn.addEventListener('touchstart', stop, { passive: true });
+            flipBtn.addEventListener('keydown', stop);
+            flipBtn.addEventListener('click', e => { e.stopPropagation(); flipTrayCard(idx); });
+            card.appendChild(flipBtn);
+        }
+
         // Hover-to-preview: hold hover for 1s to hear the piece
         let hoverTimer = null;
         card.addEventListener('mouseenter', () => {
@@ -8086,6 +8459,7 @@ function renderTray() {
             startDrag(e, p, null);
         });
         card.addEventListener('touchstart', e => {
+            if (touchDragInProgress(e)) { e.preventDefault(); return; }
             const p = findPiece(baseName, label);
             if (!p) return;
             e.preventDefault();
@@ -8112,11 +8486,15 @@ let craftFlipH = false;        // kept for compat — always mirrors craftStack[
 let craftOutputPiece = null;   // the result ready to drag/claim
 let craftOpen = false;
 
-function showCraftTable() {
+// mode: 'full' (Flip + Dupe) or 'flip' (Dupe hidden). Always set explicitly so a
+// flip-only level does not leave Dupe hidden for the Daily Challenge or Composer.
+function showCraftTable(mode = 'full') {
     const table = document.getElementById('craft-table');
     const divider = document.getElementById('craft-tray-divider');
     if (table) table.classList.add('visible');
     if (divider) divider.classList.add('visible');
+    const dupeBtn = document.getElementById('craft-dupe-btn');
+    if (dupeBtn) dupeBtn.style.display = mode === 'flip' ? 'none' : '';
     craftOpen = true;
     // Old static onboarding overlay removed — craft table is taught contextually
     // via flip tooltip (3.4) and duplicate tooltip (3.7)
@@ -8290,7 +8668,27 @@ function scheduleDupeProactiveHint() {
     }, 8000);
 }
 
+// Flip / Dupe run timed animations that snapshot the stack and later wipe it. While one
+// is running the craft table must not accept or release pieces, or a piece dropped in
+// mid-animation is silently destroyed (and the snapshot is duplicated).
+let craftBusy = false;
+let craftTimers = [];
+function craftTimeout(fn, ms) {
+    const id = setTimeout(() => { craftTimers = craftTimers.filter(t => t !== id); fn(); }, ms);
+    craftTimers.push(id);
+    return id;
+}
+function cancelCraftAnimations() {
+    craftTimers.forEach(t => clearTimeout(t));
+    craftTimers = [];
+    craftBusy = false;
+    document.querySelectorAll('.craft-flip-ghost').forEach(g => g.remove());
+    const dz = document.getElementById('craft-drop-zone');
+    if (dz) { dz.style.opacity = ''; dz.classList.remove('duplicating', 'consuming'); }
+}
+
 function hideCraftTable() {
+    cancelCraftAnimations();
     const table = document.getElementById('craft-table');
     const divider = document.getElementById('craft-tray-divider');
     if (table) table.classList.remove('visible');
@@ -8420,7 +8818,8 @@ function updateCraftDrop() {
 }
 
 function craftDzDragOut(e) {
-    if (craftStack.length === 0) return;
+    if (craftStack.length === 0 || craftBusy) return;
+    if (e.type === 'touchstart' && touchDragInProgress(e)) { e.preventDefault(); return; }
     const top = craftStack[craftStack.length - 1];
     const label = getFlippedLabel(top.baseName, top.flipH);
     const piece = findPiece(top.baseName, label);
@@ -8557,6 +8956,7 @@ function craftOutputTouchStart(e) {
     if (!craftOutputPiece || !output.classList.contains('claimable')) return;
     e.preventDefault();
     e.stopPropagation();
+    if (touchDragInProgress(e)) return;
     const { baseName, flipH } = craftOutputPiece;
     const label = getFlippedLabel(baseName, flipH);
     const piece = findPiece(baseName, label);
@@ -8659,7 +9059,8 @@ function claimOutputPiece() {
 }
 
 function craftToggleFlip() {
-    if (craftStack.length === 0) return;
+    if (craftStack.length === 0 || craftBusy) return;
+    craftBusy = true;
     // Advance craft tutorial if active (step 2 → 3 for flip)
     if (craftTutorialStep === 2 && craftTutorialType === 'flip') {
         removeSpotlight();
@@ -8728,7 +9129,7 @@ function craftToggleFlip() {
         ghost.appendChild(inner);
         document.body.appendChild(ghost);
         allGhosts.push(ghost);
-        setTimeout(() => {
+        craftTimeout(() => {
             spawnSparkles(ghost, 2);
             // Land offset mirrors updateCraftDrop layer positioning in output zone
             const outStackOffset = (preFlipStack.length - 1 - i) * 4;
@@ -8748,7 +9149,8 @@ function craftToggleFlip() {
     const lastLaunch = (preFlipStack.length - 1) * GHOST_STAGGER;
     const totalDuration = lastLaunch + GHOST_FLIGHT;
 
-    setTimeout(() => {
+    craftTimeout(() => {
+        craftBusy = false;
         // Sparkle burst on output
         spawnSparkles(output, 3);
 
@@ -8773,7 +9175,8 @@ function craftToggleFlip() {
 }
 
 function craftDuplicate() {
-    if (craftStack.length === 0) return;
+    if (craftStack.length === 0 || craftBusy) return;
+    craftBusy = true;
     sfx('dupe');
 
     // Snapshot the stack before clearing it
@@ -8789,7 +9192,7 @@ function craftDuplicate() {
     spawnSparkles(dz, 6);
 
     // Step 2: After shake, dissolve original + show duplicates in output
-    setTimeout(() => {
+    craftTimeout(() => {
         dz.classList.remove('duplicating');
         spawnSparkles(dz, 3);
 
@@ -8797,7 +9200,8 @@ function craftDuplicate() {
         restartCssAnimation(dz, 'consuming');
 
         // After dissolve, clear input and show result — user clicks to claim
-        setTimeout(() => {
+        craftTimeout(() => {
+            craftBusy = false;
             // Clear input stack
             craftStack = [];
             craftBaseName = null;
@@ -8838,7 +9242,7 @@ function initCraftOutput() {
 }
 
 function isCraftDrop(clientX, clientY) {
-    if (!craftOpen) return false;
+    if (!craftOpen || craftBusy) return false;
     const dz = document.getElementById('craft-drop-zone');
     const rect = dz.getBoundingClientRect();
     return clientX >= rect.left && clientX <= rect.right &&
@@ -8928,6 +9332,7 @@ function cancelDragProcessing() {
     document.removeEventListener('mouseup', onDragEnd);
     document.removeEventListener('touchmove', onTouchMove);
     document.removeEventListener('touchend', onTouchEnd);
+    removeTouchDragListeners();
     clearSnapPreview();
     document.getElementById('craft-drop-zone')?.classList.remove('drag-hover');
     document.querySelectorAll('.tray-piece').forEach(t => t.classList.remove('dragging'));
@@ -9007,6 +9412,68 @@ function startDrag(e, piece, fromGrid) {
     document.addEventListener('mouseup', onDragEnd);
 }
 
+// Active touch drag: which finger owns it, where it started and whether it has moved
+// far enough to count as a drag. A touch that never moves is a tap and must not move
+// the piece (the preview is lifted above the finger, so a tap would otherwise drop it
+// half a row higher).
+let touchDrag = null;
+const TOUCH_DRAG_THRESHOLD = 8;
+
+// Ignore extra fingers while one touch drag is already running.
+function touchDragInProgress(e) {
+    // A drag whose finger is no longer on the screen lost its touchend (the element it
+    // started on was re-rendered away); clear it instead of blocking all touch input.
+    if (touchDrag && e.touches && ![...e.touches].some(t => t.identifier === touchDrag.id)) {
+        removeTouchDragListeners();
+        abortDrag();
+    }
+    return !!touchDrag || (e.touches && e.touches.length > 1);
+}
+
+// Touch events keep targeting the element the touch started on, even after that
+// element is removed from the page (tray re-render, craft table reset). Events on a
+// detached node never bubble to document, so the drag also listens on the node itself
+// and handles events there only once it is detached.
+function addTouchDragListeners(el) {
+    document.addEventListener('touchmove', onTouchMove, {passive:false});
+    document.addEventListener('touchend', onTouchEnd);
+    document.addEventListener('touchcancel', onTouchCancel);
+    if (!el || !touchDrag) return;
+    const detachedOnly = fn => ev => { if (!el.isConnected) fn(ev); };
+    touchDrag.el = el;
+    touchDrag.fns = { touchmove: detachedOnly(onTouchMove), touchend: detachedOnly(onTouchEnd), touchcancel: detachedOnly(onTouchCancel) };
+    el.addEventListener('touchmove', touchDrag.fns.touchmove, {passive:false});
+    el.addEventListener('touchend', touchDrag.fns.touchend);
+    el.addEventListener('touchcancel', touchDrag.fns.touchcancel);
+}
+
+function removeTouchDragListeners() {
+    document.removeEventListener('touchmove', onTouchMove);
+    document.removeEventListener('touchend', onTouchEnd);
+    document.removeEventListener('touchcancel', onTouchCancel);
+    if (touchDrag && touchDrag.el && touchDrag.fns) {
+        for (const [type, fn] of Object.entries(touchDrag.fns)) touchDrag.el.removeEventListener(type, fn);
+    }
+    touchDrag = null;
+}
+
+// Abort a drag without placing anything: grid and tray pieces stay where they were;
+// a piece lifted out of the craft table (already removed from it) goes back to the tray.
+function abortDrag() {
+    if (draggedFromCraft && draggedPiece) {
+        if (dragRaf) { cancelAnimationFrame(dragRaf); dragRaf = null; }
+        pendingDragPoint = null;
+        currentSnapCol = null; currentSnapPos = null; dragRejectedCol = null;
+        finishDrag(undefined, undefined);
+        return;
+    }
+    cancelDragProcessing();
+    dragRejectedCol = null;
+    renderTray();
+    renderGrid();
+    applyHighlights();
+}
+
 function startDragTouch(e, piece, fromGrid) {
     e.preventDefault();
     if (puzzleInteractionLocked) {
@@ -9017,7 +9484,8 @@ function startDragTouch(e, piece, fromGrid) {
         return;
     }
     removeTutorialTooltip();
-    const touch = e.touches[0];
+    const touch = e.changedTouches?.[0] || e.touches[0];
+    touchDrag = { id: touch.identifier, x: touch.clientX, y: touch.clientY, moved: false };
     draggedPiece = piece;
     draggedFromGrid = fromGrid;
     const firstCell = document.querySelector('.grid-cell');
@@ -9037,8 +9505,13 @@ function startDragTouch(e, piece, fromGrid) {
     const snapPoint = getTouchSnapPoint(touch);
     scheduleDragProcess(snapPoint.x, snapPoint.y);
 
-    document.addEventListener('touchmove', onTouchMove, {passive:false});
-    document.addEventListener('touchend', onTouchEnd);
+    addTouchDragListeners(e.target);
+}
+
+function findDragTouch(list) {
+    if (!touchDrag || !list) return null;
+    for (const t of list) if (t.identifier === touchDrag.id) return t;
+    return null;
 }
 
 function updateDragPreview(x, y, isTouchEvent) {
@@ -9115,7 +9588,11 @@ function onDragMove(e) {
 
 function onTouchMove(e) {
     e.preventDefault();
-    const touch = e.touches[0];
+    const touch = findDragTouch(e.touches);
+    if (!touch) return;
+    if (!touchDrag.moved && Math.hypot(touch.clientX - touchDrag.x, touch.clientY - touchDrag.y) > TOUCH_DRAG_THRESHOLD) {
+        touchDrag.moved = true;
+    }
     updateDragPreview(touch.clientX, touch.clientY, true);
     const snapPoint = getTouchSnapPoint(touch);
     scheduleDragProcess(snapPoint.x, snapPoint.y);
@@ -9164,7 +9641,7 @@ function finishDrag(clientX, clientY, snapPoint = null) {
                 { const _snapEl = document.querySelector(`.grid-column[data-col="${currentSnapCol}"] .placed-piece`);
                   if (_snapEl) { _snapEl.classList.add('snap-in'); _snapEl.addEventListener('animationend', () => _snapEl.classList.remove('snap-in'), {once:true}); } }
                 applyHighlights();
-                setTimeout(() => flashConnectedNeighbors(currentSnapCol), 250);
+                { const flashCol = currentSnapCol; setTimeout(() => flashConnectedNeighbors(flashCol), 250); }
                 checkAnswer(currentSnapCol);
             }
         } else {
@@ -9211,7 +9688,10 @@ function finishDrag(clientX, clientY, snapPoint = null) {
 
         // Place piece into craft table
         const baseName = draggedPiece.name;
-        const flipState = draggedTrayIndex >= 0 ? !!trayFlipState[draggedTrayIndex] : false;
+        const flipMap = FLIP_MAP[baseName];
+        const flipState = draggedTrayIndex >= 0
+            ? !!trayFlipState[draggedTrayIndex]
+            : !!(flipMap && flipMap.flipH && draggedPiece.label === flipMap.flipH);
         placePieceInCraft(baseName, flipState);
 
         // Remove from grid if dragged from grid
@@ -9254,7 +9734,7 @@ function finishDrag(clientX, clientY, snapPoint = null) {
               if (_snapEl) { _snapEl.classList.add('snap-in'); _snapEl.addEventListener('animationend', () => _snapEl.classList.remove('snap-in'), {once:true}); } }
             applyHighlights();
             // Delay connection flash so it doesn't clash with snap-in animation
-            setTimeout(() => flashConnectedNeighbors(currentSnapCol), 250);
+            { const flashCol = currentSnapCol; setTimeout(() => flashConnectedNeighbors(flashCol), 250); }
             checkAnswer(currentSnapCol);
         } else if (draggedFromGrid) {
             // Can't place here, put piece back
@@ -9300,7 +9780,7 @@ function explainRejectedDrop(piece) {
 
     const sameFits = getValidSnapPositions(piece, col).some(s => s.valid);
     if (sameFits) {
-        showToast('Right piece — try a different height in that column.', 'info', 2600);
+        showToast('That shape fits at another height in this column.', 'info', 2600);
         return;
     }
 
@@ -9322,11 +9802,19 @@ function onDragEnd(e) {
 }
 
 function onTouchEnd(e) {
-    document.removeEventListener('touchmove', onTouchMove);
-    document.removeEventListener('touchend', onTouchEnd);
-    const touch = e.changedTouches?.[0];
-    const snapPoint = touch ? getTouchSnapPoint(touch) : null;
-    finishDrag(touch?.clientX, touch?.clientY, snapPoint);
+    const touch = findDragTouch(e.changedTouches);
+    if (!touch) return; // a different finger lifted
+    const moved = touchDrag.moved;
+    removeTouchDragListeners();
+    if (!moved) { abortDrag(); return; }
+    const snapPoint = getTouchSnapPoint(touch);
+    finishDrag(touch.clientX, touch.clientY, snapPoint);
+}
+
+function onTouchCancel(e) {
+    if (!findDragTouch(e.changedTouches)) return;
+    removeTouchDragListeners();
+    abortDrag();
 }
 
 // ==================================================================
@@ -9435,9 +9923,45 @@ function kbCommit() {
     checkAnswer(col);
 }
 
+// Keyboard path into the craft table: Enter on the drop zone while holding a tray piece.
+function kbPlaceInCraft() {
+    if (!kbIsActive() || kbHeldTrayIndex < 0 || !craftOpen || craftBusy) return;
+    const idx = kbHeldTrayIndex;
+    const baseName = trayAvailable[idx];
+    const flip = !!trayFlipState[idx];
+    if (craftOutputPiece) {
+        const allOut = craftOutputPiece.pieces ||
+            [{ baseName: craftOutputPiece.baseName, flipH: craftOutputPiece.flipH }];
+        if (!composerMode && maxTraySize > 0 && trayAvailable.length - 1 + allOut.length > maxTraySize) {
+            showToast('Hand is full! Place a piece on the board first.', 'info');
+            announce('Hand is full. Place a piece on the board first.');
+            return;
+        }
+        allOut.forEach(p => { trayAvailable.push(p.baseName); trayFlipState.push(p.flipH); });
+        clearCraftOutput();
+    }
+    const piece = kbHeldPiece;
+    kbCancel(true);
+    placePieceInCraft(baseName, flip);
+    collapseTrayPiece(idx);
+    announce(`${pieceAltText(piece)} is on the craft table. Press F to flip${document.getElementById('craft-dupe-btn')?.style.display === 'none' ? '' : ', D to duplicate'}, C to take the result.`);
+}
+
 // Columns are only reachable by Tab while a piece is held, so Tab order stays short.
 function updateKeyboardAffordances() {
     const held = kbIsActive();
+    const dz = document.getElementById('craft-drop-zone');
+    if (dz) {
+        if (held && craftOpen && !craftBusy) {
+            dz.setAttribute('tabindex', '0');
+            dz.setAttribute('role', 'button');
+            dz.setAttribute('aria-label', 'Put the held piece on the craft table');
+        } else {
+            dz.removeAttribute('tabindex');
+            dz.removeAttribute('role');
+            dz.removeAttribute('aria-label');
+        }
+    }
     document.querySelectorAll('#melody-grid .grid-column').forEach(colEl => {
         const col = parseInt(colEl.dataset.col);
         const placeable = held && isPuzzleCol(col) && !gridState[col];
@@ -9457,6 +9981,13 @@ document.addEventListener('keydown', e => {
     if (!document.getElementById('screen-puzzle')?.classList.contains('active')) return;
     const tray = e.target.closest?.('.tray-piece');
     const colEl = e.target.closest?.('#melody-grid .grid-column');
+
+    if (e.target.id === 'craft-drop-zone' && kbIsActive() && (e.code === 'Enter' || e.code === 'Space')) {
+        e.preventDefault();
+        e.stopPropagation();
+        kbPlaceInCraft();
+        return;
+    }
 
     // stopPropagation keeps Space from also reaching the global play/pause shortcut.
     if (tray && (e.code === 'Enter' || e.code === 'Space')) {
@@ -9556,6 +10087,10 @@ function clearCompletionGuidance() {
     if (craftProactiveTimeout) { clearTimeout(craftProactiveTimeout); craftProactiveTimeout = null; }
     if (dupeProactiveTimeout) { clearTimeout(dupeProactiveTimeout); dupeProactiveTimeout = null; }
     if (singBackTimeout) { clearTimeout(singBackTimeout); singBackTimeout = null; }
+    // A guided walkthrough still pending would restart the level mid-celebration.
+    guidedStepTimeouts.forEach(t => clearTimeout(t));
+    guidedStepTimeouts = [];
+    isGuidedMode = false;
 }
 
 function lockSolvedPuzzlePieces() {
@@ -9622,39 +10157,25 @@ function checkAnswer(col) {
                     t += dur;
                 });
             }
-            currentHintCol = null;
-            currentHintLevel = 0;
+            // Only the hinted column's ladder is finished; hints elsewhere keep their step.
+            if (col === currentHintCol) { currentHintCol = null; currentHintLevel = 0; }
             applyHighlights();
         }
     } else {
         wrongPlacements++;
         onPlayerAction();
         sfx('wrong');
-        const WRONG_MESSAGES = [
-            'Not quite — try singing it first',
-            'Close! Hum the melody and compare',
-            'Listen again and sing along',
-            'Almost — does it match what you sang?',
-            'Sing the line, then find the shape',
-        ];
-        showToast(WRONG_MESSAGES[Math.floor(Math.random() * WRONG_MESSAGES.length)], 'error');
-        // Targeted feedback — tell the player what went wrong
-        const SHAPE_DESC = {
-            'Arpeggio': 'jumping through chord tones',
-            'Neighbor': 'staying close, stepping away and back',
-            'Approach': 'walking step by step',
-            'Enclosure': 'circling from both sides'
-        };
-        let feedback = '';
-        if (nameMatch && !labelMatch) {
-            feedback = 'Right piece! Try flipping the direction';
-        } else if (nameMatch && !posMatch) {
-            feedback = 'Right piece, wrong row \u2014 listen for the pitch level';
-        } else if (!nameMatch) {
-            const correctDesc = SHAPE_DESC[answer.pieceName] || '';
-            feedback = 'Listen for something ' + correctDesc;
-        }
-        if (feedback) setTimeout(() => showToast(feedback, 'info', 3000), 1200);
+        // One targeted message, then let the player HEAR the difference: their piece
+        // in this spot, then what the melody actually plays here.
+        let feedback;
+        if (nameMatch && !labelMatch) feedback = 'Right piece, other direction.';
+        else if (nameMatch && !posMatch) feedback = 'Right piece, wrong height.';
+        else feedback = 'Not this shape.';
+        // Height does not change the notes, and limited-listen levels must not get a
+        // free listen of the answer — compare by ear only when it is meaningful.
+        const compared = !(nameMatch && labelMatch) && !(currentLevelData.listens > 0) && playMistakeComparison(col, state);
+        if (nameMatch && labelMatch) feedback = 'Right piece, wrong height — follow the line from its neighbour.';
+        showToast(compared ? `${feedback} Hear yours, then the melody.` : `${feedback} Listen again and compare.`, 'error', 3200);
         // Detect "right piece, wrong direction" → show flip tooltip
         if (nameMatch && !labelMatch && shouldShowFlipTooltip()) {
             setTimeout(() => showCraftFlipTooltip(), 500);
@@ -9662,7 +10183,14 @@ function checkAnswer(col) {
         const el = document.querySelector(`.grid-column[data-col="${col}"] .placed-piece`);
         if (el) {
             el.style.animation = 'shake 0.4s ease';
+            // The shaking piece is about to be returned to the tray; grabbing it now
+            // would leave a second copy behind.
+            el.style.pointerEvents = 'none';
+        }
+        {
             setTimeout(() => {
+                // Left the level, or the column changed meanwhile: nothing to return.
+                if (gridState[col] !== state) return;
                 // Always return the piece to the tray on wrong placement
                 // (regardless of whether it came from grid or tray — a wrong answer should never stay on the board)
                 const baseName = state.piece.name;
@@ -9681,6 +10209,42 @@ function checkAnswer(col) {
         // Check stuck state after wrong placement
         checkStuckAfterWrong(col);
     }
+}
+
+// Play the misplaced piece as it would sound in this column, a short gap, then the
+// melody's real notes for the column. Returns false when it could not play
+// (the melody is already playing, or the notes are unknown).
+function playMistakeComparison(col, placedState) {
+    if (isPlaying || !fullMelodyNotes || !currentLevelData) return false;
+    const correct = fullMelodyNotes.pieceNotes[col];
+    const chord = parseChord(currentLevelData.chords[col]);
+    const target = col + 1 < numCols ? fullMelodyNotes.pieceNotes[col + 1]?.[0] : fullMelodyNotes.targetNote;
+    if (!correct || !correct.length || !chord || target == null) return false;
+    const yours = calculatePieceNotes(placedState.piece, chord, target, placedState.selectedIntervals || {});
+    if (!yours || !yours.length) return false;
+
+    getAudioCtx(); getMasterGain();
+    const eighth = getEighth();
+    const sw = soundParams.swing;
+    const playRun = (notes, t) => {
+        notes.forEach((midi, i) => {
+            const dur = (i % 2 === 0) ? eighth * 2 * sw : eighth * 2 * (1 - sw);
+            playNote(midiToFreq(midi), t, dur * 0.9);
+            t += dur;
+        });
+        playNote(midiToFreq(target), t, eighth * 1.6, 0.6); // land on the next note
+        return t + eighth * 2;
+    };
+    const start = audioCtx.currentTime + 0.45;
+    const mid = playRun(yours, start) + eighth * 2;
+    const end = playRun(correct, mid);
+    // Treat it as playback: Listen stops it instead of layering, and leaving the
+    // level cancels the playhead timers (stopPlayback clears playbackTimeouts).
+    isPlaying = true;
+    const toMs = t => Math.max(0, (t - audioCtx.currentTime) * 1000);
+    playbackTimeouts.push(setTimeout(() => setPlayheadColumn(col, false), toMs(mid)));
+    playbackTimeouts.push(setTimeout(() => { clearPlayhead(); isPlaying = false; }, toMs(end)));
+    return true;
 }
 
 function nearestChordTone(chord, degree, centerMidi) {
@@ -9774,8 +10338,7 @@ function playCelebrationMelody(callback) {
     const originTime = audioCtx.currentTime + 0.1;
     let currentTime = originTime;
     let globalNoteIdx = 0;
-    celebrationTimeouts.forEach(t => clearTimeout(t));
-    celebrationTimeouts = [];
+    cancelCelebration();
 
     // Phase 1: Gold flash across all placed pieces left-to-right
     // We schedule gold flashes for every column, slightly staggered
@@ -9861,9 +10424,24 @@ function playCelebrationMelody(callback) {
     const totalMs = (currentTime - audioCtx.currentTime) * 1000 + 500;
 
     let celebrationDone = false;
+    function removeSkipHandlers() {
+        const pa = document.querySelector('.puzzle-area');
+        if (pa) pa.removeEventListener('click', skipHandler);
+        const btn = document.getElementById('play-btn');
+        if (btn) {
+            btn.dataset.skipMode = '';
+            btn.removeEventListener('click', skipHandler);
+        }
+    }
+    celebrationTeardown = () => {
+        celebrationDone = true;
+        removeSkipHandlers();
+        setPlayButtonState('idle');
+    };
     function finishCelebration() {
         if (celebrationDone) return;
         celebrationDone = true;
+        celebrationTeardown = null;
         celebrationTimeouts.forEach(t => clearTimeout(t));
         celebrationTimeouts = [];
         stopPlayback();
@@ -9873,14 +10451,7 @@ function playCelebrationMelody(callback) {
         });
         document.querySelectorAll('.resolution-ring').forEach(el => el.classList.remove('resolution-ring'));
         document.querySelectorAll('.resolution-flash,.resolution-badge,.resolution-particle').forEach(el => el.remove());
-        const pa = document.querySelector('.puzzle-area');
-        if (pa) pa.removeEventListener('click', skipHandler);
-        // Restore play button
-        const btn = document.getElementById('play-btn');
-        if (btn) {
-            btn.dataset.skipMode = '';
-            btn.removeEventListener('click', skipHandler);
-        }
+        removeSkipHandlers();
         setPlayButtonState('idle');
         callback();
     }
@@ -9890,7 +10461,8 @@ function playCelebrationMelody(callback) {
 
     // Turn play button into a skip button during celebration
     function skipHandler() { finishCelebration(); }
-    setTimeout(() => {
+    const armTid = setTimeout(() => {
+        if (celebrationDone) return;
         const pa = document.querySelector('.puzzle-area');
         if (pa) pa.addEventListener('click', skipHandler);
         const btn = document.getElementById('play-btn');
@@ -9900,9 +10472,11 @@ function playCelebrationMelody(callback) {
             btn.addEventListener('click', skipHandler);
         }
     }, 400); // small delay so the final placement click doesn't immediately skip
+    celebrationTimeouts.push(armTid);
 }
 
 function completeLevel() {
+    levelAttemptSolved = true;
     // Timer was already stopped in checkAnswer at the moment of solve; guard for safety
     if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
     if (stuckIdleTimer) { clearInterval(stuckIdleTimer); stuckIdleTimer = null; }
@@ -9913,14 +10487,14 @@ function completeLevel() {
 
     const prev = getLevelProgress(currentLevel);
     const prevStars = prev.stars || 0;
-    const prevBestListens = prev.bestListens || null;
+    const prevBestListens = prev.bestListens ?? null;
     lastCompletionSummary = {
         stars,
         previousStars: prevStars,
         firstComplete: !prev.completed,
         starsImproved: stars > prevStars,
         previousBestListens: prevBestListens,
-        isNewBestListens: !prevBestListens || totalListens < prevBestListens,
+        isNewBestListens: prevBestListens === null || totalListens < prevBestListens,
         elapsed,
         missionResults: null
     };
@@ -9928,14 +10502,16 @@ function completeLevel() {
         completed: true,
         stars: Math.max(prev.stars || 0, stars),
         bestTime: prev.bestTime ? Math.min(prev.bestTime, elapsed) : elapsed,
-        bestListens: prev.bestListens ? Math.min(prev.bestListens, totalListens) : totalListens
+        bestListens: prev.bestListens != null ? Math.min(prev.bestListens, totalListens) : totalListens
     };
     lastCompletionSummary.missionResults = updateMissionProgress({
         stars,
         totalListens,
         hintsUsed,
         wrongPlacements,
-        chapter: currentLevelData.chapter
+        chapter: currentLevelData.chapter,
+        len: currentLevelData.chords.length,
+        placed: (currentLevelData.removeCols || []).map(c => currentLevelData.solution.find(s => s.col === c)?.pieceName)
     });
     // Streak tracking
     updateStreak();
@@ -9951,10 +10527,11 @@ function completeLevel() {
 }
 
 function calculateStars() {
-    // 3★: sharp ears — ≤2 listens, no hints, no mistakes
-    if (totalListens <= 2 && hintsUsed === 0 && wrongPlacements === 0) return 3;
-    // 2★: solid — ≤4 listens and at most 1 hint or mistake
-    if (totalListens <= 4 && hintsUsed + wrongPlacements <= 1) return 2;
+    const limits = getStarListenLimits();
+    // 3★: sharp ears — few listens, no hints, no mistakes
+    if (totalListens <= limits.three && hintsUsed === 0 && wrongPlacements === 0) return 3;
+    // 2★: solid — a few more listens and at most 1 hint or mistake
+    if (totalListens <= limits.two && hintsUsed + wrongPlacements <= 1) return 2;
     // 1★: completed
     return 1;
 }
@@ -9972,23 +10549,22 @@ function getLevelHintBudget(levelData) {
 const HINT_DESCRIPTIONS = {
     'Arpeggio Ascending': 'The melody moves upward through the chord tones.',
     'Arpeggio Descending': 'The melody moves downward through the chord tones.',
-    'Approach Ascending': 'The melody steps upward into the target note.',
-    'Approach Descending': 'The melody steps downward into the target note.',
-    'Neighbor Down-Up': 'The melody goes down then up around the target note.',
-    'Neighbor Up-Down': 'The melody goes up then down around the target note.',
+    'Approach Ascending': 'The melody walks up by step and slides a half step into the target note.',
+    'Approach Descending': 'The melody walks down by step and slides a half step into the target note.',
+    'Neighbor Upper First': 'The melody touches the note above, returns, then the note below.',
+    'Neighbor Lower First': 'The melody touches the note below, returns, then the note above.',
     'Enclosure': 'The melody circles around the target note from both sides.'
 };
 
+// Hint ladder, per column:
+//   1. Ear hint — the column is looped slowly so the player can hear its shape.
+//   2. Choice — only the pieces that fit this spot the same way (the real decision).
+//   3. Reveal — the right piece is placed.
 function useHint() {
     if (hintsRemaining <= 0) return;
-    sfx('hint');
-
-    // Tempo slider is now always visible — skip straight to position hints
-    if (currentHintLevel === 0) currentHintLevel = 1;
-
-    // Position-based hints per column
     const unsolved = currentLevelData.removeCols.filter(c => !isSolved(c));
     if (unsolved.length === 0) return;
+    sfx('hint');
 
     // Craft table hint: if an unsolved column needs a piece that isn't in the tray
     // (requires flip or dupe), give the user the exact piece they need
@@ -10000,8 +10576,12 @@ function useHint() {
     }
 
     if (currentHintCol === null || isSolved(currentHintCol)) {
-        currentHintCol = unsolved[Math.floor(Math.random() * unsolved.length)];
-        currentHintLevel = 1; // reset column-level hint
+        // Prefer a column the shapes alone cannot settle — that is where help matters.
+        const alts = getLevelFitAlternatives();
+        const earCols = unsolved.filter(c => (alts[c] || []).length > 1);
+        const pool = earCols.length ? earCols : unsolved;
+        currentHintCol = pool[Math.floor(Math.random() * pool.length)];
+        currentHintLevel = 0;
     }
 
     currentHintLevel++;
@@ -10013,12 +10593,74 @@ function useHint() {
     const answer = currentLevelData.solution.find(s => s.col === currentHintCol);
     if (!answer) return;
 
-    if (currentHintLevel === 2) {
-        showPositionHint(answer);
-    } else {
-        showPositionHint(answer);
-        showOptionsHint(answer);
+    if (currentHintLevel === 1) showListenHint(answer);
+    else if (currentHintLevel === 2) { showPositionHint(answer); showOptionsHint(answer); }
+    else revealHint(answer);
+}
+
+// Placements that fit each removed column by shape, for the current level and tray.
+function getLevelFitAlternatives() {
+    if (!currentLevelData || composerMode) return {};
+    const template = LEVEL_TEMPLATES.find(t => t.id === currentLevelData.id);
+    const craftMode = (template && template.craft) || currentLevelData.craft || 'full';
+    const solution = [...currentLevelData.solution].sort((a, b) => a.col - b.col);
+    return analyzeGeometricFits({
+        len: currentLevelData.chords.length,
+        solution,
+        removeCols: currentLevelData.removeCols,
+        targetPos: currentLevelData.targetPiece.position,
+        trayBases: currentLevelData.trayBasePieces || [],
+        canFlip: craftMode !== 'hidden',
+        canDuplicate: craftMode === 'full',
+    }).altsByCol;
+}
+
+function showListenHint(answer) {
+    const colEl = document.querySelector(`.grid-column[data-col="${answer.col}"]`);
+    if (colEl) restartCssAnimation(colEl, 'hint-listen');
+    showHintToast('Listen to this spot slowly — does it leap, walk, or circle the note?');
+    if (isPlaying) stopPlayback();
+    const slowPreview = () => {
+        if (!currentLevelData || isSolved(answer.col)) return 0;
+        const saved = currentBPM;
+        currentBPM = Math.max(50, Math.round(saved * 0.7));
+        const eighth = getEighth();
+        playColumnPreview(answer.col);
+        currentBPM = saved;
+        return (fullMelodyNotes?.pieceNotes[answer.col]?.length || 4) * eighth * 1000;
+    };
+    const dur = slowPreview();
+    levelSetupTimeouts.push(setTimeout(slowPreview, dur + 700));
+}
+
+function revealHint(answer) {
+    const piece = findPiece(answer.pieceName, answer.pieceLabel);
+    if (!piece) return;
+    showHintToast(`It's the ${answer.pieceName} ${answer.pieceLabel}. Listen to how it sounds in the line.`);
+    const existing = gridState[answer.col];
+    if (existing && existing.piece && !isSolved(answer.col)) {
+        // A wrong piece still sitting here (e.g. mid-shake) goes back to the tray.
+        const fm = FLIP_MAP[existing.piece.name];
+        trayAvailable.push(existing.piece.name);
+        trayFlipState.push(!!(fm && fm.flipH && existing.piece.label === fm.flipH));
+        renderTray();
     }
+    const sel = answer.selectedIntervals || selectRandomIntervals(piece);
+    gridState[answer.col] = { piece, position: answer.position, selectedIntervals: sel };
+    sfx('place');
+    renderGrid(); applyHighlights();
+    setTimeout(() => flashConnectedNeighbors(answer.col), 250);
+    checkAnswer(answer.col);
+}
+
+// Pressing H asks once before spending a hint (hints lower the star rating).
+let hintKeyArmedUntil = 0;
+function onHintKey() {
+    if (hintsRemaining <= 0) return;
+    const now = Date.now();
+    if (now < hintKeyArmedUntil) { hintKeyArmedUntil = 0; useHint(); return; }
+    hintKeyArmedUntil = now + 2500;
+    showToast('Press H again to use a hint.', 'info', 2500);
 }
 
 function tryCraftHint(unsolved) {
@@ -10124,31 +10766,26 @@ function showOptionsHint(answer) {
     const correctPiece = findPiece(answer.pieceName, answer.pieceLabel);
     if (!correctPiece) return; // can't show hint if piece is missing from library
 
-    // Build wrong options from pieces relevant to the current level's pool only —
-    // avoids showing pieces the player hasn't learned yet as decoys
+    // Wrong options: first the pieces that fit this spot exactly like the answer (the
+    // choice only the ear can make), then other pieces from this level's tray.
+    const sameFit = (getLevelFitAlternatives()[answer.col] || [])
+        .map(a => findPiece(a.pieceName, a.pieceLabel))
+        .filter(p => p && !(p.name === answer.pieceName && p.label === answer.pieceLabel));
     const poolNames = new Set(currentLevelData.trayBasePieces || []);
     poolNames.add(answer.pieceName); // always include the correct piece's type
     const candidates = library.filter(p =>
         p.name !== 'Target' &&
         !(p.name === answer.pieceName && p.label === answer.pieceLabel) &&
-        poolNames.has(p.name)
+        poolNames.has(p.name) && !sameFit.includes(p)
     );
     const shuffled = [...candidates].sort(() => Math.random() - 0.5);
-    const wrongPieces = shuffled.slice(0, 2);
+    const wrongPieces = [...new Set([...sameFit, ...shuffled])].slice(0, 2);
     const options = [correctPiece, ...wrongPieces].sort(() => Math.random() - 0.5);
 
     // Play this column's audio so the player can hear what belongs here
     playColumnPreview(answer.col);
 
-    // Explain what to listen for
-    const HINT_EAR_TIPS = {
-        'Arpeggio': 'Hear the jump? That\'s the Arpeggio.',
-        'Neighbor': 'Hear how it stays close? That\'s the Neighbor.',
-        'Approach': 'Hear the chromatic walk? That\'s the Approach.',
-        'Enclosure': 'Hear it circle the note? That\'s the Enclosure.',
-    };
-    const earTip = HINT_EAR_TIPS[answer.pieceName];
-    if (earTip) setTimeout(() => showHintToast(earTip), 1200);
+    setTimeout(() => showHintToast('Which of these matches what you hear?'), 600);
 
     const colRect = colEl.getBoundingClientRect();
     const popup = document.createElement('div');
@@ -10338,6 +10975,10 @@ function hideGuideMe() {
 
 function startGuidedMode() {
     isGuidedMode = true;
+    // The walkthrough places every piece itself; player input meanwhile would race it.
+    cancelDragProcessing();
+    if (typeof kbCancel === 'function') kbCancel(true);
+    puzzleInteractionLocked = true;
     if (stuckIdleTimer) { clearInterval(stuckIdleTimer); stuckIdleTimer = null; }
     hideGuideMe();
     clearHintVisuals();
@@ -10370,7 +11011,7 @@ function guidedStep(stepIdx) {
         // must use their ears, not just replay what they watched from memory
         isGuidedMode = false;
         showToast('Now try a fresh one on your own!', 'success');
-        guidedStepTimeouts.push(setTimeout(() => startLevel(currentLevel, { transition: 'level-retry' }), 1200));
+        guidedStepTimeouts.push(setTimeout(() => startLevel(currentLevel, { transition: 'level-retry', remix: true }), 1200));
         return;
     }
 
@@ -10389,7 +11030,7 @@ function guidedStep(stepIdx) {
     const PIECE_EXPLAIN = {
         'Arpeggio': 'Hear the jump? That\'s the Arpeggio.',
         'Neighbor': 'Hear how it stays close? That\'s the Neighbor.',
-        'Approach': 'Hear the chromatic walk? That\'s the Approach.',
+        'Approach': 'Hear the steady walk into the note? That\'s the Approach.',
         'Enclosure': 'Hear it circle the note? That\'s the Enclosure.'
     };
     const explain = PIECE_EXPLAIN[answer.pieceName] || '';
@@ -10505,10 +11146,12 @@ function playMelody(opts = {}) {
         playbackTimeouts.push(id);
     }
 
+    const allChords = [...(currentLevelData?.chords || []), currentLevelData?.targetChord].map(parseChord);
     for (let col = 0; col < numCols; col++) {
         const colNotes = notes.pieceNotes[col] || [];
         if (colNotes.length === 0) continue; // skip empty columns — no playhead flash either
         schedulePlayhead(currentTime, col);
+        playComp(allChords[col], currentTime, (swingLong + swingShort) * colNotes.length / 2 * 0.95);
         colNotes.forEach(midi => {
             const isOnBeat = (globalNoteIdx % 2 === 0);
             const noteDur = isOnBeat ? swingLong : swingShort;
@@ -10520,6 +11163,7 @@ function playMelody(opts = {}) {
 
     // Target note
     schedulePlayhead(currentTime, numCols);
+    playComp(allChords[numCols], currentTime, eighth * 4);
     playNote(midiToFreq(notes.targetNote), currentTime, eighth * 2);
     currentTime += eighth * 2;
 
@@ -10542,7 +11186,23 @@ function updateStarsDisplay() {
     }
 }
 
+// Listen allowances grow with the number of empty columns: a 1-gap line can be
+// solved in two listens, a 4-gap line fairly needs more.
+function getStarListenLimits(levelData = currentLevelData) {
+    const gaps = Math.max(1, levelData?.removeCols?.length || 1);
+    return { three: gaps + 1, two: gaps + 3 };
+}
+
+function updateStarInfoText() {
+    const l = getStarListenLimits();
+    const three = document.getElementById('star-info-3');
+    const two = document.getElementById('star-info-2');
+    if (three) three.textContent = `★★★ ≤${l.three} listens, no hints, no mistakes`;
+    if (two) two.textContent = `★★☆ ≤${l.two} listens, at most 1 hint or mistake`;
+}
+
 function toggleStarInfo() {
+    updateStarInfoText();
     const popup = document.getElementById('star-info-popup');
     popup.classList.toggle('hidden');
     if (!popup.classList.contains('hidden')) {
@@ -10633,26 +11293,9 @@ function playPiecePreview(baseName, label) {
     getAudioCtx();
     getMasterGain();
 
-    let notes = null;
-
-    // Use actual melody notes so the preview matches the puzzle's octave/register
-    if (fullMelodyNotes && currentLevelData) {
-        const solEntry = currentLevelData.solution.find(s =>
-            s.pieceName === baseName && s.pieceLabel === label);
-        if (solEntry && fullMelodyNotes.pieceNotes[solEntry.col]?.length > 0) {
-            notes = fullMelodyNotes.pieceNotes[solEntry.col];
-        }
-    }
-
-    // Fallback: compute from level context (or hardcoded if no level)
-    if (!notes) {
-        const chord = currentLevelData ? parseChord(currentLevelData.chords[0]) : parseChord('G7');
-        const targetNote = (fullMelodyNotes && fullMelodyNotes.targetNote) || 60;
-        const piece = findPiece(baseName, label);
-        if (!piece) return;
-        const sel = selectRandomIntervals(piece);
-        notes = calculatePieceNotes(piece, chord, targetNote, sel);
-    }
+    // Always a neutral example (G7 → C), never the puzzle's own notes: previewing the
+    // real column would let players hear the answer without spending a listen.
+    const notes = generatePieceIntroNotes(baseName, label);
     if (!notes || notes.length === 0) return 0;
 
     const eighth = getEighth();
@@ -10898,7 +11541,7 @@ function simplifyTutorialText(text) {
     if (/all four/i.test(text)) return 'Listen, then match each shape.';
     if (/Tap any filled column/i.test(text)) return 'Tap filled columns to hear them.';
     if (/Listen to the melody/i.test(text)) return 'Listen first, then place the piece.';
-    return text.length > 58 ? text.slice(0, 55).trim() + '...' : text;
+    return text;
 }
 
 function getObjectiveTooltipTarget(text) {
@@ -11107,6 +11750,10 @@ function playColumnPreview(col, opts = {}) {
     setPlayheadColumn(col, false);
 
     let t = audioCtx.currentTime + 0.05;
+    if (!isTargetCol && currentLevelData) {
+        const colLen = colNotes.length / 2 * (swL + swS);
+        playComp(parseChord(currentLevelData.chords[col]), t, colLen * 0.95);
+    }
 
     if (isTargetCol) {
         playNote(midiToFreq(fullMelodyNotes.targetNote), t, eighth * 2 * 0.9);
@@ -11163,7 +11810,8 @@ function getLevelLearningLine() {
 
 function getThreeStarAdvice(listens) {
     const misses = [];
-    if (listens > 2) misses.push((listens - 2) + ' fewer listen' + (listens - 2 === 1 ? '' : 's'));
+    const limit = getStarListenLimits().three;
+    if (listens > limit) misses.push((listens - limit) + ' fewer listen' + (listens - limit === 1 ? '' : 's'));
     if (hintsUsed > 0) misses.push('solve without hints');
     if (wrongPlacements > 0) misses.push('avoid wrong placements');
     return misses.length ? misses.join(' · ') : 'keep the same clean take';
@@ -11291,11 +11939,71 @@ function showSuccessModal(stars, listens) {
         stat(listens, 'listen') + bestStr +
         '&nbsp;\u00b7&nbsp;' + stat(hintsUsed, 'hint') +
         '&nbsp;\u00b7&nbsp;' + stat(wrongPlacements, 'mistake');
+    const remixBtn = document.getElementById('success-remix-btn');
+    if (remixBtn) remixBtn.style.display = (isCurrentDailyChallenge() || TUTORIAL_LEVELS[currentLevel]) ? 'none' : '';
+    renderSuccessLine();
     renderSuccessFeedback(stars, listens);
     renderSuccessNextGoal(stars, listens);
     renderSuccessMissions();
     document.getElementById('success-star-info')?.remove();
     document.getElementById('success-flavor')?.remove();
+}
+
+// "Your line": every note of the solved melody with its name (spelled for the key)
+// and its role over the chord, so the puzzle connects back to real theory and to the
+// player's instrument. Columns the player filled are outlined.
+function renderSuccessLine() {
+    const wrap = document.getElementById('success-line-wrap');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    if (!fullMelodyNotes || !currentLevelData) return;
+    const chords = [...currentLevelData.chords, currentLevelData.targetChord];
+    const parsed = chords.map(parseChord);
+    const removed = new Set(currentLevelData.removeCols || []);
+    const cell = (midi, c) => {
+        const role = noteRole(midi, parsed[c]);
+        return `<div class="sl-note">${spellNote(midi, spellingForKey(chords[c]))}<span class="sl-role${role === 'chr' ? ' sl-chr' : ''}">${escapeHtml(role)}</span></div>`;
+    };
+    let cols = '';
+    for (let c = 0; c < numCols; c++) {
+        const notes = fullMelodyNotes.pieceNotes[c] || [];
+        cols += `<div class="sl-col${removed.has(c) ? ' sl-yours' : ''}"><div class="sl-chord">${escapeHtml(chords[c])}</div>${notes.map(n => cell(n, c)).join('')}</div>`;
+    }
+    cols += `<div class="sl-col sl-target"><div class="sl-chord">${escapeHtml(chords[numCols])}</div>${cell(fullMelodyNotes.targetNote, numCols)}</div>`;
+    wrap.innerHTML = `<div class="success-line-title">Your line</div><div class="success-line" aria-label="Notes of the line with their chord roles">${cols}</div>
+        <button class="success-line-play" onclick="playLineSlowly()">&#9654; Play it slowly, then try it on your instrument</button>`;
+}
+
+// Slow, accompanied playback of the solved line (does not count as a listen).
+function playLineSlowly() {
+    if (!fullMelodyNotes || !currentLevelData) return;
+    stopPlayback();
+    getAudioCtx(); getMasterGain();
+    const saved = currentBPM;
+    currentBPM = Math.max(50, Math.round(saved * 0.65));
+    const eighth = getEighth();
+    currentBPM = saved;
+    const sw = soundParams.swing;
+    const chords = [...currentLevelData.chords, currentLevelData.targetChord].map(parseChord);
+    let t = audioCtx.currentTime + 0.1;
+    for (let c = 0; c < numCols; c++) {
+        const notes = fullMelodyNotes.pieceNotes[c] || [];
+        playComp(chords[c], t, notes.length * eighth * 0.95);
+        notes.forEach((midi, i) => {
+            const dur = (i % 2 === 0) ? eighth * 2 * sw : eighth * 2 * (1 - sw);
+            playNote(midiToFreq(midi), t, dur * 0.9);
+            t += dur;
+        });
+    }
+    playComp(chords[numCols], t, eighth * 4);
+    playNote(midiToFreq(fullMelodyNotes.targetNote), t, eighth * 3);
+}
+
+function remixLevel() {
+    dismissOverlay('success-overlay', () => {
+        stopPlayback();
+        startLevel(currentLevel, { transition: 'level-retry', remix: true });
+    });
 }
 
 function retryLevel() {
@@ -11305,9 +12013,6 @@ function retryLevel() {
             // Daily challenge retry — regenerate the same seeded puzzle
             onDailyPressed();
         } else {
-            // Track retry count for invisible scaffolding
-            const key = '_retry_' + currentLevel;
-            gameProgress[key] = (gameProgress[key] || 0) + 1;
             startLevel(currentLevel, { transition: 'level-retry' });
         }
     });
@@ -11389,6 +12094,11 @@ function showWarmup() {
         picks.push(learned[Math.floor(Math.random() * learned.length)]);
     }
     warmupState = { pieces: picks, current: 0, correctCount: 0, answer: null };
+    if (warmupNextTimeout) { clearTimeout(warmupNextTimeout); warmupNextTimeout = null; }
+    const mysteryContainer = document.querySelector('.warmup-modal .piece-intro-mystery');
+    if (mysteryContainer) mysteryContainer.style.display = '';
+    const skipBtn = document.querySelector('.warmup-modal .piece-intro-skip');
+    if (skipBtn) skipBtn.style.display = '';
 
     document.getElementById('warmup-overlay').classList.remove('hidden');
     showWarmupQuestion();
@@ -11511,10 +12221,11 @@ function checkWarmupAnswer(choiceName, choiceLabel, btnEl) {
     // Disable all buttons
     document.querySelectorAll('.warmup-choice').forEach(b => b.onclick = null);
 
-    // Next question after delay
+    // Next question after delay (tracked: Skip must cancel it)
     warmupState.current++;
-    setTimeout(() => showWarmupQuestion(), 2000);
+    warmupNextTimeout = setTimeout(() => { warmupNextTimeout = null; showWarmupQuestion(); }, 2000);
 }
+let warmupNextTimeout = null;
 
 function finishWarmup() {
     const { correctCount, pieces } = warmupState;
@@ -11570,6 +12281,7 @@ function finishWarmup() {
 }
 
 function dismissWarmup() {
+    if (warmupNextTimeout) { clearTimeout(warmupNextTimeout); warmupNextTimeout = null; }
     document.getElementById('warmup-overlay').classList.add('hidden');
     // Restore hidden elements for next time
     const mysteryContainer = document.querySelector('.warmup-modal .piece-intro-mystery');
@@ -11600,8 +12312,8 @@ function updateLastPlayedTimestamp() {
 // ==================================================================
 const PIECE_INTRO_HINTS = {
     'Arpeggio': { a: 'Ascending — hear how it jumps up through the chord?', b: 'Descending — hear how it leaps down?' },
-    'Neighbor': { a: 'Down-Up — hear how it dips down and returns?', b: 'Up-Down — hear how it reaches up and comes back?' },
-    'Approach': { a: 'Ascending — hear the chromatic walk upward?', b: 'Descending — hear it stepping down into the note?' },
+    'Neighbor': { a: 'Upper First — it steps up, returns, then dips below.', b: 'Lower First — it dips below, returns, then steps up.' },
+    'Approach': { a: 'Ascending — hear it walk up and slide into the note?', b: 'Descending — hear it walk down and slide into the note?' },
     'Enclosure': { a: 'From Below — it starts below, rises above, then lands.', b: 'From Above — it starts above, dips below, then lands.' },
 };
 
@@ -11931,14 +12643,14 @@ function dismissPieceIntro() {
 const PIECE_DESCRIPTIONS = {
     'Arpeggio': 'Leaps through the notes of the chord. The foundation of bebop vocabulary — every great line starts here.',
     'Neighbor': 'Decorates the target note by stepping to an adjacent tone and returning. Perfect for adding smooth melodic motion.',
-    'Approach': 'Steps chromatically into the target note from above or below. A classic bebop device for creating tension and resolution.',
+    'Approach': 'Walks by step toward the target and slides in by a half step, from above or below. A classic bebop device for tension and resolution.',
     'Enclosure': 'Surrounds the target note from both sides before landing on it. The ultimate bebop secret weapon for hip lines.',
 };
 
 const PIECE_TAGLINES = {
     'Arpeggio':  'Leaping',
     'Neighbor':  'Smooth',
-    'Approach':  'Chromatic',
+    'Approach':  'Stepwise',
     'Enclosure': 'Surrounding',
 };
 
@@ -12193,11 +12905,26 @@ function processAchievementQueue() {
 // ==================================================================
 // KEYBOARD SHORTCUTS
 // ==================================================================
+// Global shortcuts must not fire while the player types (Composer chord inputs, etc.).
+function isTypingTarget(el) {
+    return !!(el && el.closest && el.closest('input, select, textarea, [contenteditable=""], [contenteditable="true"]'));
+}
+
 document.addEventListener('keydown', e => {
+    if (isTypingTarget(e.target)) return;
+    if (e.defaultPrevented) return; // already handled (keyboard placement, craft zone)
     if (document.getElementById('screen-puzzle').classList.contains('active')) {
         if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
-        if (e.code === 'KeyH') useHint();
+        if (e.code === 'KeyH') onHintKey();
         // Craft table shortcuts
+        if (e.code === 'KeyF' && kbIsActive() && kbHeldTrayIndex >= 0 && canFlipInTray()) {
+            e.preventDefault();
+            const idx = kbHeldTrayIndex;
+            kbCancel(true);
+            flipTrayCard(idx);
+            kbPickUpTray(idx);
+            return;
+        }
         if (e.code === 'KeyF' && craftOpen && craftStack.length > 0) {
             const flipBtn = document.getElementById('craft-flip-btn');
             if (flipBtn && flipBtn.classList.contains('ready')) { e.preventDefault(); craftToggleFlip(); }
@@ -12361,22 +13088,24 @@ async function loadRhodesSamples() {
     if (_samplesLoading || _samplesReady) return;
     _samplesLoading = true;
     const ctx = getAudioCtx();
-    // Load Rhodes samples for MIDI 48 (C3) to 84 (C6) — covers the game's range
-    const BASE = 'https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM/electric_piano_1-mp3/';
+    // Self-hosted Rhodes samples, one every minor third from C3 (48) to C7 (96); every
+    // other note is pitch-shifted at most a semitone. The original CDN is a fallback.
+    const LOCAL = 'samples/rhodes/';
+    const CDN = 'https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM/electric_piano_1-mp3/';
+    const fetchSample = url => fetch(url).then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status));
     const promises = [];
-    for (let midi = 48; midi <= 84; midi++) {
-        const name = midiToSampleName(midi);
-        const url = BASE + encodeURIComponent(name) + '.mp3';
+    for (let midi = 48; midi <= 96; midi += 3) {
+        const file = encodeURIComponent(midiToSampleName(midi)) + '.mp3';
         promises.push(
-            fetch(url)
-                .then(r => r.ok ? r.arrayBuffer() : null)
-                .then(buf => buf ? ctx.decodeAudioData(buf) : null)
+            fetchSample(LOCAL + file)
+                .catch(() => fetchSample(CDN + file))
+                .then(buf => ctx.decodeAudioData(buf))
                 .then(decoded => { if (decoded) _sampleCache[midi] = decoded; })
                 .catch(() => {}) // silently skip failed samples
         );
     }
     await Promise.all(promises);
-    _samplesReady = Object.keys(_sampleCache).length > 10;
+    _samplesReady = Object.keys(_sampleCache).length >= 12;
     _samplesLoading = false;
     if (_samplesReady) console.log('Rhodes samples loaded:', Object.keys(_sampleCache).length, 'notes');
     else console.warn('Rhodes sample loading incomplete, using synth fallback');
@@ -12395,10 +13124,14 @@ function findClosestSample(midi) {
     return { buffer: _sampleCache[bestMidi], detune: (midi - bestMidi) * 100 };
 }
 
-playNote = function(freq, startTime, duration) {
+// level: 0–1 multiplier on the music volume (accompaniment plays below the melody).
+playNote = function(freq, startTime, duration, level = 1) {
     const ctx = getAudioCtx();
     const dest = getMasterGain();
-    const v = settings.volMusic;
+    const v = settings.volMusic * level;
+    // Muted: exponential ramps to a zero target throw a RangeError, which would abort
+    // whatever called us (melody playback, drop handling, the win celebration).
+    if (!(v > 0)) return;
 
     // Try sample-based playback
     if (_samplesReady) {
@@ -12464,7 +13197,41 @@ const SOUND_PRESETS = {
     classic: { tone: 0.5,  drive: 0.15, reverb: 0.2,  tremRate: 0.45, tremDepth: 0.35 },
 };
 
+function syncCompToggle() {
+    const btn = document.getElementById('comp-toggle');
+    if (!btn) return;
+    const on = soundParams.comp !== false;
+    btn.textContent = 'Chords under melody: ' + (on ? 'On' : 'Off');
+    btn.setAttribute('aria-pressed', String(on));
+    btn.classList.toggle('active', on);
+}
+
+function toggleComp() {
+    soundParams.comp = soundParams.comp === false;
+    syncCompToggle();
+    saveSoundParams();
+    sfx('click');
+}
+
+// Shell voicing for a chord: root in the bass, then 7th and 3rd above — the classic
+// bebop comping sound, kept under the melody's register.
+function compVoicing(chord) {
+    if (!chord) return [];
+    const root = 48 + chord.rootIndex;          // C3–B3
+    return [root, root + chord.intervals[3], root + 12 + chord.intervals[1]];
+}
+
+// Soft chord on the downbeat of a column so the player hears the harmony the line
+// is built on. Skipped when the player turned accompaniment off.
+function playComp(chord, startTime, duration) {
+    if (soundParams.comp === false || !chord) return;
+    compVoicing(chord).forEach((midi, i) => {
+        playNote(midiToFreq(midi), startTime, duration, i === 0 ? 0.3 : 0.2);
+    });
+}
+
 function openSoundPanel() {
+    syncCompToggle();
     document.getElementById('sound-panel-overlay').classList.remove('hidden');
     syncAllKnobs();
 }
@@ -12628,7 +13395,7 @@ function applySwingFromX(clientX) {
     const swing = 0.50 + Math.max(0, Math.min(1, pct)) * 0.25;
     soundParams.swing = Math.round(swing * 100) / 100; // round to 1%
     updateSwingGauge();
-    saveSoundParams();
+    // Saved once in endKnobDrag, not on every pointer move.
 }
 
 function startSliderDrag(e, slider) {
@@ -13408,8 +14175,13 @@ function confirmResetProgress() {
 function doResetProgress(btn) {
     gameProgress = {};
     saveProgress();
-    localStorage.removeItem('bebopOnboardDone');
-    localStorage.removeItem('bebopCraftOnboard');
+    // Replay the craft-table onboarding too (settings and sound params are kept).
+    try {
+        ['bebopCraftTutorial_flip', 'bebopCraftTutorial_dupe', 'bebopCraftFlipDone', 'bebopDupeTooltipDone']
+            .forEach(k => localStorage.removeItem(k));
+    } catch (e) {}
+    craftFlipTooltipShown = false;
+    craftDupeTooltipShown = false;
     document.getElementById('reset-overlay')?.remove();
     showToast('Progress reset', 'info');
     renderMap();
@@ -13625,6 +14397,13 @@ function isDailyCompleted() {
 function updateDailyButton() {
     const btn = document.getElementById('daily-btn');
     if (!btn) return;
+    // The Daily Challenge opens once Chapter 2 is unlocked, so day-one players are
+    // not handed a puzzle with pieces they have never met.
+    const unlocked = isChapterUnlocked(2);
+    btn.setAttribute('aria-disabled', String(!unlocked)); // still clickable: explains how to unlock
+    btn.classList.toggle('locked', !unlocked);
+    btn.title = unlocked ? '' : 'Unlocks with Chapter 2';
+    if (!unlocked) { btn.innerHTML = 'Daily Challenge <span class="daily-lock">· Ch. 2</span>'; return; }
     if (isDailyCompleted()) {
         btn.innerHTML = 'Daily Challenge <span class="daily-check">\u2713</span>';
     } else {
@@ -13635,6 +14414,7 @@ function updateDailyButton() {
 let isDailyMode = false;
 
 function onDailyPressed() {
+    if (!isChapterUnlocked(2)) { showToast('The Daily Challenge unlocks with Chapter 2.', 'info'); return; }
     sfx('click');
     isDailyMode = true;
     clearAutoPlayTimeout();
@@ -13647,6 +14427,7 @@ function onDailyPressed() {
     hideCraftTable();
     hideTempoHint();
     composerMode = false;
+    cancelCelebration();
     if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
     if (stuckIdleTimer) { clearInterval(stuckIdleTimer); stuckIdleTimer = null; }
 
@@ -13655,19 +14436,12 @@ function onDailyPressed() {
     const seed = hashDateString(dateStr);
     const rng = seededRandom(seed);
 
-    // Pick a template from Ch3-Ch5 (player needs some skill)
-    const dailyPool = LEVEL_TEMPLATES.filter(t => t.ch >= 2 && t.ch <= 5 && t.len >= 3);
+    // Pick from chapters the player has unlocked (never pieces they have not met yet)
+    const maxCh = Math.max(...CHAPTERS.filter(c => c.id <= 5 && isChapterUnlocked(c.id)).map(c => c.id));
+    const dailyPool = LEVEL_TEMPLATES.filter(t => t.ch >= Math.min(2, maxCh) && t.ch <= maxCh && t.len >= 3 && !TUTORIAL_LEVELS[t.id]);
     const template = dailyPool[Math.floor(rng() * dailyPool.length)];
 
-    // Temporarily replace Math.random with seeded version for puzzle generation
-    const origRandom = Math.random;
-    Math.random = rng;
-    let levelData;
-    try {
-        levelData = generateRandomPuzzle(template);
-    } finally {
-        Math.random = origRandom;
-    }
+    const levelData = generateRandomPuzzle(template, Math.floor(rng() * 2 ** 31));
 
     if (!levelData) {
         showToast('Could not generate daily puzzle — try again', 'error');
@@ -13781,6 +14555,7 @@ function onComposerPressed() {
 
 function startComposerMode(len) {
     stopPlayback();
+    cancelCelebration();
     clearHintVisuals();
     if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
     composerMode = true;
@@ -13803,7 +14578,6 @@ function startComposerMode(len) {
         removeCols,
         trayBasePieces: ['Arpeggio', 'Neighbor', 'Approach', 'Enclosure'],
         hints: 0,
-        timeThreshold: 9999,
         tutorial: '',
         listens: 0,
         extraPieces: 0
@@ -14014,18 +14788,16 @@ async function init() {
     initKnobInteraction();
     capturePieceIntroMarkup();
 
-    // Try inline data first (works from file://), fallback to fetch
+    // Piece library (vector shapes + interval options); artwork is generated as SVG.
     if (typeof DEFAULT_LIBRARY_DATA !== 'undefined' && DEFAULT_LIBRARY_DATA.library) {
         library = DEFAULT_LIBRARY_DATA.library;
     } else {
-        try {
-            const resp = await fetch('default-library.json');
-            if (resp.ok) {
-                const data = await resp.json();
-                if (data.library) library = data.library;
-            }
-        } catch(e) { console.warn('Failed to load library:', e); }
+        console.warn('Piece library missing — library-data.js failed to load');
     }
+    // Labels renamed in v1.7; a cached older library-data.js may still use the old ones.
+    const LEGACY_LABELS = { 'Down-Up': 'Upper First', 'Up-Down': 'Lower First' };
+    library.forEach(p => { if (LEGACY_LABELS[p.label]) p.label = LEGACY_LABELS[p.label]; });
+    if (typeof applyPieceArt === 'function') applyPieceArt(library);
 
     library.forEach(p => enrichPieceConnectionData(p));
     initCraftOutput();
@@ -14045,15 +14817,19 @@ document.addEventListener('DOMContentLoaded', init);
 (function() {
     let _secretBuf = '';
     const SECRET_CODE = '676767';
+    // Developer shortcut only: open the game with ?dev to enable it.
+    if (!new URLSearchParams(location.search).has('dev')) return;
     document.addEventListener('keydown', e => {
-        if (e.key >= '0' && e.key <= '9') {
+        if (isTypingTarget(e.target)) return;
+        if (!(e.key >= '0' && e.key <= '9')) { _secretBuf = ''; return; }
+        {
             _secretBuf += e.key;
             if (_secretBuf.length > SECRET_CODE.length) _secretBuf = _secretBuf.slice(-SECRET_CODE.length);
             if (_secretBuf === SECRET_CODE) {
                 _secretBuf = '';
                 // Unlock all levels: mark every level as completed with 3 stars
                 LEVELS.forEach(l => {
-                    gameProgress[l.id] = { completed: true, stars: 3, bestTime: 30 };
+                    gameProgress[l.id] = { ...(gameProgress[l.id] || {}), completed: true, stars: 3 };
                 });
                 saveProgress();
                 renderMap();

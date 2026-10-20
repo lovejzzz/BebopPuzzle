@@ -496,8 +496,8 @@
             <div class="label-pills">
                 <span class="label-pill" onclick="setLabel('Ascending')">Asc</span>
                 <span class="label-pill" onclick="setLabel('Descending')">Desc</span>
-                <span class="label-pill" onclick="setLabel('Down-Up')">Down-Up</span>
-                <span class="label-pill" onclick="setLabel('Up-Down')">Up-Down</span>
+                <span class="label-pill" onclick="setLabel('Upper First')">Upper First</span>
+                <span class="label-pill" onclick="setLabel('Lower First')">Lower First</span>
                 <span class="label-pill" onclick="setLabel('From Above')">From Above</span>
                 <span class="label-pill" onclick="setLabel('From Below')">From Below</span>
             </div>
@@ -552,7 +552,8 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="library-data.js"></script>
+<script src="library-data.js?v=1.7"></script>
+<script src="piece-art.js?v=1.7"></script>
 <script>
 // ============================================================
 // STATE
@@ -634,6 +635,8 @@ function init() {
     if (typeof DEFAULT_LIBRARY_DATA !== 'undefined' && DEFAULT_LIBRARY_DATA.library) {
         S.library = JSON.parse(JSON.stringify(DEFAULT_LIBRARY_DATA.library));
     }
+    // Thumbnails are not stored in the library any more; draw them from the shapes.
+    applyPieceArt(S.library);
 
     createSnapMarkers();
     resize();
@@ -1124,8 +1127,8 @@ function doSave(name, label, entryY, exitY, allowInv, replaceIdx) {
             int3: Array.from(S.intervals.int3),
         },
         elements: JSON.parse(JSON.stringify(S.elements)),
-        thumbnail: canvas.toDataURL('image/png', 0.5),
     };
+    piece.thumbnail = pieceThumbnail(piece);
 
     S.selectedIndices = oldSel; updateUI(); draw();
 
@@ -1163,18 +1166,23 @@ function doNewCanvas() {
 // ============================================================
 // EXPORT / IMPORT
 // ============================================================
+// Thumbnails are generated at load time (piece-art.js), so exports carry shapes only.
+function exportableLibrary() {
+    return S.library.map(p => { const { thumbnail, ...rest } = p; return rest; });
+}
+
 function exportLibraryJS() {
     // Export as library-data.js format
-    const data = { version: 1, exportDate: new Date().toISOString(), library: S.library };
+    const data = { version: 1, exportDate: new Date().toISOString(), library: exportableLibrary() };
     const js = `const DEFAULT_LIBRARY_DATA = ${JSON.stringify(data, null, 2)};\n`;
     downloadBlob(js, 'library-data.js', 'application/javascript');
     toast('Exported library-data.js');
 }
 
 function exportLibraryJSON() {
-    const data = { version: 1, exportDate: new Date().toISOString(), library: S.library };
-    downloadBlob(JSON.stringify(data,null,2), 'default-library.json', 'application/json');
-    toast('Exported default-library.json');
+    const data = { version: 1, exportDate: new Date().toISOString(), library: exportableLibrary() };
+    downloadBlob(JSON.stringify(data,null,2), 'piece-library.json', 'application/json');
+    toast('Exported piece-library.json');
 }
 
 function importLibraryJSON() {
@@ -1201,6 +1209,7 @@ function importLibraryJSON() {
                         if (idx !== -1) S.library[idx] = imp;
                     });
                     S.library = [...S.library, ...newPieces];
+                    applyPieceArt(S.library);
                     renderLibrary();
                     toast(`Imported ${data.library.length} pieces (${newPieces.length} new, ${updated.length} updated)`);
                 }

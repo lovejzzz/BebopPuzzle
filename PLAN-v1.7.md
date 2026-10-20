@@ -3,6 +3,10 @@
 Branch: `v1.7-audit-improvements` (from `main` @ 996eeab). One commit per phase; each phase is
 verified in the browser preview (audio muted) before moving on. PR to `main` at the end.
 
+Status (2026-10-20): all phases A–G implemented and verified in the browser preview
+(80/80 levels generate, start and complete with no console errors; 216 seeded puzzles
+all meet the ear-column requirement, max 4 ms each).
+
 Goal of the release: turn the game from a shape-fitting puzzle into a real ear-training game,
 and fix every bug found in the October 2026 audit.
 
